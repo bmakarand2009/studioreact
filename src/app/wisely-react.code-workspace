@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "../.."
+		},
+		{
+			"path": "../../../v5byclasses"
+		},
+		{
+			"path": "../../../fuse-demo-v18.0.0"
+		},
+		{
+			"path": "../../../wiselyui"
+		}
+	],
+	"settings": {}
+}
