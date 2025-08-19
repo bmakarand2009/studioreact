@@ -2,6 +2,8 @@
 
 import { withRole } from '@/components/guards/withRole';
 import { useAuth } from '@/hooks/useAuth';
+import { ContactsSection } from '@/components/admin/ContactsSection';
+import { useState } from 'react';
 import { 
   Users, 
   BookOpen, 
@@ -10,7 +12,7 @@ import {
   AlertTriangle, 
   TrendingUp, 
   Shield, 
-  Activity 
+  Activity
 } from 'lucide-react';
 
 function AdminDashboard() {
@@ -18,6 +20,8 @@ function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+
+
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
@@ -26,12 +30,12 @@ function AdminDashboard() {
               <span className="text-white text-xl font-bold">W</span>
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                Admin Dashboard
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400">
-                Manage your platform and monitor system performance
-              </p>
+                             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                 Admin Dashboard
+               </h1>
+               <p className="text-gray-600 dark:text-gray-400">
+                 Manage your platform and monitor system performance
+               </p>
             </div>
           </div>
         </div>
@@ -98,19 +102,19 @@ function AdminDashboard() {
             {/* Recent Activity */}
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
               <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Recent System Activity
-                </h3>
+                                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                   Recent System Activity
+                 </h3>
               </div>
               <div className="p-6">
                 <div className="space-y-4">
-                  {[
-                    { action: 'New user registration', user: 'john.doe@email.com', time: '2 minutes ago', type: 'info' },
-                    { action: 'Course created', user: 'Prof. Smith', time: '15 minutes ago', type: 'success' },
-                    { action: 'Payment received', user: 'jane.smith@email.com', time: '1 hour ago', type: 'success' },
-                    { action: 'System backup completed', user: 'System', time: '2 hours ago', type: 'info' },
-                    { action: 'Failed login attempt', user: 'unknown@email.com', time: '3 hours ago', type: 'warning' },
-                  ].map((activity, index) => (
+                                     {[
+                     { action: 'New user registration', user: 'john.doe@email.com', time: '2 minutes ago', type: 'info' },
+                     { action: 'Course created', user: 'Prof. Smith', time: '15 minutes ago', type: 'success' },
+                     { action: 'Payment received', user: 'jane.smith@email.com', time: '1 hour ago', type: 'success' },
+                     { action: 'System backup completed', user: 'System', time: '2 hours ago', type: 'info' },
+                     { action: 'Failed login attempt', user: 'unknown@email.com', time: '3 hours ago', type: 'warning' },
+                   ].map((activity, index) => (
                     <div key={index} className="flex items-center space-x-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
                       <div className={`w-2 h-2 rounded-full ${
                         activity.type === 'success' ? 'bg-green-500' :
@@ -127,34 +131,41 @@ function AdminDashboard() {
               </div>
             </div>
 
-            {/* Quick Actions */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
-              <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Quick Administrative Actions
-                </h3>
-              </div>
-              <div className="p-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <button className="flex items-center justify-center px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                    <Users className="h-5 w-5 mr-2" />
-                    Manage Users
-                  </button>
-                  <button className="flex items-center justify-center px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-                    <BookOpen className="h-5 w-5 mr-2" />
-                    Create Course
-                  </button>
-                  <button className="flex items-center justify-center px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
-                    <BarChart3 className="h-5 w-5 mr-2" />
-                    View Reports
-                  </button>
-                  <button className="flex items-center justify-center px-4 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors">
-                    <Settings className="h-5 w-5 mr-2" />
-                    System Settings
-                  </button>
-                </div>
-              </div>
-            </div>
+                         {/* Quick Actions */}
+             <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
+               <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                   Quick Administrative Actions
+                 </h3>
+               </div>
+               <div className="p-6">
+                 <div className="grid grid-cols-2 gap-4">
+                   <button className="flex items-center justify-center px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                     <Users className="h-5 w-5 mr-2" />
+                     Manage Users
+                   </button>
+                   <button className="flex items-center justify-center px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                     <BookOpen className="h-5 w-5 mr-2" />
+                     View Reports
+                   </button>
+                   <button className="flex items-center justify-center px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                     <BarChart3 className="h-5 w-5 mr-2" />
+                     View Reports
+                   </button>
+                   <button className="flex items-center justify-center px-4 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors">
+                     <Settings className="h-5 w-5 mr-2" />
+                     System Settings
+                   </button>
+                 </div>
+               </div>
+             </div>
+
+
+
+                         {/* Contacts Section */}
+             <div className="lg:col-span-3">
+               <ContactsSection />
+             </div>
           </div>
 
           {/* Right Column - Alerts & System Status */}
@@ -162,17 +173,17 @@ function AdminDashboard() {
             {/* System Alerts */}
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
               <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  System Alerts
-                </h3>
+                                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                   System Alerts
+                 </h3>
               </div>
               <div className="p-6">
                 <div className="space-y-4">
-                  {[
-                    { message: 'Database backup scheduled for tonight', type: 'info' },
-                    { message: 'High memory usage detected', type: 'warning' },
-                    { message: 'SSL certificate expires in 30 days', type: 'warning' },
-                  ].map((alert, index) => (
+                                     {[
+                     { message: 'Database backup scheduled for tonight', type: 'info' },
+                     { message: 'High memory usage detected', type: 'warning' },
+                     { message: 'SSL certificate expires in 30 days', type: 'warning' },
+                   ].map((alert, index) => (
                     <div key={index} className="flex items-start space-x-3">
                       <AlertTriangle className={`h-5 w-5 mt-0.5 ${
                         alert.type === 'warning' ? 'text-yellow-500' : 'text-blue-500'
@@ -187,40 +198,32 @@ function AdminDashboard() {
             {/* System Health */}
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
               <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  System Health
-                </h3>
+                                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                   System Health
+                 </h3>
               </div>
               <div className="p-6">
                 <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">Database</span>
-                    <div className="flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span className="text-sm text-green-600 dark:text-green-400">Healthy</span>
+                                     {[
+                     { label: 'Database', status: 'Healthy', color: 'green' },
+                     { label: 'API Services', status: 'Healthy', color: 'green' },
+                     { label: 'File Storage', status: 'Warning', color: 'yellow' },
+                     { label: 'Email Service', status: 'Healthy', color: 'green' },
+                   ].map((item, index) => (
+                    <div key={index} className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">{item.label}</span>
+                      <div className="flex items-center space-x-2">
+                        <div className={`w-2 h-2 rounded-full ${
+                          item.color === 'green' ? 'bg-green-500' :
+                          item.color === 'yellow' ? 'bg-yellow-500' : 'bg-gray-500'
+                        }`}></div>
+                        <span className={`text-sm ${
+                          item.color === 'green' ? 'text-green-600 dark:text-green-400' :
+                          item.color === 'yellow' ? 'text-yellow-600 dark:text-yellow-400' : 'text-gray-600 dark:text-gray-400'
+                        }`}>{item.status}</span>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">API Services</span>
-                    <div className="flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span className="text-sm text-green-600 dark:text-green-400">Healthy</span>
-                    </div>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">File Storage</span>
-                    <div className="flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                      <span className="text-sm text-yellow-600 dark:text-yellow-400">Warning</span>
-                    </div>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">Email Service</span>
-                    <div className="flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span className="text-sm text-green-600 dark:text-green-400">Healthy</span>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -228,29 +231,30 @@ function AdminDashboard() {
             {/* Security Status */}
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
               <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Security Status
-                </h3>
+                                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                   Security Status
+                 </h3>
               </div>
               <div className="p-6">
                 <div className="text-center">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full mb-4">
-                    <Shield className="h-8 w-8 text-green-600 dark:text-green-400" />
-                  </div>
-                  <p className="text-lg font-semibold text-gray-900 dark:text-white mb-2">All Systems Secure</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Last security scan: 2 hours ago</p>
+                                     <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 bg-green-100 dark:bg-green-900">
+                     <Shield className="h-8 w-8 text-green-600 dark:text-green-400" />
+                   </div>
+                   <p className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                     All Systems Secure
+                   </p>
+                   <p className="text-sm text-gray-600 dark:text-gray-400">
+                     Last security scan: 2 hours ago
+                   </p>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+
     </div>
   );
 }
 
-// Protect this page with role-based access control
-export default withRole(AdminDashboard, {
-  allowedRoles: ['ROLE_ADMIN'],
-  redirectTo: '/dashboard'
-});
+export default withRole(AdminDashboard, { allowedRoles: ['ROLE_ADMIN'] });

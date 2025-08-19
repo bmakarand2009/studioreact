@@ -11,7 +11,7 @@ import {
   Play
 } from 'lucide-react';
 
-export default function HomePage() {
+export default function PublicLandingPage() {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
       {/* Hero Section */}

@@ -1,137 +1,158 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { usePathname, useSearchParams } from 'next/navigation';
-import { useTheme } from '@/components/providers/ThemeProvider';
-import { useAppConfig } from '@/hooks/useAppConfig';
+import { ReactNode } from 'react';
+import { usePathname } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
 import EmptyLayout from './layouts/empty/empty-layout';
-import CenteredLayout from './layouts/horizontal/centered/centered-layout';
-import EnterpriseLayout from './layouts/horizontal/enterprise/enterprise-layout';
-import MaterialLayout from './layouts/horizontal/material/material-layout';
-import ModernLayout from './layouts/horizontal/modern/modern-layout';
-import WajoobaStudentLayout from './layouts/horizontal/wajooba-student/wajooba-student-layout';
 import WajoobaPublicLayout from './layouts/horizontal/wajooba-public/wajooba-public-layout';
-import ClassicLayout from './layouts/vertical/classic/classic-layout';
-import ClassyLayout from './layouts/vertical/classy/classy-layout';
-import CompactLayout from './layouts/vertical/compact/compact-layout';
-import DenseLayout from './layouts/vertical/dense/dense-layout';
-import FuturisticLayout from './layouts/vertical/futuristic/futuristic-layout';
-import ThinLayout from './layouts/vertical/thin/thin-layout';
+import WajoobaStudentLayout from './layouts/vertical/wajooba-student/wajooba-student-layout';
 import WajoobaAdminLayout from './layouts/vertical/wajooba-admin/wajooba-admin-layout';
+import { useRef } from 'react';
 
-export interface LayoutProps {
-  children: React.ReactNode;
+interface LayoutProps {
+  children: ReactNode;
 }
 
-export default function Layout({ children }: LayoutProps) {
-  const [mounted, setMounted] = useState(false);
+/**
+ * Main layout router that dynamically selects and renders different layouts
+ * based on route paths or query parameters
+ */
+export function Layout({ children }: LayoutProps) {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const { theme, colorScheme } = useTheme();
-  const { config } = useAppConfig();
+  const { isLoading, user } = useAuth();
+  const layout = getRouteLayout(pathname);
 
-  // Determine layout based on route and configuration
-  const getLayout = (): string => {
-    // Check for layout in query params first
-    const layoutFromQuery = searchParams.get('layout');
-    if (layoutFromQuery) {
-      return layoutFromQuery;
-    }
+  // Use ref to track previous values and detect changes
+  const prevValuesRef = useRef({ pathname, isLoading, hasUser: !!user, layout });
 
-    // Check for layout in route data (you can implement this based on your routing)
-    const routeLayout = getRouteLayout(pathname);
-    if (routeLayout) {
-      return routeLayout;
-    }
+  console.log('Layout: Rendering with:', {
+    pathname,
+    isLoading,
+    hasUser: !!user,
+    layout
+  });
 
-    // Default to config layout
-    return config?.layout || 'wajooba-admin';
-  };
-
-  const getRouteLayout = (path: string): string | null => {
-    // Define route-specific layouts
-    const routeLayouts: Record<string, string> = {
-      '/login': 'empty',
-      '/forgot-password': 'empty',
-      '/sign-up': 'empty',
-      '/sign-in': 'empty',
-      '/auth': 'empty',
-      '/dashboard': 'wajooba-admin',
-      '/admin': 'wajooba-admin',
-      '/student': 'wajooba-student',
-      '/public': 'wajooba-public',
-    };
-
-    // Check if path starts with any of the defined routes
-    for (const [route, layout] of Object.entries(routeLayouts)) {
-      if (path.startsWith(route)) {
-        return layout;
-      }
-    }
-
-    return null;
-  };
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!mounted) return;
-
-    // Update body classes for theme and scheme
-    document.body.classList.remove('light', 'dark');
-    document.body.classList.add(theme);
-
-    // Update theme classes
-    document.body.classList.forEach((className) => {
-      if (className.startsWith('theme-')) {
-        document.body.classList.remove(className, className.split('-')[1]);
-      }
+  // Check what changed
+  const prevValues = prevValuesRef.current;
+  if (prevValues.pathname !== pathname || 
+      prevValues.isLoading !== isLoading || 
+      prevValues.hasUser !== !!user || 
+      prevValues.layout !== layout) {
+    console.log('Layout: Values changed:', {
+      pathname: { from: prevValues.pathname, to: pathname },
+      isLoading: { from: prevValues.isLoading, to: isLoading },
+      hasUser: { from: prevValues.hasUser, to: !!user },
+      layout: { from: prevValues.layout, to: layout }
     });
-    document.body.classList.add(colorScheme);
-  }, [theme, colorScheme, mounted]);
-
-  if (!mounted) {
-    return null;
+    prevValuesRef.current = { pathname, isLoading, hasUser: !!user, layout };
   }
 
-  const currentLayout = getLayout();
+  // Show loading state only when necessary
+  // Only show loading when checking for auth tokens on the root route
+  const shouldShowLoading = isLoading && pathname === '/';
 
-  // Render appropriate layout based on current layout type
-  switch (currentLayout) {
+  console.log('Layout: Loading state decision:', {
+    isLoading,
+    pathname,
+    hasUser: !!user,
+    shouldShowLoading,
+    isPublicRoute: ['/', '/login', '/forgot-password', '/sign-up', '/sign-in', '/auth', '/courses', '/contact', '/about', '/pricing', '/features'].includes(pathname),
+    reason: isLoading ? (
+      pathname === '/' ? 'Root route - checking for auth tokens' : 'Loading but not root route'
+    ) : 'Not loading'
+  });
+
+  // Additional check: if we have a user, we should never show loading
+  if (user && isLoading) {
+    console.warn('Layout: WARNING - User exists but still loading! This should not happen.');
+  }
+
+  if (shouldShowLoading) {
+    console.log('Layout: Showing loading state for protected route or authenticated user');
+    return (
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Render the appropriate layout based on the route
+  switch (layout) {
     case 'empty':
       return <EmptyLayout>{children}</EmptyLayout>;
-
-    // Horizontal layouts
-    case 'centered':
-      return <CenteredLayout>{children}</CenteredLayout>;
-    case 'enterprise':
-      return <EnterpriseLayout>{children}</EnterpriseLayout>;
-    case 'material':
-      return <MaterialLayout>{children}</MaterialLayout>;
-    case 'modern':
-      return <ModernLayout>{children}</ModernLayout>;
-    case 'wajooba-student':
-      return <WajoobaStudentLayout>{children}</WajoobaStudentLayout>;
     case 'wajooba-public':
       return <WajoobaPublicLayout>{children}</WajoobaPublicLayout>;
-
-    // Vertical layouts
-    case 'classic':
-      return <ClassicLayout>{children}</ClassicLayout>;
-    case 'classy':
-      return <ClassyLayout>{children}</ClassyLayout>;
-    case 'compact':
-      return <CompactLayout>{children}</CompactLayout>;
-    case 'dense':
-      return <DenseLayout>{children}</DenseLayout>;
-    case 'futuristic':
-      return <FuturisticLayout>{children}</FuturisticLayout>;
-    case 'thin':
-      return <ThinLayout>{children}</ThinLayout>;
     case 'wajooba-admin':
-    default:
       return <WajoobaAdminLayout>{children}</WajoobaAdminLayout>;
+    case 'wajooba-student':
+      return <WajoobaStudentLayout>{children}</WajoobaStudentLayout>;
+    default:
+      // Default to public layout for unknown routes
+      return <WajoobaPublicLayout>{children}</WajoobaPublicLayout>;
   }
 }
+
+/**
+ * Determine which layout to use based on the current route
+ */
+const getRouteLayout = (path: string): string | null => {
+  // Define route-specific layouts - order matters for matching!
+  const routeLayouts: Record<string, string> = {
+    // Auth routes - use empty layout
+    '/login': 'empty',
+    '/forgot-password': 'empty',
+    '/sign-up': 'empty',
+    '/sign-in': 'empty',
+    '/auth': 'empty',
+    
+    // Student routes - use student layout (MUST come before public routes)
+    '/student': 'wajooba-student',
+    '/student/dashboard': 'wajooba-student',
+    '/student/courses': 'wajooba-student',
+    '/student/calendar': 'wajooba-student',
+    '/student/store': 'wajooba-student',
+    '/student/assessments': 'wajooba-student',
+    '/student/assignments': 'wajooba-student',
+    '/student/grades': 'wajooba-student',
+    
+    // Admin routes - use admin layout
+    '/admin': 'wajooba-admin',
+    '/admin/dashboard': 'wajooba-admin',
+    '/admin/users': 'wajooba-admin',
+    '/admin/courses': 'wajooba-admin',
+    '/admin/settings': 'wajooba-admin',
+    
+    // Staff routes - use admin layout  
+    '/staff': 'wajooba-admin',
+    '/staff/dashboard': 'wajooba-admin',
+    
+    // Public routes - use public layout (MUST come after specific routes)
+    '/': 'wajooba-public',
+    '/courses': 'wajooba-public',
+    '/contact': 'wajooba-public',
+    '/about': 'wajooba-public',
+    '/pricing': 'wajooba-public',
+    '/features': 'wajooba-public',
+    
+    // Generic dashboard - redirects based on role
+    '/dashboard': 'wajooba-admin',
+  };
+
+  // Check if path starts with any of the defined routes
+  // We need to check more specific routes first
+  const sortedRoutes = Object.entries(routeLayouts).sort((a, b) => {
+    // Sort by route length (longer routes first) to ensure specific matches
+    return b[0].length - a[0].length;
+  });
+
+  for (const [route, layout] of sortedRoutes) {
+    if (path.startsWith(route)) {
+      return layout;
+    }
+  }
+
+  return null;
+};

@@ -1,54 +1,56 @@
 /**
  * User Service
- * Manages user data, profiles, and user-related operations
+ * Simple data service for user operations - no state management
+ * React state management should be handled by hooks and context
  */
 
 import { API_CONFIG } from '../app-constants';
 import { authService } from '../auth';
 
 export interface UserProfile {
-  id: string;
+  guId: string;
+  id?: string;
   email: string;
-  firstName: string;
-  lastName: string;
+  firstName?: string;
+  lastName?: string;
+  name: string;
+  fullName: string;
   displayName?: string;
   avatar?: string;
+  picture?: string;
   bio?: string;
   phone?: string;
-  dateOfBirth?: Date;
-  gender?: 'male' | 'female' | 'other' | 'prefer-not-to-say';
-  location?: {
-    country?: string;
-    state?: string;
-    city?: string;
-    timezone?: string;
-  };
-  preferences: {
-    language: string;
-    theme: string;
-    notifications: {
-      email: boolean;
-      push: boolean;
-      sms: boolean;
-    };
-    privacy: {
-      profileVisibility: 'public' | 'private' | 'friends';
-      showEmail: boolean;
-      showPhone: boolean;
-      showLocation: boolean;
-    };
-  };
-  socialLinks?: {
-    website?: string;
-    linkedin?: string;
-    twitter?: string;
-    github?: string;
-  };
+  role: string;
+  orgId: string;
+  tenantId?: string;
+  isLoggedIn: boolean;
   isActive: boolean;
   isVerified: boolean;
+  isEmailVerified: boolean;
+  isAdminVerified: boolean;
+  isFirstLogin: boolean;
+  isNewClient?: boolean;
+  isNewTenant?: boolean;
+  hasAcceptedTerms: boolean;
+  hasParent?: boolean;
+  isParent?: boolean;
+  balance?: number;
+  children?: any[];
+  description?: string;
+  imageUrl?: string;
+  isLocalPicture?: string;
   lastLogin?: Date;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
+  permissions?: string[];
+  // Student-specific fields
+  isStudentPreview?: boolean;
+  studentToken?: string;
+  // Admin-specific fields
+  isPreviewMode?: boolean;
+  isPreviewOfSecuredPage?: boolean;
+  // Additional fields that might come from backend
+  [key: string]: any;
 }
 
 export interface UserSettings {
@@ -123,6 +125,129 @@ class UserService {
   private readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
   /**
+   * Check if user has specific role
+   */
+  hasRole(user: UserProfile | null, role: string | string[]): boolean {
+    if (!user?.role) return false;
+    
+    if (Array.isArray(role)) {
+      return role.includes(user.role);
+    }
+    
+    return user.role === role;
+  }
+
+  /**
+   * Check if user is staff (admin, staff, or frontdesk)
+   */
+  isStaffRole(user: UserProfile | null): boolean {
+    return this.hasRole(user, ['ROLE_ADMIN', 'ROLE_STAFF', 'ROLE_FRONTDESK']);
+  }
+
+  /**
+   * Check if user is student
+   */
+  isStudentRole(user: UserProfile | null): boolean {
+    return this.hasRole(user, 'ROLE_STUDENT');
+  }
+
+  /**
+   * Check if user is admin
+   */
+  isAdminRole(user: UserProfile | null): boolean {
+    return this.hasRole(user, 'ROLE_ADMIN');
+  }
+
+  /**
+   * Check if user is in student preview mode
+   */
+  isStudentPreview(user: UserProfile | null): boolean {
+    return user?.isStudentPreview || false;
+  }
+
+  /**
+   * Check if user is in preview mode
+   */
+  isPreviewMode(user: UserProfile | null): boolean {
+    return user?.isPreview || false;
+  }
+
+  /**
+   * Get the original role when in preview mode
+   */
+  getOriginalRole(user: UserProfile | null): string | null {
+    if (user?.isPreview && user.originalRole) {
+      return user.originalRole;
+    }
+    return user?.role || null;
+  }
+
+  /**
+   * Check if user can preview other users
+   */
+  canPreviewUsers(user: UserProfile | null): boolean {
+    return this.hasRole(user, ['ROLE_ADMIN', 'ROLE_STAFF']);
+  }
+
+  /**
+   * Get user role
+   */
+  getUserRole(user: UserProfile | null): string | null {
+    return user?.role || null;
+  }
+
+  /**
+   * Get organization ID
+   */
+  getOrgId(user: UserProfile | null): string | null {
+    return user?.orgId || null;
+  }
+
+  /**
+   * Get tenant ID
+   */
+  getTenantId(user: UserProfile | null): string | null {
+    return user?.tenantId || null;
+  }
+
+  /**
+   * Get user permissions
+   */
+  getUserPermissions(user: UserProfile | null): string[] {
+    return user?.permissions || [];
+  }
+
+  /**
+   * Update user profile
+   */
+  async updateUserProfile(userId: string, updates: Partial<UserProfile>): Promise<UserProfile | null> {
+    try {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/users/${userId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authService.getAuthHeaders(),
+        },
+        body: JSON.stringify(updates),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update user profile');
+      }
+
+      const updatedProfile: UserProfile = await response.json();
+      
+      // Update cache
+      this.cacheUserProfile(updatedProfile);
+      
+      return updatedProfile;
+    } catch (error) {
+      console.error('Error updating user profile:', error);
+      return null;
+    }
+  }
+
+  /**
    * Get user profile by ID
    */
   async getUserProfile(userId: string): Promise<UserProfile | null> {
@@ -151,52 +276,6 @@ class UserService {
       return userProfile;
     } catch (error) {
       console.error('Error fetching user profile:', error);
-      return null;
-    }
-  }
-
-  /**
-   * Get current user profile
-   */
-  async getCurrentUserProfile(): Promise<UserProfile | null> {
-    const currentUser = authService.getCurrentUser();
-    if (!currentUser) return null;
-
-    return this.getUserProfile(currentUser.id);
-  }
-
-  /**
-   * Update user profile
-   */
-  async updateUserProfile(userId: string, updates: Partial<UserProfile>): Promise<UserProfile | null> {
-    try {
-      const response = await fetch(`${API_CONFIG.BASE_URL}/users/${userId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          ...authService.getAuthHeaders(),
-        },
-        body: JSON.stringify(updates),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update user profile');
-      }
-
-      const updatedProfile: UserProfile = await response.json();
-      
-      // Update cache
-      this.cacheUserProfile(updatedProfile);
-      
-      // Update auth service if it's the current user
-      const currentUser = authService.getCurrentUser();
-      if (currentUser && currentUser.id === userId) {
-        authService.updateProfile(updates);
-      }
-      
-      return updatedProfile;
-    } catch (error) {
-      console.error('Error updating user profile:', error);
       return null;
     }
   }
@@ -255,7 +334,7 @@ class UserService {
 
       const updatedSettings: UserSettings = await response.json();
       
-      // Update cache
+      // Cache the result
       this.cacheUserSettings(updatedSettings);
       
       return updatedSettings;
@@ -368,12 +447,6 @@ class UserService {
 
       // Clear cache
       this.clearUserCache(userId);
-      
-      // If it's the current user, logout
-      const currentUser = authService.getCurrentUser();
-      if (currentUser && currentUser.id === userId) {
-        await authService.logout();
-      }
 
       return true;
     } catch (error) {
@@ -484,8 +557,8 @@ class UserService {
    * Cache user profile
    */
   private cacheUserProfile(profile: UserProfile): void {
-    this.userCache.set(profile.id, profile);
-    this.cacheExpiry.set(profile.id, Date.now() + this.CACHE_DURATION);
+    this.userCache.set(profile.guId, profile);
+    this.cacheExpiry.set(profile.guId, Date.now() + this.CACHE_DURATION);
   }
 
   /**
@@ -507,11 +580,17 @@ class UserService {
   /**
    * Clear user cache
    */
-  private clearUserCache(userId: string): void {
-    this.userCache.delete(userId);
-    this.settingsCache.delete(userId);
-    this.cacheExpiry.delete(userId);
-    this.cacheExpiry.delete(`settings_${userId}`);
+  private clearUserCache(userId?: string): void {
+    if (userId) {
+      this.userCache.delete(userId);
+      this.settingsCache.delete(userId);
+      this.cacheExpiry.delete(userId);
+      this.cacheExpiry.delete(`settings_${userId}`);
+    } else {
+      this.userCache.clear();
+      this.settingsCache.clear();
+      this.cacheExpiry.clear();
+    }
   }
 
   /**

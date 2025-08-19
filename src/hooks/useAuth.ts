@@ -1,124 +1,206 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import { userService } from '@/app/core/user';
 import { authService } from '@/services/authService';
+import { useUserContext } from '@/contexts/UserContext';
+import type { UserProfile } from '@/app/core/user';
 
-interface User {
-  id: string;
-  email: string;
-  role: string;
-  fullName: string;
-  [key: string]: any;
-}
-
-interface UseAuthReturn {
-  user: User | null;
+export interface UseAuthReturn {
+  user: UserProfile | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  hasRole: (role: string | string[]) => Promise<boolean>;
-  hasPermission: (permission: string | string[]) => Promise<boolean>;
+  hasRole: (role: string | string[]) => boolean;
+  hasPermission: (permission: string) => boolean;
   logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
 
+// Global flag to prevent multiple auth checks from running simultaneously
+let globalAuthCheckRunning = false;
+
 export function useAuth(): UseAuthReturn {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { state, setUser, setLoading, setAuthenticated, logout: contextLogout } = useUserContext();
   const router = useRouter();
   const pathname = usePathname();
+  
+  // Use ref to track if auth check has already run
+  const hasRunRef = useRef(false);
+  // Use ref to track if we're currently processing
+  const isProcessingRef = useRef(false);
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        setIsLoading(true);
-        
-        // Initialize auth state from localStorage first
-        authService.initializeAuthState();
-        
-        const authenticated = await authService.check();
-        
-        if (authenticated) {
-          const currentUser = await authService.getCurrentUser();
-          setUser(currentUser);
-          setIsAuthenticated(true);
-          console.log('useAuth: User authenticated:', currentUser);
-        } else {
-          setUser(null);
-          setIsAuthenticated(false);
-          console.log('useAuth: User not authenticated');
-          
-          // Only redirect if not on a public route
-          const publicRoutes = ['/login', '/forgot-password', '/sign-up', '/'];
-          if (!publicRoutes.includes(pathname)) {
-            router.push('/login');
-          }
+  const checkAuth = useCallback(async () => {
+    // Prevent multiple executions globally
+    if (globalAuthCheckRunning || hasRunRef.current || isProcessingRef.current) {
+      console.log('useAuth: Auth check already running globally or locally, skipping');
+      return;
+    }
+
+    // Don't run auth check if already loading
+    if (state.isLoading) {
+      console.log('useAuth: Skipping auth check - already loading');
+      return;
+    }
+
+    // If we already have a user, don't check again
+    if (state.user && !state.isLoading) {
+      console.log('useAuth: User already exists, skipping auth check');
+      hasRunRef.current = true; // Mark as run to prevent future executions
+      return;
+    }
+
+    try {
+      globalAuthCheckRunning = true; // Set global flag
+      hasRunRef.current = true; // Mark as run immediately
+      isProcessingRef.current = true; // Mark as processing
+      setLoading(true);
+      console.log('useAuth: Starting auth check...');
+
+      // Set a timeout to reset the global flag if something goes wrong
+      const timeoutId = setTimeout(() => {
+        if (globalAuthCheckRunning) {
+          console.warn('useAuth: Global auth check timeout, resetting flag');
+          globalAuthCheckRunning = false;
         }
-      } catch (error) {
-        console.error('useAuth: Error checking auth:', error);
+      }, 10000); // 10 seconds timeout
+
+      // Check if user is already authenticated in the service
+      if (authService.isLoggedIn()) {
+        console.log('useAuth: User is logged in, fetching current user...');
+        // Try to get user from auth service
+        const currentUser = await authService.getCurrentUser();
+        if (currentUser) {
+          console.log('useAuth: Current user found:', currentUser.email || currentUser.name);
+          clearTimeout(timeoutId);
+          setUser(currentUser as UserProfile);
+          return;
+        }
+      }
+
+      // Try to authenticate using the auth service
+      console.log('useAuth: Checking authentication status...');
+      const authenticated = await authService.check();
+
+      if (authenticated) {
+        console.log('useAuth: Authentication successful, fetching user...');
+        const currentUser = await authService.getCurrentUser();
+        if (currentUser) {
+          console.log('useAuth: Setting user in context:', currentUser.email || currentUser.name);
+          setUser(currentUser as UserProfile);
+        }
+      } else {
+        console.log('useAuth: Not authenticated');
         setUser(null);
-        setIsAuthenticated(false);
         
-        // Only redirect if not on a public route
+        // Only redirect if we're not already on a public route
         const publicRoutes = ['/login', '/forgot-password', '/sign-up', '/'];
         if (!publicRoutes.includes(pathname)) {
-          router.push('/login');
+          console.log('useAuth: Redirecting to login from:', pathname);
+          // Redirect to login with current page as redirect parameter
+          const redirectUrl = `/login?redirect=${encodeURIComponent(pathname)}`;
+          router.push(redirectUrl);
+        } else {
+          console.log('useAuth: Already on public route:', pathname);
         }
-      } finally {
-        setIsLoading(false);
       }
-    };
+      
+      clearTimeout(timeoutId);
+    } catch (error) {
+      console.error('useAuth: Auth check error:', error);
+      setUser(null);
+      
+      // Only redirect if we're not already on a public route
+      const publicRoutes = ['/login', '/forgot-password', '/sign-up', '/'];
+      if (!publicRoutes.includes(pathname)) {
+        console.log('useAuth: Error redirecting to login from:', pathname);
+        // Redirect to login with current page as redirect parameter
+        const redirectUrl = `/login?redirect=${encodeURIComponent(pathname)}`;
+        router.push(redirectUrl);
+      } else {
+        console.log('useAuth: Error but already on public route:', pathname);
+      }
+    } finally {
+      console.log('useAuth: Setting loading to false, current state:', state.isLoading);
+      setLoading(false);
+      isProcessingRef.current = false; // Mark as not processing
+      globalAuthCheckRunning = false; // Clear global flag
+      
+      // Verify the loading state was reset
+      setTimeout(() => {
+        console.log('useAuth: Loading state after reset:', state.isLoading);
+      }, 100);
+    }
+  }, [pathname, router, setUser, setLoading, state.isLoading, state.user]);
 
+  useEffect(() => {
+    // Only run auth check once on mount, not on every render
+    console.log('useAuth: useEffect triggered - running initial auth check');
+    
+    // Check if we already have a user or if we're already loading
+    if (state.user || state.isLoading || hasRunRef.current) {
+      console.log('useAuth: Skipping initial auth check - user exists, already loading, or already run');
+      hasRunRef.current = true;
+      return;
+    }
+    
     checkAuth();
-  }, []); // Remove pathname and router from dependencies to prevent infinite loops
-
-  const hasRole = async (role: string | string[]): Promise<boolean> => {
-    if (!user) return false;
     
-    if (Array.isArray(role)) {
-      return role.includes(user.role);
-    }
-    
-    return user.role === role;
-  };
-
-  const hasPermission = async (permission: string | string[]): Promise<boolean> => {
-    if (!user) return false;
-    
-    // This would check user permissions from the backend
-    // For now, we'll use role-based permissions
-    const rolePermissions: Record<string, string[]> = {
-      'ROLE_ADMIN': ['read', 'write', 'delete', 'manage_users', 'manage_system'],
-      'ROLE_STAFF': ['read', 'write', 'manage_courses'],
-      'ROLE_STUDENT': ['read', 'enroll_courses'],
+    // Cleanup function to reset the ref if component unmounts
+    return () => {
+      hasRunRef.current = false;
+      isProcessingRef.current = false;
     };
+  }, []); // Empty dependency array - only run once on mount
 
-    const userPermissions = rolePermissions[user.role] || [];
-    
-    if (Array.isArray(permission)) {
-      return permission.some(p => userPermissions.includes(p));
+  const hasRole = useCallback((role: string | string[]) => {
+    console.log('useAuth: hasRole called with:', { role, currentUser: state.user });
+    return userService.hasRole(state.user, role);
+  }, [state.user]);
+
+  const hasPermission = useCallback((permission: string) => {
+    // For now, return true if user has any role
+    // This can be expanded based on actual permission system
+    return state.isAuthenticated;
+  }, [state.isAuthenticated]);
+
+  const refreshUser = useCallback(async () => {
+    console.log('useAuth: Manual refresh requested');
+    try {
+      setLoading(true);
+      const currentUser = await authService.getCurrentUser();
+      if (currentUser) {
+        setUser(currentUser as UserProfile);
+        console.log('useAuth: User refreshed successfully');
+      }
+    } catch (error) {
+      console.error('useAuth: Refresh error:', error);
+      setUser(null);
+    } finally {
+      setLoading(false);
     }
-    
-    return userPermissions.includes(permission);
-  };
+  }, [setUser, setLoading]);
 
-  const logout = async (): Promise<void> => {
+  const logout = useCallback(async () => {
     try {
       await authService.logout();
-      setUser(null);
-      setIsAuthenticated(false);
+      contextLogout();
       router.push('/login');
     } catch (error) {
-      console.error('Logout failed:', error);
+      console.error('useAuth: Logout error:', error);
+      // Force logout even if API fails
+      contextLogout();
+      router.push('/login');
     }
-  };
+  }, [authService, contextLogout, router]);
 
   return {
-    user,
-    isLoading,
-    isAuthenticated,
+    user: state.user,
+    isLoading: state.isLoading,
+    isAuthenticated: state.isAuthenticated,
     hasRole,
     hasPermission,
     logout,
+    refreshUser,
   };
 }

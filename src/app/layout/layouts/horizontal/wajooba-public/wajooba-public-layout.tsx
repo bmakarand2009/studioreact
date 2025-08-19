@@ -1,9 +1,10 @@
 'use client';
 
 import { ReactNode, useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useNavigation } from '@/hooks/useNavigation';
-import { useUser } from '@/hooks/useUser';
+import { useAuth } from '@/hooks/useAuth';
 import HorizontalNavigation from '@/components/navigation/horizontal-navigation';
 import LoadingBar from '@/components/ui/loading-bar';
 import { Button } from '@/components/ui';
@@ -17,7 +18,8 @@ export default function WajoobaPublicLayout({ children }: WajoobaPublicLayoutPro
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const isScreenSmall = useMediaQuery('(max-width: 768px)');
   const { navigation } = useNavigation();
-  const { user } = useUser();
+  const { user } = useAuth();
+  const router = useRouter();
 
   // Close mobile menu on screen size change
   useEffect(() => {
@@ -40,12 +42,12 @@ export default function WajoobaPublicLayout({ children }: WajoobaPublicLayoutPro
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
-            <div className="flex items-center">
+            <div className="flex items-center cursor-pointer" onClick={() => router.push('/')}>
               <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
                 <span className="text-white text-sm font-bold">W</span>
               </div>
               <span className="ml-2 text-xl font-semibold text-gray-900 dark:text-white">
-                Wisely
+                Wajooba
               </span>
             </div>
 
@@ -61,19 +63,35 @@ export default function WajoobaPublicLayout({ children }: WajoobaPublicLayoutPro
             <div className="flex items-center space-x-4">
               {/* CTA Buttons */}
               <div className="hidden md:flex items-center space-x-3">
-                {!user ? (
-                  <>
-                    <Button variant="ghost" size="sm">
-                      Sign In
-                    </Button>
-                    <Button variant="primary" size="sm">
-                      Get Started
-                    </Button>
-                  </>
-                ) : (
-                  <Button variant="primary" size="sm">
+                {user ? (
+                  <Button variant="primary" size="sm" onClick={() => {
+                    // Redirect based on user role
+                    switch (user.role) {
+                      case 'ROLE_ADMIN':
+                        router.push('/admin/dashboard');
+                        break;
+                      case 'ROLE_STUDENT':
+                        router.push('/student/dashboard');
+                        break;
+                      case 'ROLE_STAFF':
+                        router.push('/staff/dashboard');
+                        break;
+                      default:
+                        router.push('/dashboard');
+                        break;
+                    }
+                  }}>
                     Dashboard
                   </Button>
+                ) : (
+                  <>
+                    <Button variant="ghost" size="sm" onClick={() => router.push('/login')}>
+                      Sign In
+                    </Button>
+                    {/* <Button variant="primary" size="sm" onClick={() => router.push('/register')}>
+                      Get Started
+                    </Button> */}
+                  </>
                 )}
               </div>
 
@@ -101,18 +119,40 @@ export default function WajoobaPublicLayout({ children }: WajoobaPublicLayoutPro
                 onItemClick={() => setMobileMenuOpen(false)}
               />
               {/* Mobile CTA Buttons */}
-              {!user && (
-                <div className="pt-4 pb-3 border-t border-gray-200 dark:border-gray-700">
-                  <div className="space-y-2">
-                    <Button variant="ghost" size="sm" fullWidth>
-                      Sign In
+              <div className="pt-4 pb-3 border-t border-gray-200 dark:border-gray-700">
+                <div className="space-y-2">
+                  {user ? (
+                    <Button variant="primary" size="sm" fullWidth onClick={() => {
+                      // Redirect based on user role
+                      switch (user.role) {
+                        case 'ROLE_ADMIN':
+                          router.push('/admin/dashboard');
+                          break;
+                        case 'ROLE_STUDENT':
+                          router.push('/student/dashboard');
+                          break;
+                        case 'ROLE_STAFF':
+                          router.push('/staff/dashboard');
+                          break;
+                        default:
+                          router.push('/dashboard');
+                          break;
+                      }
+                    }}>
+                      Dashboard
                     </Button>
-                    <Button variant="primary" size="sm" fullWidth>
-                      Get Started
-                    </Button>
-                  </div>
+                  ) : (
+                    <>
+                      <Button variant="ghost" size="sm" fullWidth onClick={() => router.push('/login')}>
+                        Sign In
+                      </Button>
+                      {/* <Button variant="primary" size="sm" fullWidth onClick={() => router.push('/register')}>
+                        Get Started
+                      </Button> */}
+                    </>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
           </div>
         )}
@@ -134,12 +174,12 @@ export default function WajoobaPublicLayout({ children }: WajoobaPublicLayoutPro
                   <span className="text-white text-lg font-bold">W</span>
                 </div>
                 <span className="ml-3 text-xl font-semibold text-gray-900 dark:text-white">
-                  Wisely
+                  Wajooba
                 </span>
               </div>
               <p className="mt-4 text-gray-600 dark:text-gray-400 max-w-md">
                 Empowering education through innovative technology solutions. 
-                Join thousands of students and educators using Wisely.
+                Join thousands of students and educators using Wajooba.
               </p>
             </div>
 
@@ -194,7 +234,7 @@ export default function WajoobaPublicLayout({ children }: WajoobaPublicLayoutPro
 
           <div className="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
             <p className="text-center text-base text-gray-400 dark:text-gray-500">
-              © {new Date().getFullYear()} Wisely. All rights reserved.
+              © {new Date().getFullYear()} Wajooba. All rights reserved.
             </p>
           </div>
         </div>

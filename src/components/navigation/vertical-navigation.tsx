@@ -1,19 +1,22 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui';
 import { 
-  HomeIcon, 
-  UsersIcon, 
-  BookOpenIcon, 
-  ChartBarIcon,
-  UserCircleIcon,
-  XIcon,
-  ChevronDownIcon,
-  ChevronRightIcon,
-  LogOutIcon
+  Home, 
+  Users, 
+  BookOpen, 
+  BarChart3,
+  UserCircle,
+  X,
+  ChevronDown,
+  ChevronRight,
+  LogOut,
+  Calendar,
+  ShoppingCart,
+  ClipboardCheck
 } from 'lucide-react';
 
 interface NavigationItem {
@@ -32,10 +35,13 @@ interface VerticalNavigationProps {
 }
 
 const iconMap: Record<string, React.ComponentType<any>> = {
-  home: HomeIcon,
-  users: UsersIcon,
-  book: BookOpenIcon,
-  'bar-chart': ChartBarIcon,
+  home: Home,
+  users: Users,
+  book: BookOpen,
+  'bar-chart': BarChart3,
+  calendar: Calendar,
+  'shopping-cart': ShoppingCart,
+  'clipboard-check': ClipboardCheck,
 };
 
 export default function VerticalNavigation({ navigation, user, onLogout, onClose }: VerticalNavigationProps) {
@@ -54,11 +60,43 @@ export default function VerticalNavigation({ navigation, user, onLogout, onClose
 
   const getIcon = (iconName: string) => {
     const IconComponent = iconMap[iconName];
-    return IconComponent ? <IconComponent className="h-5 w-5" /> : null;
+    if (IconComponent) {
+      return <IconComponent className="h-5 w-5" />;
+    }
+    // Fallback icon if the requested icon is not found
+    return <Home className="h-5 w-5" />;
   };
 
   const isActive = (url: string) => {
-    return pathname === url || pathname.startsWith(url + '/');
+    // Exact match first
+    if (pathname === url) {
+      return true;
+    }
+    
+    // For dashboard routes, only match exact dashboard path, not all routes starting with /admin/ or /student/
+    if (url === '/admin/dashboard' && pathname === '/admin/dashboard') {
+      return true;
+    }
+    
+    if (url === '/student/dashboard' && pathname === '/student/dashboard') {
+      return true;
+    }
+    
+    if (url === '/staff/dashboard' && pathname === '/staff/dashboard') {
+      return true;
+    }
+    
+    // For other routes, check if pathname starts with the URL (but not dashboard)
+    if (url !== '/' && !url.includes('dashboard') && pathname.startsWith(url)) {
+      return true;
+    }
+    
+    // For root path, only match exact
+    if (url === '/' && pathname === '/') {
+      return true;
+    }
+    
+    return false;
   };
 
   return (
@@ -84,7 +122,7 @@ export default function VerticalNavigation({ navigation, user, onLogout, onClose
                 className="h-10 w-10 rounded-full"
               />
             ) : (
-              <UserCircleIcon className="h-6 w-6 text-gray-600 dark:text-gray-400" />
+              <UserCircle className="h-6 w-6 text-gray-600 dark:text-gray-400" />
             )}
           </div>
           <div className="flex-1 min-w-0">
@@ -100,25 +138,32 @@ export default function VerticalNavigation({ navigation, user, onLogout, onClose
 
       {/* Navigation Items */}
       <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
-        {navigation.map((item) => (
-          <div key={item.id}>
-            <Link
-              href={item.url}
-              className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors ${
-                isActive(item.url)
-                  ? 'bg-primary text-white'
-                  : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
-              }`}
-            >
-              {item.icon && (
-                <span className="mr-3 flex-shrink-0">
-                  {getIcon(item.icon)}
-                </span>
-              )}
-              <span className="flex-1">{item.title}</span>
-            </Link>
-          </div>
-        ))}
+        {useMemo(() => navigation.map((item) => {
+          const active = isActive(item.url);
+          
+          return (
+            <div key={item.id}>
+              <Link
+                href={item.url}
+                className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors ${
+                  active
+                    ? 'bg-primary-600 text-white shadow-md border-l-4 border-primary-400'
+                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
+                }`}
+              >
+                {item.icon && (
+                  <span className={`mr-3 flex-shrink-0 ${active ? 'text-white' : 'text-gray-500 dark:text-gray-400'}`}>
+                    {getIcon(item.icon)}
+                  </span>
+                )}
+                <span className="flex-1">{item.title}</span>
+                {active && (
+                  <div className="w-2 h-2 bg-white rounded-full ml-2"></div>
+                )}
+              </Link>
+            </div>
+          );
+        }), [navigation, pathname])}
       </nav>
 
       {/* Logout Button */}
@@ -127,7 +172,7 @@ export default function VerticalNavigation({ navigation, user, onLogout, onClose
           onClick={onLogout}
           className="w-full flex items-center justify-center px-3 py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
         >
-          <LogOutIcon className="h-4 w-4 mr-2" />
+          <LogOut className="h-4 w-4 mr-2" />
           Logout
         </button>
       </div>

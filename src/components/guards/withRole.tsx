@@ -1,7 +1,8 @@
 'use client';
 
 import { useAuth } from '@/hooks/useAuth';
-import { useRouter } from 'next/navigation';
+import { usePreview } from '@/contexts/PreviewContext';
+import { useRouter, usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 interface WithRoleProps {
@@ -15,14 +16,24 @@ export function withRole<P extends object>(
 ) {
   return function WithRoleComponent(props: P) {
     const { user, isLoading, hasRole } = useAuth();
+    const { isInPreviewMode, previewUser } = usePreview();
     const router = useRouter();
+    const pathname = usePathname();
     const [hasRedirected, setHasRedirected] = useState(false);
     const [roleCheckComplete, setRoleCheckComplete] = useState(false);
 
     useEffect(() => {
       const checkRole = async () => {
         if (!isLoading && user && !hasRedirected && !roleCheckComplete) {
-          const hasRequiredRole = await hasRole(allowedRoles);
+          let hasRequiredRole = false;
+          
+          // If in preview mode, check if the preview user has the required role
+          if (isInPreviewMode && previewUser) {
+            hasRequiredRole = allowedRoles.includes(previewUser.role);
+          } else {
+            // Check the actual user's role
+            hasRequiredRole = await hasRole(allowedRoles);
+          }
           
           if (!hasRequiredRole) {
             setHasRedirected(true);
@@ -54,22 +65,27 @@ export function withRole<P extends object>(
       };
 
       checkRole();
-    }, [user, isLoading, hasRole, allowedRoles, redirectTo, router, hasRedirected, roleCheckComplete]);
+    }, [user, isLoading, hasRole, allowedRoles, redirectTo, router, hasRedirected, roleCheckComplete, isInPreviewMode, previewUser]);
 
-    // Show loading while checking auth
+    // Show loading while checking auth OR while role check is incomplete
     if (isLoading || !roleCheckComplete) {
       return (
-        <div className="min-h-screen flex items-center justify-center">
+        <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-deep-600 mx-auto mb-4"></div>
-            <p className="text-gray-600 dark:text-gray-400">Checking permissions...</p>
+            <p className="text-gray-600 dark:text-gray-400">
+              {isLoading ? 'Loading...' : 'Checking permissions...'}
+            </p>
           </div>
         </div>
       );
     }
 
-    // If user doesn't have required role, don't render
-    if (!user) {
+    // If no user and not in preview mode, redirect to login with current page as redirect URL
+    if (!user && !isInPreviewMode) {
+      // Redirect to login with current page as redirect parameter
+      const redirectUrl = `/login?redirect=${encodeURIComponent(pathname)}`;
+      router.push(redirectUrl);
       return null;
     }
 

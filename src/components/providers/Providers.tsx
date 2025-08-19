@@ -1,18 +1,21 @@
 'use client';
 
-import React from 'react';
-import { ThemeProvider } from './ThemeProvider';
+import { ReactNode } from 'react';
+import { UserProvider } from '@/contexts/UserContext';
+import { PreviewProvider } from '@/contexts/PreviewContext';
 import { AppInitializer } from './AppInitializer';
 
 interface ProvidersProps {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 export function Providers({ children }: ProvidersProps) {
   return (
-    <ThemeProvider>
-      <AppInitializer />
-      {children}
-    </ThemeProvider>
+    <UserProvider>
+      <PreviewProvider>
+        <AppInitializer />
+        {children}
+      </PreviewProvider>
+    </UserProvider>
   );
 }

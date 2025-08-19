@@ -30,7 +30,72 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const router = useRouter();
+
+  // Check if user is already authenticated on page load
+  useEffect(() => {
+    const checkExistingAuth = async () => {
+      try {
+        // Check if user is already logged in
+        const isLoggedIn = await authService.isLoggedIn();
+        if (isLoggedIn) {
+          // Get current user to determine redirect path
+          const currentUser = await authService.getCurrentUser();
+          if (currentUser) {
+            let redirectPath = '/dashboard'; // default fallback
+            
+            switch (currentUser.role) {
+              case 'ROLE_ADMIN':
+                redirectPath = '/admin/dashboard';
+                break;
+              case 'ROLE_STUDENT':
+                redirectPath = '/student/dashboard';
+                break;
+              case 'ROLE_STAFF':
+                redirectPath = '/staff/dashboard';
+                break;
+              default:
+                redirectPath = '/dashboard';
+                break;
+            }
+
+            // Check if there's a return URL from query params
+            const urlParams = new URLSearchParams(window.location.search);
+            const returnUrl = urlParams.get('redirect') || urlParams.get('redirectURL');
+            
+            if (returnUrl && returnUrl !== '/login' && returnUrl !== '/') {
+              // Validate that the return URL is safe (not external)
+              try {
+                const returnUrlObj = new URL(returnUrl, window.location.origin);
+                if (returnUrlObj.origin === window.location.origin) {
+                  redirectPath = returnUrl;
+                  console.log('Auto-login: Redirecting to original requested page:', redirectPath);
+                } else {
+                  console.log('Auto-login: Invalid return URL, using default dashboard');
+                }
+              } catch (e) {
+                console.log('Auto-login: Invalid return URL format, using default dashboard');
+              }
+            } else {
+              console.log('Auto-login: Redirecting to default dashboard:', redirectPath);
+            }
+
+            console.log('Auto-login: Redirecting to:', redirectPath);
+            router.replace(redirectPath);
+            return;
+          }
+        }
+      } catch (error) {
+        console.log('Auto-login check failed:', error);
+        // Continue to show login form if check fails
+      } finally {
+        setIsCheckingAuth(false);
+      }
+    };
+
+    checkExistingAuth();
+  }, [router]);
 
   const {
     register,
@@ -71,10 +136,13 @@ export default function LoginPage() {
 
         // Check if there's a return URL from query params
         const urlParams = new URLSearchParams(window.location.search);
-        const returnUrl = urlParams.get('redirectURL');
+        const returnUrl = urlParams.get('redirect') || urlParams.get('redirectURL');
         
-        if (returnUrl && returnUrl !== '/login') {
+        if (returnUrl && returnUrl !== '/login' && returnUrl !== '/') {
           redirectPath = returnUrl;
+          console.log('Redirecting to original requested page:', redirectPath);
+        } else {
+          console.log('Redirecting to default dashboard:', redirectPath);
         }
 
         console.log('Redirecting to:', redirectPath);
@@ -110,6 +178,18 @@ export default function LoginPage() {
       setError('Facebook login failed. Please try again.');
     }
   };
+
+  // Show loading while checking authentication
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-deep-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex">

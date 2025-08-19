@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { navigationService } from '@/app/core';
 import type { NavigationItem as ServiceNavigationItem } from '@/app/core/navigation';
 
@@ -50,7 +50,10 @@ export function useNavigation() {
     loadNavigation();
   }, []);
 
-  return { navigation };
+  // Memoize the navigation object to prevent unnecessary re-renders
+  const memoizedNavigation = useMemo(() => navigation, [navigation]);
+
+  return { navigation: memoizedNavigation };
 }
 
 // Default navigation structures
@@ -97,11 +100,32 @@ function getDefaultStudentNavigation(): NavigationItem[] {
       url: '/student/dashboard',
     },
     {
+      id: 'calendar',
+      title: 'Calendar',
+      type: 'item',
+      icon: 'calendar',
+      url: '/student/calendar',
+    },
+    {
       id: 'courses',
-      title: 'My Courses',
+      title: 'Courses',
       type: 'item',
       icon: 'book',
       url: '/student/courses',
+    },
+    {
+      id: 'store',
+      title: 'My Store',
+      type: 'item',
+      icon: 'shopping-cart',
+      url: '/student/store',
+    },
+    {
+      id: 'assessments',
+      title: 'Assessments',
+      type: 'item',
+      icon: 'clipboard-check',
+      url: '/student/assessments',
     },
     {
       id: 'assignments',

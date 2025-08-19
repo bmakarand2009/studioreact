@@ -52,24 +52,40 @@ class AuthService {
   private tokenExpiry: number | null = null;
 
   constructor() {
-    this.initializeFromStorage();
+    // Only initialize from storage on client side
+    if (typeof window !== 'undefined') {
+      this.initializeFromStorage();
+    }
   }
 
   /**
-   * Initialize auth state from localStorage
+   * Check if running on client side
+   */
+  private isClient(): boolean {
+    return typeof window !== 'undefined';
+  }
+
+  /**
+   * Initialize auth state from cookies
    */
   private initializeFromStorage(): void {
+    if (!this.isClient()) return;
+
     try {
-      const storedToken = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
-      const storedRefreshToken = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
-      const storedUser = localStorage.getItem(STORAGE_KEYS.USER_PREFERENCES);
+      const storedToken = this.getCookie(STORAGE_KEYS.AUTH_TOKEN);
+      const storedRefreshToken = this.getCookie(STORAGE_KEYS.REFRESH_TOKEN);
+      const storedUser = this.getCookie(STORAGE_KEYS.USER_PREFERENCES);
 
       if (storedToken && storedRefreshToken) {
         this.accessToken = storedToken;
         this.refreshToken = storedRefreshToken;
         
         if (storedUser) {
-          this.user = JSON.parse(storedUser);
+          try {
+            this.user = JSON.parse(storedUser);
+          } catch (e) {
+            console.error('Error parsing stored user data:', e);
+          }
         }
       }
     } catch (error) {
@@ -181,7 +197,7 @@ class AuthService {
       this.accessToken = data.accessToken;
       this.tokenExpiry = Date.now() + data.expiresIn * 1000;
       
-      localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, this.accessToken);
+      this.setCookie(STORAGE_KEYS.AUTH_TOKEN, this.accessToken, 7);
       
       return this.accessToken;
     } catch (error) {
@@ -261,7 +277,7 @@ class AuthService {
       const updatedUser: User = await response.json();
       
       this.user = { ...this.user, ...updatedUser };
-      localStorage.setItem(STORAGE_KEYS.USER_PREFERENCES, JSON.stringify(this.user));
+      this.setCookie(STORAGE_KEYS.USER_PREFERENCES, JSON.stringify(this.user), 7);
       
       return this.user;
     } catch (error) {
@@ -351,9 +367,9 @@ class AuthService {
     this.refreshToken = tokens.refreshToken;
     this.tokenExpiry = Date.now() + tokens.expiresIn * 1000;
 
-    localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, tokens.accessToken);
-    localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, tokens.refreshToken);
-    localStorage.setItem(STORAGE_KEYS.USER_PREFERENCES, JSON.stringify(user));
+    this.setCookie(STORAGE_KEYS.AUTH_TOKEN, tokens.accessToken, 7);
+    this.setCookie(STORAGE_KEYS.REFRESH_TOKEN, tokens.refreshToken, 7);
+    this.setCookie(STORAGE_KEYS.USER_PREFERENCES, JSON.stringify(user), 7);
   }
 
   /**
@@ -365,9 +381,11 @@ class AuthService {
     this.refreshToken = null;
     this.tokenExpiry = null;
 
-    localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
-    localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
-    localStorage.removeItem(STORAGE_KEYS.USER_PREFERENCES);
+    if (this.isClient()) {
+      this.deleteCookie(STORAGE_KEYS.AUTH_TOKEN);
+      this.deleteCookie(STORAGE_KEYS.REFRESH_TOKEN);
+      this.deleteCookie(STORAGE_KEYS.USER_PREFERENCES);
+    }
   }
 
   /**
@@ -376,6 +394,36 @@ class AuthService {
   getAuthHeaders(): Record<string, string> {
     const token = this.getAccessToken();
     return token ? { 'Authorization': `Bearer ${token}` } : {};
+  }
+
+  /**
+   * Cookie management methods
+   */
+  private setCookie(name: string, value: string, days: number = 7): void {
+    if (!this.isClient()) return;
+
+    const expires = new Date();
+    expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+    document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;SameSite=Lax`;
+  }
+
+  private getCookie(name: string): string | null {
+    if (!this.isClient()) return null;
+
+    const nameEQ = name + "=";
+    const ca = document.cookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+      if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
+  }
+
+  private deleteCookie(name: string): void {
+    if (!this.isClient()) return;
+
+    document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;`;
   }
 }
 

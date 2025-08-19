@@ -4,21 +4,24 @@ import { ReactNode, useState, useEffect, useMemo } from 'react';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useNavigation } from '@/hooks/useNavigation';
 import { useAuth } from '@/hooks/useAuth';
+import { usePreview } from '@/contexts/PreviewContext';
 import VerticalNavigation from '@/components/navigation/vertical-navigation';
 import Header from '@/components/layout/header';
 import LoadingBar from '@/components/ui/loading-bar';
+
 import { Button } from '@/components/ui';
 import { MenuIcon, XIcon } from 'lucide-react';
 
-interface WajoobaAdminLayoutProps {
+interface WajoobaStudentLayoutProps {
   children: ReactNode;
 }
 
-export default function WajoobaAdminLayout({ children }: WajoobaAdminLayoutProps) {
+export default function WajoobaStudentLayout({ children }: WajoobaStudentLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const isScreenSmall = useMediaQuery('(max-width: 768px)');
   const { navigation } = useNavigation();
   const { user, logout, isLoading } = useAuth();
+  const { isInPreviewMode, previewUser } = usePreview();
 
   // Memoize navigation to prevent unnecessary re-renders
   const memoizedNavigation = useMemo(() => navigation, [navigation]);
@@ -36,15 +39,9 @@ export default function WajoobaAdminLayout({ children }: WajoobaAdminLayoutProps
 
   // Don't show loading state here - let the role guard handle it
   // The role guard will show appropriate loading messages
-  if (!user) {
-    return null; // Don't render anything if no user
+  if (!user && !isInPreviewMode) {
+    return null; // Don't render anything if no user and not in preview mode
   }
-
-  // Use admin navigation
-  const currentNavigation = memoizedNavigation.adminNavigation;
-
-  // Use actual admin user
-  const displayUser = user;
 
   return (
     <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
@@ -60,9 +57,9 @@ export default function WajoobaAdminLayout({ children }: WajoobaAdminLayoutProps
         }`}
       >
         <VerticalNavigation
-          navigation={currentNavigation}
-          user={displayUser}
-          onLogout={logout}
+          navigation={memoizedNavigation.studentNavigation}
+          user={isInPreviewMode ? previewUser : user}
+          onLogout={isInPreviewMode ? () => {} : logout}
           onClose={() => setSidebarOpen(false)}
         />
       </div>
@@ -80,7 +77,7 @@ export default function WajoobaAdminLayout({ children }: WajoobaAdminLayoutProps
         {/* Header */}
         <Header
           onMenuClick={toggleSidebar}
-          user={displayUser}
+          user={isInPreviewMode ? previewUser : user}
           navigation={memoizedNavigation}
         />
 
@@ -93,6 +90,13 @@ export default function WajoobaAdminLayout({ children }: WajoobaAdminLayoutProps
         <footer className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-3">
           <div className="text-center text-sm text-gray-500 dark:text-gray-400">
             © {new Date().getFullYear()} Wajooba. All rights reserved.
+            {isInPreviewMode && (
+              <span className="ml-2">
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold text-white border border-[#00c6d8] bg-[#00c6d8]">
+                  PREVIEW MODE
+                </span>
+              </span>
+            )}
           </div>
         </footer>
       </div>

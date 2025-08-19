@@ -2,6 +2,7 @@ import { AuthUtils } from '@/utils/authUtils';
 import { environment } from '@/config/environment';
 import { logEnvironmentInfo } from '@/utils/environment';
 import { appLoadService } from '@/app/core/app-load';
+import { userService } from '@/app/core/user';
 
 export interface LoginCredentials {
   userId: string;
@@ -112,6 +113,7 @@ export class AuthService {
    * Get current user - returns from memory if available, otherwise fetches from backend
    */
   async getCurrentUser(): Promise<any> {
+    // Check local memory first
     if (this._currentUser) {
       return this._currentUser;
     }
@@ -121,8 +123,6 @@ export class AuthService {
       if (!token) {
         return null;
       }
-
-      const isOAuth = this.isOAuthToken(token);
 
       const response = await fetch(`${this.baseUrl}/rest/reInitInfo`, {
         method: 'GET',
@@ -156,6 +156,7 @@ export class AuthService {
    */
   setCurrentUser(user: any): void {
     this._currentUser = user;
+    this._authenticated = true;
   }
 
   /**
@@ -163,6 +164,7 @@ export class AuthService {
    */
   clearCurrentUser(): void {
     this._currentUser = null;
+    this._authenticated = false;
   }
 
   /**
@@ -215,6 +217,7 @@ export class AuthService {
         this._authenticated = true;
         this.accessToken = data.access_token;
         
+        // Set in auth service
         this.setCurrentUser(data.contact);
         
         if (data.refresh_token) {
@@ -443,7 +446,6 @@ export class AuthService {
 
   /**
    * Check authentication status
-   * This is the central method for token validation
    */
   async check(): Promise<boolean> {
     try {
@@ -452,11 +454,13 @@ export class AuthService {
         return false;
       }
 
+      // Check local memory first
       if (this._currentUser) {
         this._authenticated = true;
         return true;
       }
 
+      // Try to fetch user from backend
       try {
         const user = await this.getCurrentUser();
         if (user) {
@@ -574,6 +578,167 @@ export class AuthService {
     } catch (error) {
       return null;
     }
+  }
+
+  /**
+   * Check for auth token in URL and automatically start login process
+   * This handles URLs like: http://marksampletest.me.com:3000/?auth=eyJhbGciOiJIUzI1NiJ9....
+   */
+  async checkAuthTokenInUrl(): Promise<boolean> {
+    try {
+      const authToken = this.getQueryParameter('auth');
+      
+      if (!authToken) {
+        return false;
+      }
+
+      console.log('Auth token found in URL, attempting to validate...');
+
+      // Store the token temporarily
+      this.accessToken = authToken;
+      
+      // Try to validate the token by calling reInitInfo
+      try {
+        const user = await this.getCurrentUser();
+        if (user) {
+          // Token is valid, user is authenticated
+          console.log('Auth token validated successfully, user authenticated:', user.email || user.name);
+          console.log('User role:', user.role);
+          console.log('Current pathname:', typeof window !== 'undefined' ? window.location.pathname : 'N/A');
+          
+          this._authenticated = true;
+          this.setCurrentUser(user);
+          
+          // Clean up the URL by removing the auth parameter
+          this.cleanupAuthUrl();
+          
+          // Handle post-authentication redirect
+          console.log('About to handle post-auth redirect...');
+          
+          // Add a small delay to ensure React context is properly updated
+          await new Promise(resolve => setTimeout(resolve, 500));
+          
+          await this.handlePostAuthRedirect();
+          
+          return true;
+        }
+      } catch (error) {
+        // Token is invalid, clear it and return false
+        console.error('Auth token validation failed:', error);
+        this.accessToken = '';
+        this._authenticated = false;
+        this.clearCurrentUser();
+        return false;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('Error checking auth token in URL:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Clean up the URL by removing the auth parameter after successful authentication
+   */
+  private cleanupAuthUrl(): void {
+    try {
+      if (typeof window !== 'undefined' && window.history && window.history.replaceState) {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('auth');
+        
+        // Replace the current URL without the auth parameter
+        window.history.replaceState({}, document.title, url.toString());
+      }
+    } catch (error) {
+      // Silent fail - URL cleanup is not critical
+    }
+  }
+
+  /**
+   * Check if there's an auth token in the URL (for debugging)
+   */
+  hasAuthTokenInUrl(): boolean {
+    return !!this.getQueryParameter('auth');
+  }
+
+  /**
+   * Get the auth token from URL without processing it (for debugging)
+   */
+  getAuthTokenFromUrl(): string | null {
+    return this.getQueryParameter('auth');
+  }
+
+  /**
+   * Manual method to check for auth token in URL (for testing)
+   * Can be called from browser console: authService.manualCheckAuthToken()
+   */
+  async manualCheckAuthToken(): Promise<boolean> {
+    const result = await this.checkAuthTokenInUrl();
+    return result;
+  }
+
+  /**
+   * Handle post-authentication redirect based on user role
+   */
+  async handlePostAuthRedirect(): Promise<void> {
+    try {
+      const user = await this.getCurrentUser();
+      if (!user) {
+        console.log('No user found for post-auth redirect');
+        return;
+      }
+
+      // Determine redirect path based on user role
+      // Handle both formats: "ROLE_ADMIN" and "admin"
+      let redirectPath = '/';
+      const userRole = user.role || '';
+      
+      if (userRole === 'ROLE_ADMIN' || userRole === 'admin' || userRole === 'ROLE_STAFF' || userRole === 'staff') {
+        redirectPath = '/admin/dashboard';
+      } else if (userRole === 'ROLE_STUDENT' || userRole === 'student') {
+        redirectPath = '/student/dashboard';
+      }
+
+      console.log(`User authenticated with role '${userRole}', should redirect to: ${redirectPath}`);
+      console.log('Redirect will be handled by AppInitializer to avoid full page reload');
+      
+      // Don't redirect here - let AppInitializer handle it with Next.js router
+      // This prevents the double redirect issue
+    } catch (error) {
+      console.error('Error in post-auth redirect:', error);
+    }
+  }
+
+  /**
+   * Manual method to trigger redirect (for testing)
+   * Can be called from browser console: authService.manualRedirect()
+   */
+  async manualRedirect(): Promise<void> {
+    console.log('Manual redirect triggered');
+    await this.handlePostAuthRedirect();
+  }
+
+  /**
+   * Get current authentication status for debugging
+   */
+  getAuthStatus(): {
+    isAuthenticated: boolean;
+    hasToken: boolean;
+    hasUser: boolean;
+    tokenLength: number;
+    userRole?: string;
+    userEmail?: string;
+  } {
+    const token = this.accessToken;
+    return {
+      isAuthenticated: this._authenticated,
+      hasToken: !!token,
+      hasUser: !!this._currentUser,
+      tokenLength: token ? token.length : 0,
+      userRole: this._currentUser?.role,
+      userEmail: this._currentUser?.email || this._currentUser?.name,
+    };
   }
 }
 

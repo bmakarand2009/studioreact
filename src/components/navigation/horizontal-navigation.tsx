@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -27,7 +28,35 @@ export default function HorizontalNavigation({
   const pathname = usePathname();
 
   const isActive = (url: string) => {
-    return pathname === url || pathname.startsWith(url + '/');
+    // Exact match first
+    if (pathname === url) {
+      return true;
+    }
+    
+    // For dashboard routes, only match exact dashboard path, not all routes starting with /admin/ or /student/
+    if (url === '/admin/dashboard' && pathname === '/admin/dashboard') {
+      return true;
+    }
+    
+    if (url === '/student/dashboard' && pathname === '/student/dashboard') {
+      return true;
+    }
+    
+    if (url === '/staff/dashboard' && pathname === '/staff/dashboard') {
+      return true;
+    }
+    
+    // For other routes, check if pathname starts with the URL (but not dashboard)
+    if (url !== '/' && !url.includes('dashboard') && pathname.startsWith(url)) {
+      return true;
+    }
+    
+    // For root path, only match exact
+    if (url === '/' && pathname === '/') {
+      return true;
+    }
+    
+    return false;
   };
 
   const handleItemClick = () => {
@@ -39,39 +68,39 @@ export default function HorizontalNavigation({
   if (mobile) {
     return (
       <div className="space-y-1">
-        {navigation.map((item) => (
+        {useMemo(() => navigation.map((item) => (
           <Link
             key={item.id}
             href={item.url}
             onClick={handleItemClick}
-            className={`block px-3 py-2 rounded-md text-base font-medium ${
+            className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
               isActive(item.url)
-                ? 'bg-primary text-white'
+                ? 'bg-primary-600 text-white shadow-md'
                 : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
             }`}
           >
             {item.title}
           </Link>
-        ))}
+        )), [navigation, pathname, handleItemClick])}
       </div>
     );
   }
 
   return (
     <nav className="flex space-x-8">
-      {navigation.map((item) => (
+      {useMemo(() => navigation.map((item) => (
         <Link
           key={item.id}
           href={item.url}
           className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
             isActive(item.url)
-              ? 'bg-primary text-white'
+              ? 'bg-primary-600 text-white shadow-md'
               : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
           }`}
         >
           {item.title}
         </Link>
-      ))}
+      )), [navigation, pathname])}
     </nav>
   );
 }
