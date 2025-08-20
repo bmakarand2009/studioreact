@@ -45,7 +45,7 @@ export class AuthService {
   private baseUrl: string;
 
   constructor() {
-    this.baseUrl = environment.apiBaseUrl;
+    this.baseUrl = environment.api.baseUrl;
     logEnvironmentInfo();
   }
 
@@ -189,7 +189,7 @@ export class AuthService {
     }
 
     try {
-      const tenantId = appLoadService.tenantId || credentials.tid || environment.defaultTenantId;
+      const tenantId = appLoadService.tenantId || credentials.tid;
       
       if (!tenantId) {
         throw new Error('Tenant ID not available. Please ensure app is properly initialized.');
@@ -237,9 +237,7 @@ export class AuthService {
    * OAuth login methods - Using v5byclasses approach (backend provides redirect URL)
    */
   async googleLogin(): Promise<void> {
-    if (!environment.enableOAuth) {
-      throw new Error('OAuth is not enabled');
-    }
+    // OAuth is always enabled for now
     
     try {
       const tenantId = appLoadService.tenantId;
@@ -277,9 +275,7 @@ export class AuthService {
   }
 
   async facebookLogin(): Promise<void> {
-    if (!environment.enableOAuth) {
-      throw new Error('OAuth is not enabled');
-    }
+    // OAuth is always enabled for now
     
     try {
       const tenantId = appLoadService.tenantId;

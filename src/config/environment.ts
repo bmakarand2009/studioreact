@@ -11,95 +11,84 @@
  * - Production: api.onwajooba.com
  */
 
-import { 
-  developmentConfig, 
-  stagingConfig, 
-  productionConfig,
-  type Environment,
-  type EnvironmentConfig 
-} from './environments';
-
-// Get current environment
-const getCurrentEnvironment = (): Environment => {
-  const env = process.env.NEXT_PUBLIC_ENV;
-  const nodeEnv = process.env.NODE_ENV;
-  
-  if (env === 'staging') return 'staging';
-  if (env === 'production') return 'production';
-  if (nodeEnv === 'production') return 'production';
-  
-  return 'development';
-};
-
-// Get environment configuration
-const getEnvironmentConfig = (): EnvironmentConfig => {
-  const env = getCurrentEnvironment();
-  
-  switch (env) {
-    case 'staging':
-      return stagingConfig;
-    case 'production':
-      return productionConfig;
-    default:
-      return developmentConfig;
-  }
-};
-
-const currentEnv = getCurrentEnvironment();
-const envConfig = getEnvironmentConfig();
-
+// Environment configuration for the application
 export const environment = {
-  // Current Environment
-  current: currentEnv,
-  config: envConfig,
-  
-  // Environment Detection
-  isDevelopment: currentEnv === 'development',
-  isStaging: currentEnv === 'staging',
-  isProduction: currentEnv === 'production',
-  
-  // API Configuration - From environment config
-  apiBaseUrl: envConfig.apiBaseUrl,
-  
-  // Environment-specific API URLs
-  apiUrls: {
-    development: 'https://api.wajooba.me',
-    staging: 'https://api.wajooba.xyz',
-    production: 'https://api.onwajooba.com'
+  // API Configuration
+  api: {
+    baseUrl: process.env.NEXT_PUBLIC_API_URL || 'https://api.wajooba.me',
+    timeout: 30000, // 30 seconds
+    retryAttempts: 3,
   },
-  
-  // App Configuration
-  appName: 'Wajooba React',
-  appVersion: '1.0.0',
-  
-  // Architecture Type
-  isPureFrontend: true,
-  hasNoBackend: true,
-  
-  // Feature Flags - From environment config
-  enableOAuth: envConfig.features.enableOAuth,
-  enableSocialLogin: envConfig.features.enableSocialLogin,
-  enableMultiTenancy: envConfig.features.enableMultiTenancy,
-  enableAnalytics: envConfig.features.enableAnalytics,
-  
-  // Default Tenant
-  defaultTenantId: 'default',
-  
-  // Brand Colors
-  brandColors: {
-    primary: '#0055a6',
-    secondary: '#00c6d8',
-    tertiary: '#ff8854',
-    accent: '#ff1a00',
+
+  // Application Configuration
+  app: {
+    name: 'Wajooba LMS',
+    version: process.env.NEXT_PUBLIC_APP_VERSION || '1.0.0',
+    environment: process.env.NODE_ENV || 'development',
   },
-  
-  // Environment-specific features
+
+  // Feature Flags
   features: {
-    enableDebugLogs: envConfig.enableDebugLogs,
-    enableMockData: envConfig.enableMockData,
-    enablePerformanceMonitoring: envConfig.enablePerformanceMonitoring,
-    logLevel: envConfig.logLevel
-  }
+    enableAnalytics: process.env.NEXT_PUBLIC_ENABLE_ANALYTICS === 'true',
+    enableDebugMode: process.env.NODE_ENV === 'development',
+    enableMockData: process.env.NEXT_PUBLIC_ENABLE_MOCK_DATA === 'true',
+  },
+
+  // Authentication Configuration
+  auth: {
+    tokenKey: 'wajooba_auth_token',
+    refreshTokenKey: 'wajooba_refresh_token',
+    tokenExpiryKey: 'wajooba_token_expiry',
+    userDataKey: 'wajooba_user_data',
+  },
+
+  // UI Configuration
+  ui: {
+    theme: {
+      default: 'light',
+      storageKey: 'wajooba_theme',
+    },
+    language: {
+      default: 'en',
+      storageKey: 'wajooba_language',
+    },
+  },
+
+  // External Services
+  external: {
+    googleAnalytics: {
+      id: process.env.NEXT_PUBLIC_GA_ID,
+      enabled: process.env.NEXT_PUBLIC_ENABLE_ANALYTICS === 'true',
+    },
+    sentry: {
+      dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
+      enabled: process.env.NEXT_PUBLIC_ENABLE_SENTRY === 'true',
+    },
+  },
 };
 
+// Helper function to check if we're in development mode
+export const isDevelopment = environment.app.environment === 'development';
+
+// Helper function to check if we're in production mode
+export const isProduction = environment.app.environment === 'production';
+
+// Helper function to get API URL with endpoint
+export const getApiUrl = (endpoint: string): string => {
+  const baseUrl = environment.api.baseUrl;
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  return `${baseUrl}${cleanEndpoint}`;
+};
+
+// Helper function to check if feature is enabled
+export const isFeatureEnabled = (feature: keyof typeof environment.features): boolean => {
+  return environment.features[feature] || false;
+};
+
+// Helper function to get environment variable with fallback
+export const getEnvVar = (key: string, fallback: string = ''): string => {
+  return process.env[key] || fallback;
+};
+
+// Export default environment
 export default environment;

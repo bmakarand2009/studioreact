@@ -25,25 +25,12 @@ export function Layout({ children }: LayoutProps) {
   // Use ref to track previous values and detect changes
   const prevValuesRef = useRef({ pathname, isLoading, hasUser: !!user, layout });
 
-  console.log('Layout: Rendering with:', {
-    pathname,
-    isLoading,
-    hasUser: !!user,
-    layout
-  });
-
   // Check what changed
   const prevValues = prevValuesRef.current;
   if (prevValues.pathname !== pathname || 
       prevValues.isLoading !== isLoading || 
       prevValues.hasUser !== !!user || 
       prevValues.layout !== layout) {
-    console.log('Layout: Values changed:', {
-      pathname: { from: prevValues.pathname, to: pathname },
-      isLoading: { from: prevValues.isLoading, to: isLoading },
-      hasUser: { from: prevValues.hasUser, to: !!user },
-      layout: { from: prevValues.layout, to: layout }
-    });
     prevValuesRef.current = { pathname, isLoading, hasUser: !!user, layout };
   }
 
@@ -51,24 +38,12 @@ export function Layout({ children }: LayoutProps) {
   // Only show loading when checking for auth tokens on the root route
   const shouldShowLoading = isLoading && pathname === '/';
 
-  console.log('Layout: Loading state decision:', {
-    isLoading,
-    pathname,
-    hasUser: !!user,
-    shouldShowLoading,
-    isPublicRoute: ['/', '/login', '/forgot-password', '/sign-up', '/sign-in', '/auth', '/courses', '/contact', '/about', '/pricing', '/features'].includes(pathname),
-    reason: isLoading ? (
-      pathname === '/' ? 'Root route - checking for auth tokens' : 'Loading but not root route'
-    ) : 'Not loading'
-  });
-
   // Additional check: if we have a user, we should never show loading
   if (user && isLoading) {
     console.warn('Layout: WARNING - User exists but still loading! This should not happen.');
   }
 
   if (shouldShowLoading) {
-    console.log('Layout: Showing loading state for protected route or authenticated user');
     return (
       <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">

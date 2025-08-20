@@ -91,7 +91,7 @@ export function ContactsSection() {
   // Get student preview token from API
   const getStudentPreviewToken = async (studentId: string): Promise<string> => {
     try {
-      const response = await fetch(`${environment.apiBaseUrl}/rest/contact/${studentId}/token`, {
+      const response = await fetch(`${environment.api.baseUrl}/rest/contact/${studentId}/token`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${authService.accessToken}`,

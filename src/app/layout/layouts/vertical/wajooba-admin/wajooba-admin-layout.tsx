@@ -6,7 +6,7 @@ import { useNavigation } from '@/hooks/useNavigation';
 import { useAuth } from '@/hooks/useAuth';
 import VerticalNavigation from '@/components/navigation/vertical-navigation';
 import Header from '@/components/layout/header';
-import LoadingBar from '@/components/ui/loading-bar';
+
 import { Button } from '@/components/ui';
 import { MenuIcon, XIcon } from 'lucide-react';
 
@@ -49,7 +49,7 @@ export default function WajoobaAdminLayout({ children }: WajoobaAdminLayoutProps
   return (
     <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
       {/* Loading Bar */}
-      <LoadingBar />
+      
 
 
 

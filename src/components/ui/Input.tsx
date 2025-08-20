@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { cn } from '@/utils/cn';
+import { cn } from '@/lib/utils';
 
 const inputVariants = cva(
   'w-full rounded-lg border-2 bg-white px-4 py-3 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-gray-800',
@@ -33,24 +33,38 @@ export interface InputProps
     VariantProps<typeof inputVariants> {
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
+  icon?: React.ReactNode; // Alias for leftIcon for compatibility
   message?: string;
   messageType?: 'default' | 'error' | 'success' | 'warning';
+  error?: string; // Alias for error message
+  label?: string; // Label for the input
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, variant, inputSize, leftIcon, rightIcon, message, messageType = 'default', ...props }, ref) => {
+  ({ className, variant, inputSize, leftIcon, rightIcon, icon, message, messageType = 'default', error, label, ...props }, ref) => {
+    // Use icon as leftIcon if provided
+    const finalLeftIcon = icon || leftIcon;
+    // Use error as message if provided
+    const finalMessage = error || message;
+    const finalMessageType = error ? 'error' : messageType;
+
     return (
-      <div className="w-full">
+      <div className="w-full space-y-2">
+        {label && (
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            {label}
+          </label>
+        )}
         <div className="relative">
-          {leftIcon && (
+          {finalLeftIcon && (
             <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center justify-center text-gray-500 dark:text-gray-400">
-              {leftIcon}
+              {finalLeftIcon}
             </div>
           )}
           <input
             className={cn(
               inputVariants({ variant, inputSize, className }),
-              leftIcon && 'pl-12',
+              finalLeftIcon && 'pl-12',
               rightIcon && 'pr-12'
             )}
             ref={ref}
@@ -62,27 +76,27 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             </div>
           )}
         </div>
-        {message && (
+        {finalMessage && (
           <div className="mt-2 flex items-center gap-2">
-            {messageType === 'error' && (
+            {finalMessageType === 'error' && (
               <div className="h-1.5 w-1.5 rounded-full bg-error-500"></div>
             )}
-            {messageType === 'success' && (
+            {finalMessageType === 'success' && (
               <div className="h-1.5 w-1.5 rounded-full bg-success-500"></div>
             )}
-            {messageType === 'warning' && (
+            {finalMessageType === 'warning' && (
               <div className="h-1.5 w-1.5 rounded-full bg-warning-500"></div>
             )}
             <p
               className={cn(
                 'text-sm',
-                messageType === 'error' && 'text-error-600 dark:text-error-400',
-                messageType === 'success' && 'text-success-600 dark:text-success-400',
-                messageType === 'warning' && 'text-warning-600 dark:text-warning-400',
-                messageType === 'default' && 'text-gray-600 dark:text-gray-400'
+                finalMessageType === 'error' && 'text-error-600 dark:text-error-400',
+                finalMessageType === 'success' && 'text-success-600 dark:text-success-400',
+                finalMessageType === 'warning' && 'text-warning-600 dark:text-warning-400',
+                finalMessageType === 'default' && 'text-gray-600 dark:text-gray-400'
               )}
             >
-              {message}
+              {finalMessage}
             </p>
           </div>
         )}

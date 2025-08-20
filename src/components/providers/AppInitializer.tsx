@@ -5,8 +5,6 @@ import { appLoadService } from '@/app/core/app-load';
 import { authService } from '@/services/authService';
 
 export function AppInitializer() {
-  console.log('AppInitializer: Component rendered');
-  
   // Use ref to prevent multiple initializations
   const hasInitializedRef = useRef(false);
   
@@ -17,12 +15,10 @@ export function AppInitializer() {
   useEffect(() => {
     // Prevent multiple initializations
     if (hasInitializedRef.current) {
-      console.log('AppInitializer: Already initialized, skipping');
       return;
     }
     
     hasInitializedRef.current = true;
-    console.log('AppInitializer: useEffect triggered');
     
     // Set a timeout to prevent the loading state from getting stuck
     const timeoutId = setTimeout(() => {
@@ -35,8 +31,6 @@ export function AppInitializer() {
     
     const initializeApp = async () => {
       try {
-        console.log('AppInitializer: Starting app initialization...');
-        
         // Initialize app configuration (tenant details)
         await appLoadService.initAppConfig();
         
@@ -44,11 +38,9 @@ export function AppInitializer() {
         await new Promise(resolve => setTimeout(resolve, 100));
         
         // First, check for auth token in URL (highest priority)
-        console.log('Checking for auth token in URL...');
         
         // Check if there's an auth token before processing
         if (authService.hasAuthTokenInUrl()) {
-          console.log('Auth token detected in URL, showing loading state...');
           setIsProcessingAuth(true);
           setAuthStep('validating');
         }
@@ -57,7 +49,6 @@ export function AppInitializer() {
         
         if (authTokenSuccess) {
           // Auth token was found and validated, user is now authenticated
-          console.log('Authentication successful via URL auth token');
           
           // Get user details to determine redirect path
           const user = await authService.getCurrentUser();

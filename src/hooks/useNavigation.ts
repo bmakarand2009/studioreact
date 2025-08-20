@@ -87,6 +87,14 @@ function getDefaultAdminNavigation(): NavigationItem[] {
       icon: 'bar-chart',
       url: '/admin/reports',
     },
+
+    {
+      id: 'settings',
+      title: 'Settings',
+      type: 'item',
+      icon: 'settings',
+      url: '/admin/settings',
+    },
   ];
 }
 

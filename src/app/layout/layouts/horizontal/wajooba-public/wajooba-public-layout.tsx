@@ -6,7 +6,7 @@ import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useNavigation } from '@/hooks/useNavigation';
 import { useAuth } from '@/hooks/useAuth';
 import HorizontalNavigation from '@/components/navigation/horizontal-navigation';
-import LoadingBar from '@/components/ui/loading-bar';
+
 import { Button } from '@/components/ui';
 import { MenuIcon, XIcon } from 'lucide-react';
 
@@ -35,7 +35,7 @@ export default function WajoobaPublicLayout({ children }: WajoobaPublicLayoutPro
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
       {/* Loading Bar */}
-      <LoadingBar />
+      
 
       {/* Header with Public Navigation */}
       <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
