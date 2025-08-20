@@ -92,9 +92,9 @@ export default function WajoobaStudentLayout({ children }: WajoobaStudentLayoutP
             © {new Date().getFullYear()} Wajooba. All rights reserved.
             {isInPreviewMode && (
               <span className="ml-2">
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold text-white border border-[#00c6d8] bg-[#00c6d8]">
-                  PREVIEW MODE
-                </span>
+                                 <span className="inline-flex items-center justify-center min-w-[120px] h-7 px-3 rounded-full text-sm font-bold text-white border border-[#00c6d8] bg-[#00c6d8]">
+                   PREVIEW MODE
+                 </span>
               </span>
             )}
           </div>

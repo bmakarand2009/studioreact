@@ -33,7 +33,7 @@ function StudentDashboard() {
               <span className="text-white text-xl font-bold">W</span>
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                 Student Dashboard
               </h1>
               <p className="text-gray-600 dark:text-gray-400">
@@ -44,54 +44,54 @@ function StudentDashboard() {
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
             <div className="flex items-center">
               <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
                 <BookOpen className="h-6 w-6 text-blue-600 dark:text-blue-400" />
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Active Courses</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">4</p>
+                                 <p className="text-xl font-bold text-gray-900 dark:text-white">4</p>
                 <p className="text-xs text-green-600 dark:text-green-400">+1 this semester</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
             <div className="flex items-center">
               <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
                 <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Completed</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">12</p>
+                <p className="text-xl font-bold text-gray-900 dark:text-white">12</p>
                 <p className="text-xs text-green-600 dark:text-green-400">+3 this year</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
             <div className="flex items-center">
               <div className="p-2 bg-yellow-100 dark:bg-yellow-900 rounded-lg">
                 <Clock className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Study Hours</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">156</p>
+                <p className="text-xl font-bold text-gray-900 dark:text-white">156</p>
                 <p className="text-xs text-blue-600 dark:text-blue-400">This month</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
             <div className="flex items-center">
               <div className="p-2 bg-purple-100 dark:bg-purple-900 rounded-lg">
                 <Award className="h-6 w-6 text-purple-600 dark:text-purple-400" />
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">GPA</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">3.8</p>
+                <p className="text-xl font-bold text-gray-900 dark:text-white">3.8</p>
                 <p className="text-xs text-green-600 dark:text-green-400">+0.2 this term</p>
               </div>
             </div>
@@ -99,17 +99,17 @@ function StudentDashboard() {
         </div>
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column - Current Courses */}
           <div className="lg:col-span-2 space-y-6">
             {/* Current Courses */}
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
-              <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+              <div className="p-4 border-b border-gray-200 dark:border-gray-700">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                   Current Courses
                 </h3>
               </div>
-              <div className="p-6">
+              <div className="p-4">
                 <div className="space-y-4">
                   {[
                     { name: 'Computer Science 101', instructor: 'Dr. Smith', progress: 75, nextClass: 'Tomorrow 10:00 AM' },
@@ -124,7 +124,7 @@ function StudentDashboard() {
                         <p className="text-sm text-gray-500 dark:text-gray-500">Next class: {course.nextClass}</p>
                       </div>
                       <div className="text-right">
-                        <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{course.progress}%</div>
+                        <div className="text-xl font-bold text-blue-600 dark:text-blue-400">{course.progress}%</div>
                         <div className="w-24 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-2">
                           <div 
                             className="bg-blue-600 h-2 rounded-full transition-all duration-300"

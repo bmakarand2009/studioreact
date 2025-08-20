@@ -8,114 +8,32 @@ export function AppInitializer() {
   // Use ref to prevent multiple initializations
   const hasInitializedRef = useRef(false);
   
-  // State to track if we're processing an auth token
-  const [isProcessingAuth, setIsProcessingAuth] = useState(false);
-  const [authStep, setAuthStep] = useState<'validating'>('validating');
+  // State to track app initialization
+  const [isInitializing, setIsInitializing] = useState(true);
+  const [connectionError, setConnectionError] = useState<string | null>(null);
   
-  useEffect(() => {
-    // Prevent multiple initializations
-    if (hasInitializedRef.current) {
-      return;
-    }
-    
-    hasInitializedRef.current = true;
-    
-    // Set a timeout to prevent the loading state from getting stuck
-    const timeoutId = setTimeout(() => {
-      if (isProcessingAuth) {
-        console.warn('AppInitializer: Auth processing timeout, clearing loading state');
-        setIsProcessingAuth(false);
-        setAuthStep('validating');
-      }
-    }, 30000); // 30 seconds timeout
-    
     const initializeApp = async () => {
-      try {
-        // Initialize app configuration (tenant details)
-        await appLoadService.initAppConfig();
-        
-        // Small delay to ensure URL is fully updated
-        await new Promise(resolve => setTimeout(resolve, 100));
-        
-        // First, check for auth token in URL (highest priority)
-        
-        // Check if there's an auth token before processing
-        if (authService.hasAuthTokenInUrl()) {
-          setIsProcessingAuth(true);
-          setAuthStep('validating');
-        }
-        
-        const authTokenSuccess = await authService.checkAuthTokenInUrl();
-        
-        if (authTokenSuccess) {
-          // Auth token was found and validated, user is now authenticated
-          
-          // Get user details to determine redirect path
-          const user = await authService.getCurrentUser();
-          if (user) {
-            // Determine redirect path based on user role
-            let redirectPath = '/';
-            const userRole = user.role || '';
-            
-            if (userRole === 'ROLE_ADMIN' || userRole === 'admin' || userRole === 'ROLE_STAFF' || userRole === 'staff') {
-              redirectPath = '/admin/dashboard';
-            } else if (userRole === 'ROLE_STUDENT' || userRole === 'student') {
-              redirectPath = '/student/dashboard';
-            }
-            
-            console.log(`Redirecting user with role '${userRole}' to: ${redirectPath}`);
-            
-            // Use window.location.replace for direct navigation (no page reload)
-            window.location.replace(redirectPath);
-          }
-          
-          setIsProcessingAuth(false);
-          // The useAuth hook will handle the rest of the flow
-          return;
-        } else if (authService.hasAuthTokenInUrl()) {
-          // Auth token was found but validation failed
-          console.log('Auth token validation failed');
-          setIsProcessingAuth(false);
-          
-          // Show error message briefly
-          setTimeout(() => {
-            alert('Authentication failed. Please check your token and try again.');
-          }, 100);
-        }
-        
-        // If no auth token, check for OAuth callbacks
-        console.log('No auth token found, checking for OAuth callbacks...');
-        const oauthSuccess = await authService.checkOAuthCallback();
-        
-        if (oauthSuccess) {
-          console.log('OAuth callback detected and processed');
-          // The user is now authenticated, redirect will be handled by useAuth hook
-        }
-      } catch (error) {
-        console.error('App initialization error:', error);
-        setIsProcessingAuth(false);
-        // Silent fail - app can continue without tenant details
-      }
-    };
-
-    initializeApp();
-    
-    // Also listen for URL changes (in case OAuth callback or auth token happens after mount)
-    const handleUrlChange = async () => {
-      console.log('AppInitializer: URL change detected');
+    try {
+      console.log('AppInitializer: Starting app initialization...');
       
-      // Check if there's an auth token
-      if (authService.hasAuthTokenInUrl()) {
-        console.log('Auth token detected on URL change, showing loading state...');
-        setIsProcessingAuth(true);
-        setAuthStep('validating');
+      // Initialize app configuration (tenant details)
+      const tenantDetails = await appLoadService.initAppConfig();
+      
+      if (!tenantDetails) {
+        console.error('AppInitializer: Failed to get tenant details - connection issue');
+        setConnectionError('Unable to connect to Wajooba servers. Please check your internet connection and try again.');
+        setIsInitializing(false);
+        return;
       }
       
-      // Check for auth token first
+      console.log('AppInitializer: Successfully initialized with tenant details');
+      
+      // Now that app is initialized, check for auth tokens
+      console.log('AppInitializer: Checking for auth tokens...');
       const authTokenSuccess = await authService.checkAuthTokenInUrl();
+      
       if (authTokenSuccess) {
-        console.log('Auth token detected on URL change, authentication successful');
-        
+        console.log('AppInitializer: Auth token found and validated');
         // Get user details to determine redirect path
         const user = await authService.getCurrentUser();
         if (user) {
@@ -129,58 +47,102 @@ export function AppInitializer() {
             redirectPath = '/student/dashboard';
           }
           
-          console.log(`Redirecting user with role '${userRole}' to: ${redirectPath}`);
+          console.log(`AppInitializer: Redirecting user with role '${userRole}' to: ${redirectPath}`);
           
           // Use window.location.replace for direct navigation (no page reload)
           window.location.replace(redirectPath);
+          return; // Don't set isInitializing to false since we're redirecting
         }
-        
-        setIsProcessingAuth(false);
-        return;
-      } else if (authService.hasAuthTokenInUrl()) {
-        // Auth token was found but validation failed
-        console.log('Auth token validation failed on URL change');
-        setIsProcessingAuth(false);
       }
       
-      // Then check for OAuth callback
-      authService.checkOAuthCallback().then(success => {
-        if (success) {
-          console.log('OAuth callback detected on URL change');
-          // OAuth callback detected on URL change
-        }
-      });
-    };
+      // App initialization complete
+      console.log('AppInitializer: App initialization complete');
+      setIsInitializing(false);
+      
+    } catch (error) {
+      console.error('App initialization error:', error);
+      setConnectionError('Unable to connect to Wajooba servers. Please check your internet connection and try again.');
+      setIsInitializing(false);
+    }
+  };
 
-    // Listen for popstate (back/forward navigation)
-    window.addEventListener('popstate', handleUrlChange);
+  useEffect(() => {
+    // Prevent multiple initializations
+    if (hasInitializedRef.current) {
+      return;
+    }
     
-    // Listen for hashchange
-    window.addEventListener('hashchange', handleUrlChange);
+    hasInitializedRef.current = true;
+    initializeApp();
     
     // Cleanup
     return () => {
-      console.log('AppInitializer: Cleanup - removing event listeners and timeout');
-      clearTimeout(timeoutId);
-      window.removeEventListener('popstate', handleUrlChange);
-      window.removeEventListener('hashchange', handleUrlChange);
+      console.log('AppInitializer: Cleanup');
     };
   }, []);
 
-  // Show loading state while processing auth token
-  if (isProcessingAuth) {
+  // Show connection error if initialization failed
+  if (connectionError) {
     return (
-      <div className="fixed inset-0 bg-white dark:bg-gray-900 z-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">
-            Validating credentials...
+      <div className="fixed inset-0 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 z-50 flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 text-center">
+          {/* Error Icon */}
+          <div className="mx-auto w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mb-6">
+            <svg className="w-8 h-8 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+          </div>
+          
+          {/* Error Title */}
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+            Connection Error
+          </h1>
+          
+          {/* Error Message */}
+          <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
+            {connectionError}
+          </p>
+          
+          {/* Retry Button */}
+          <button
+            onClick={() => {
+              setConnectionError(null);
+              setIsInitializing(true);
+              hasInitializedRef.current = false;
+              initializeApp();
+            }}
+            className="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-3 px-6 rounded-xl transition-colors duration-200 shadow-lg hover:shadow-xl"
+          >
+            Try Again
+          </button>
+          
+          {/* Additional Info */}
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-4">
+            If the problem persists, please contact support
           </p>
         </div>
       </div>
     );
   }
 
-  // This component doesn't render anything when not processing auth
+  // Show loading state while initializing app
+  if (isInitializing) {
+    return (
+      <div className="fixed inset-0 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 z-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-6"></div>
+          
+          {/* Animated Loading Dots */}
+          <div className="flex justify-center space-x-2 mt-4">
+            <div className="w-3 h-3 bg-blue-600 rounded-full animate-pulse" style={{ animationDelay: '0ms' }}></div>
+            <div className="w-3 h-3 bg-blue-600 rounded-full animate-pulse" style={{ animationDelay: '200ms' }}></div>
+            <div className="w-3 h-3 bg-blue-600 rounded-full animate-pulse" style={{ animationDelay: '400ms' }}></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // This component doesn't render nothing when initialization is complete
   return null;
 }

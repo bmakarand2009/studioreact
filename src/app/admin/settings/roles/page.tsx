@@ -266,9 +266,9 @@ function RolesSettingsPage() {
                           {role.name}
                         </h3>
                         {role.isDefault && (
-                          <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full dark:bg-blue-900 dark:text-blue-200">
-                            Default
-                          </span>
+                                             <span className="inline-flex items-center justify-center min-w-[60px] h-6 px-2 bg-blue-100 text-blue-800 text-xs font-medium rounded-full dark:bg-blue-900 dark:text-blue-200">
+                     Default
+                   </span>
                         )}
                       </div>
                       <p className="text-sm text-gray-600 dark:text-gray-400">

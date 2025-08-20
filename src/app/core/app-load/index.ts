@@ -174,7 +174,7 @@ export interface Web {
 
 // App Load Service
 export class AppLoadService {
-  private _allowedDomains = ['wajooba.me', 'onwajooba.com', 'me.com'];
+  private _allowedDomains = ['wajooba.me', 'onwajooba.com', 'me.com', 'localhost', '127.0.0.1'];
   private _tenantDetails: TenantDetails | null = null;
   private _isFirstInitialization = true;
   private _isInitializing = false;
@@ -184,25 +184,31 @@ export class AppLoadService {
 
   constructor() {
     this._hostName = typeof window !== 'undefined' ? window.location.hostname : '';
-    this._hostId = this._hostName.split('.')[0];
+    // For development, use a default host ID if we can't extract one
+    this._hostId = this._hostName.split('.')[0] || 'dev';
   }
 
   /**
    * Initialize app configuration by making ping call (runs only once)
    */
   public async initAppConfig(): Promise<TenantDetails | null> {
+    console.log(`AppLoadService: Initializing with hostname: ${this._hostName}, hostId: ${this._hostId}`);
+    
     // If already initialized, return cached result
     if (this._tenantDetails) {
+      console.log('AppLoadService: Already initialized, returning cached result');
       return this._tenantDetails;
     }
 
     // If currently initializing, wait for that promise
     if (this._isInitializing && this._initializationPromise) {
+      console.log('AppLoadService: Currently initializing, waiting for existing promise');
       return this._initializationPromise;
     }
 
     // If not initialized, start initialization
     if (!this._isInitializing) {
+      console.log('AppLoadService: Starting initialization');
       this._isInitializing = true;
       this._initializationPromise = this._performInitialization();
     }
@@ -216,12 +222,20 @@ export class AppLoadService {
   private async _performInitialization(): Promise<TenantDetails | null> {
     try {
       // Check if current hostname is in allowed domains
-      if (!this._allowedDomains.some((domain) => this._hostName.endsWith(domain))) {
+      // For development, allow localhost and 127.0.0.1
+      const isDevelopment = this._hostName === 'localhost' || this._hostName === '127.0.0.1' || this._hostName.startsWith('localhost:');
+      const isAllowedDomain = this._allowedDomains.some((domain) => this._hostName.endsWith(domain));
+      
+      console.log(`AppLoadService: Domain check - isDevelopment: ${isDevelopment}, isAllowedDomain: ${isAllowedDomain}`);
+      
+      if (!isDevelopment && !isAllowedDomain) {
+        console.log('AppLoadService: Domain not allowed, aborting initialization');
         this._isInitializing = false;
         return null;
       }
 
-      const url = `${environment.apiBaseUrl}/snode/tenant/ping?name=${this._hostId}`;
+      const url = `${environment.api.baseUrl}/snode/tenant/ping?name=${this._hostId}`;
+      console.log(`AppLoadService: Making ping request to: ${url}`);
       
       const response = await fetch(url);
       
@@ -230,12 +244,14 @@ export class AppLoadService {
       }
       
       const details: TenantDetails = await response.json();
+      console.log('AppLoadService: Successfully received tenant details:', details);
       this._tenantDetails = details;
       this._isFirstInitialization = false;
       this._isInitializing = false;
       
       return details;
     } catch (error) {
+      console.error('AppLoadService: Initialization error:', error);
       this._isInitializing = false;
       return null;
     }

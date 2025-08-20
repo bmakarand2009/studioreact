@@ -64,7 +64,7 @@ const buttonVariants = cva(
     },
     defaultVariants: {
       variant: 'primary',
-      size: 'md',
+      size: 'sm',
       fullWidth: false,
     },
   }

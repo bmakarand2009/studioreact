@@ -189,6 +189,12 @@ export class AuthService {
     }
 
     try {
+      // Ensure app is initialized before proceeding
+      if (!appLoadService.isInitialized) {
+        console.log('AuthService: App not initialized, initializing now...');
+        await appLoadService.initAppConfig();
+      }
+      
       const tenantId = appLoadService.tenantId || credentials.tid;
       
       if (!tenantId) {
@@ -240,6 +246,12 @@ export class AuthService {
     // OAuth is always enabled for now
     
     try {
+      // Ensure app is initialized before proceeding
+      if (!appLoadService.isInitialized) {
+        console.log('AuthService: App not initialized for OAuth, initializing now...');
+        await appLoadService.initAppConfig();
+      }
+      
       const tenantId = appLoadService.tenantId;
       const orgId = appLoadService.tenantDetails?.orgId;
       
@@ -278,6 +290,12 @@ export class AuthService {
     // OAuth is always enabled for now
     
     try {
+      // Ensure app is initialized before proceeding
+      if (!appLoadService.isInitialized) {
+        console.log('AuthService: App not initialized for OAuth, initializing now...');
+        await appLoadService.initAppConfig();
+      }
+      
       const tenantId = appLoadService.tenantId;
       const orgId = appLoadService.tenantDetails?.orgId;
       
@@ -347,6 +365,12 @@ export class AuthService {
    */
   async forgotPassword(data: ForgotPasswordData): Promise<void> {
     try {
+      // Ensure app is initialized before proceeding
+      if (!appLoadService.isInitialized) {
+        console.log('AuthService: App not initialized for forgot password, initializing now...');
+        await appLoadService.initAppConfig();
+      }
+      
       const orgId = appLoadService.tenantDetails?.orgId || data.orgId || window.location.hostname;
       
       if (!orgId) {

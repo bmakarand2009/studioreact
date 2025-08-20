@@ -30,7 +30,7 @@ function AdminDashboard() {
               <span className="text-white text-xl font-bold">W</span>
             </div>
             <div>
-                             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                  Admin Dashboard
                </h1>
                <p className="text-gray-600 dark:text-gray-400">
@@ -41,16 +41,16 @@ function AdminDashboard() {
         </div>
 
         {/* System Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
             <div className="flex items-center">
               <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
                 <Users className="h-6 w-6 text-blue-600 dark:text-blue-400" />
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Users</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">1,247</p>
-                <p className="text-xs text-green-600 dark:text-green-400">+12% from last month</p>
+                                 <p className="text-xl font-bold text-gray-900 dark:text-white">1,247</p>
+                 <p className="text-xs text-green-600 dark:text-green-400">+12% from last month</p>
               </div>
             </div>
           </div>
@@ -62,8 +62,8 @@ function AdminDashboard() {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Active Courses</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">89</p>
-                <p className="text-xs text-green-600 dark:text-green-400">+5 new this week</p>
+                                 <p className="text-xl font-bold text-gray-900 dark:text-white">89</p>
+                 <p className="text-xs text-green-600 dark:text-green-400">+5 new this week</p>
               </div>
             </div>
           </div>
@@ -75,8 +75,8 @@ function AdminDashboard() {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">System Load</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">67%</p>
-                <p className="text-xs text-yellow-600 dark:text-yellow-400">Moderate</p>
+                                 <p className="text-xl font-bold text-gray-900 dark:text-white">67%</p>
+                 <p className="text-xs text-yellow-600 dark:text-yellow-400">Moderate</p>
               </div>
             </div>
           </div>
@@ -88,25 +88,25 @@ function AdminDashboard() {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Revenue</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">$45.2K</p>
-                <p className="text-xs text-green-600 dark:text-green-400">+8% from last month</p>
+                                 <p className="text-xl font-bold text-gray-900 dark:text-white">$45.2K</p>
+                 <p className="text-xs text-green-600 dark:text-green-400">+8% from last month</p>
               </div>
             </div>
           </div>
         </div>
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column - System Overview */}
           <div className="lg:col-span-2 space-y-6">
             {/* Recent Activity */}
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
-              <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+              <div className="p-4 border-b border-gray-200 dark:border-gray-700">
                                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                    Recent System Activity
                  </h3>
               </div>
-              <div className="p-6">
+              <div className="p-4">
                 <div className="space-y-4">
                                      {[
                      { action: 'New user registration', user: 'john.doe@email.com', time: '2 minutes ago', type: 'info' },
@@ -133,27 +133,27 @@ function AdminDashboard() {
 
                          {/* Quick Actions */}
              <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
-               <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+               <div className="p-4 border-b border-gray-200 dark:border-gray-700">
                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                    Quick Administrative Actions
                  </h3>
                </div>
-               <div className="p-6">
+               <div className="p-4">
                  <div className="grid grid-cols-2 gap-4">
-                   <button className="flex items-center justify-center px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                     <Users className="h-5 w-5 mr-2" />
+                   <button className="flex items-center justify-center px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm">
+                     <Users className="h-4 w-4 mr-2" />
                      Manage Users
                    </button>
-                   <button className="flex items-center justify-center px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-                     <BookOpen className="h-5 w-5 mr-2" />
+                   <button className="flex items-center justify-center px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm">
+                     <BookOpen className="h-4 w-4 mr-2" />
                      View Reports
                    </button>
-                   <button className="flex items-center justify-center px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                   <button className="flex items-center justify-center px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm">
                      <BarChart3 className="h-5 w-5 mr-2" />
                      View Reports
                    </button>
-                   <button className="flex items-center justify-center px-4 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors">
-                     <Settings className="h-5 w-5 mr-2" />
+                   <button className="flex items-center justify-center px-3 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors text-sm">
+                     <Settings className="h-4 w-4 mr-2" />
                      System Settings
                    </button>
                  </div>
@@ -172,12 +172,12 @@ function AdminDashboard() {
           <div className="space-y-6">
             {/* System Alerts */}
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
-              <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+              <div className="p-4 border-b border-gray-200 dark:border-gray-700">
                                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                    System Alerts
                  </h3>
               </div>
-              <div className="p-6">
+              <div className="p-4">
                 <div className="space-y-4">
                                      {[
                      { message: 'Database backup scheduled for tonight', type: 'info' },
@@ -197,12 +197,12 @@ function AdminDashboard() {
 
             {/* System Health */}
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
-              <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+              <div className="p-4 border-b border-gray-200 dark:border-gray-700">
                                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                    System Health
                  </h3>
               </div>
-              <div className="p-6">
+              <div className="p-4">
                 <div className="space-y-4">
                                      {[
                      { label: 'Database', status: 'Healthy', color: 'green' },
@@ -230,12 +230,12 @@ function AdminDashboard() {
 
             {/* Security Status */}
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
-              <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+              <div className="p-4 border-b border-gray-200 dark:border-gray-700">
                                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                    Security Status
                  </h3>
               </div>
-              <div className="p-6">
+              <div className="p-4">
                 <div className="text-center">
                                      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 bg-green-100 dark:bg-green-900">
                      <Shield className="h-8 w-8 text-green-600 dark:text-green-400" />

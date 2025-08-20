@@ -131,7 +131,7 @@ function StudentAssessments() {
                           <h4 className="font-medium text-gray-900 dark:text-white">{assessment.title}</h4>
                           <p className="text-sm text-gray-600 dark:text-gray-400">{assessment.course}</p>
                         </div>
-                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                        <span className={`inline-flex items-center justify-center min-w-[100px] h-6 px-2 text-xs font-medium rounded-full ${
                           assessment.status === 'completed' ? 'bg-green-100 text-green-800' :
                           assessment.status === 'in-progress' ? 'bg-blue-100 text-blue-800' :
                           'bg-yellow-100 text-yellow-800'
@@ -294,7 +294,7 @@ function StudentAssessments() {
                         <p className="text-sm font-medium text-gray-900 dark:text-white">{item.assessment}</p>
                         <p className="text-xs text-gray-500 dark:text-gray-400">Due: {item.due}</p>
                       </div>
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                      <span className={`inline-flex items-center justify-center min-w-[80px] h-6 px-2 text-xs font-medium rounded-full ${
                         item.daysLeft <= 3 ? 'bg-red-100 text-red-800' :
                         item.daysLeft <= 7 ? 'bg-yellow-100 text-yellow-800' :
                         'bg-green-100 text-green-800'

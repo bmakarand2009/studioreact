@@ -15,10 +15,10 @@ const inputVariants = cva(
         warning: 'border-warning-500 focus:border-warning-500 focus:ring-warning-500/20 dark:border-warning-400 dark:focus:border-warning-400 dark:focus:ring-warning-400/20',
       },
       inputSize: {
-        default: 'h-12 px-4 py-3 text-sm',
-        sm: 'h-10 px-3 py-2 text-sm',
-        lg: 'h-14 px-6 py-4 text-base',
-        xl: 'h-16 px-8 py-5 text-lg',
+        default: 'h-10 px-3 py-2 text-sm',
+        sm: 'h-8 px-2 py-1 text-xs',
+        lg: 'h-12 px-4 py-3 text-sm',
+        xl: 'h-14 px-6 py-4 text-base',
       },
     },
     defaultVariants: {

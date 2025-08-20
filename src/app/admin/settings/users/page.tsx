@@ -197,12 +197,12 @@ function UsersSettingsPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getRoleBadgeColor(user.role)}`}>
+                      <span className={`inline-flex items-center justify-center min-w-[80px] h-6 px-2 text-xs font-semibold rounded-full ${getRoleBadgeColor(user.role)}`}>
                         {user.role.replace('ROLE_', '')}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadgeColor(user.status)}`}>
+                      <span className={`inline-flex items-center justify-center min-w-[80px] h-6 px-2 text-xs font-semibold rounded-full ${getStatusBadgeColor(user.status)}`}>
                         {user.status}
                       </span>
                     </td>

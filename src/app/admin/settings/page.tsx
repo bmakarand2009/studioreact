@@ -44,7 +44,7 @@ const settingsList: SettingCard[] = [
   },
   {
     title: 'Module Settings',
-    description: 'Module settings for your studio, changes will get applied immediately',
+    description: 'Module settings for your studio',
     url: '/admin/settings/display',
     icon: Monitor,
     color: 'bg-purple-500'
@@ -72,7 +72,7 @@ const settingsList: SettingCard[] = [
   },
   {
     title: 'Roles',
-    description: 'Control User Roles, Functionality/Screens will only be allowed based on permissions given',
+    description: 'Control User Roles',
     url: '/admin/settings/roles',
     icon: Shield,
     color: 'bg-pink-500'
@@ -118,12 +118,12 @@ function SettingsPage() {
               <Settings className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                 Settings
               </h1>
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-lg text-gray-600 dark:text-gray-400">
                 Manage your application configuration and preferences
-              </p>
+               </p>
             </div>
           </div>
         </div>
@@ -139,7 +139,7 @@ function SettingsPage() {
                 className="group block"
               >
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 border border-gray-200 dark:border-gray-700 hover:border-deep-300 dark:hover:border-deep-600 overflow-hidden h-full">
-                  <div className="p-6 h-full flex flex-col">
+                  <div className="p-4 h-full flex flex-col">
                     {/* Icon */}
                     <div className={`w-16 h-16 ${setting.color} rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-200`}>
                       <IconComponent className="h-8 w-8 text-white" />
