@@ -183,6 +183,7 @@ export class AppLoadService {
   private _hostId: string;
 
   constructor() {
+    // this._hostName = typeof window !== 'undefined' ? window.location.hostname : '';
     this._hostName = typeof window !== 'undefined' ? window.location.hostname : '';
     // For development, use a default host ID if we can't extract one
     this._hostId = this._hostName.split('.')[0] || 'dev';
@@ -234,7 +235,8 @@ export class AppLoadService {
         return null;
       }
 
-      const url = `${environment.api.baseUrl}/snode/tenant/ping?name=${this._hostId}`;
+      // const url = `${environment.api.baseUrl}/snode/tenant/ping?name=${this._hostId}`;
+      const url = `${environment.api.baseUrl}/snode/tenant/ping?name=marksampletest`;
       console.log(`AppLoadService: Making ping request to: ${url}`);
       
       const response = await fetch(url);
