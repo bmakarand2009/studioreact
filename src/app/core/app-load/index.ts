@@ -246,15 +246,15 @@ export class AppLoadService {
                                this._hostName.includes('lovable.dev');
       
       const isDevelopment = isDevelopmentHostname || isDevelopmentMode || isLovablePreview;
+      // TBD it has been taken out to nesure application works in lovable.dev
+      // const isAllowedDomain = this._allowedDomains.some((domain) => this._hostName.endsWith(domain));
+      // console.log(`AppLoadService: Domain check - isDevelopment: ${isDevelopment}, isAllowedDomain: ${isAllowedDomain}, isLovablePreview: ${isLovablePreview}`);
 
-      const isAllowedDomain = this._allowedDomains.some((domain) => this._hostName.endsWith(domain));
-      console.log(`AppLoadService: Domain check - isDevelopment: ${isDevelopment}, isAllowedDomain: ${isAllowedDomain}, isLovablePreview: ${isLovablePreview}`);
-
-      if (!disableDomainCheck && !isDevelopment && !isAllowedDomain) {
-        console.log('AppLoadService: Domain not allowed, aborting initialization');
-        this._isInitializing = false;
-        return null;
-      }
+      // if (!disableDomainCheck && !isDevelopment && !isAllowedDomain) {
+      //   console.log('AppLoadService: Domain not allowed, aborting initialization');
+      //   this._isInitializing = false;
+      //   return null;
+      // }
 
       // const url = `${environment.api.baseUrl}/snode/tenant/ping?name=${this._hostId}`;
       const url = `${environment.api.baseUrl}/snode/tenant/ping?name=marksampletest`;
