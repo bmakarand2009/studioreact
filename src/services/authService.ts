@@ -184,16 +184,6 @@ export class AuthService {
    * Sign in the user
    */
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    // If already authenticated, return current user info for redirect
-    if (this._authenticated && this._currentUser) {
-      console.log('User already authenticated, returning current session...');
-      return {
-        contact: this._currentUser,
-        access_token: this.accessToken,
-        email: this._currentUser.email,
-      };
-    }
-
     try {
       // Ensure app is initialized before proceeding
       if (!appLoadService.isInitialized) {
