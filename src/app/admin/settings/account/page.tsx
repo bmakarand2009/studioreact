@@ -19,7 +19,7 @@ import {
   CheckCircle
 } from 'lucide-react';
 import { Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui';
-import Link from 'next/link';
+import Link from '@/shims/next-link';
 
 const accountSchema = z.object({
   name: z.string().min(1, 'Organization Name is required'),

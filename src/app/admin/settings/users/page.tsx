@@ -14,7 +14,7 @@ import {
   UserPlus
 } from 'lucide-react';
 import { Button, Input } from '@/components/ui';
-import Link from 'next/link';
+import Link from '@/shims/next-link';
 
 interface User {
   id: string;

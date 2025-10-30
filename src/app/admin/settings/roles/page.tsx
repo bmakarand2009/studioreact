@@ -25,7 +25,7 @@ import {
   Search
 } from 'lucide-react';
 import { Button, Input, Switch, Alert, AlertTitle, AlertDescription } from '@/components/ui';
-import Link from 'next/link';
+import Link from '@/shims/next-link';
 import { settingsService, RoleSettings } from '@/services/settingsService';
 
 function RolesSettingsPage() {

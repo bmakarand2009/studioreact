@@ -15,7 +15,7 @@ import {
   CheckCircle
 } from 'lucide-react';
 import { Button, Switch } from '@/components/ui';
-import Link from 'next/link';
+import Link from '@/shims/next-link';
 
 interface ModuleSetting {
   id: string;

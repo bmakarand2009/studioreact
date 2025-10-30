@@ -15,7 +15,7 @@ import {
   CheckCircle
 } from 'lucide-react';
 import { Button, Input, Textarea, Switch } from '@/components/ui';
-import Link from 'next/link';
+import Link from '@/shims/next-link';
 
 const websiteSchema = z.object({
   customDomain: z.string().optional(),
