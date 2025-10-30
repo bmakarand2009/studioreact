@@ -67,31 +67,45 @@ class ApiService {
     );
   }
 
-  private getAuthToken(): string | null {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem(STORAGE_KEYS.authToken);
+  private getCookie(name: string): string | null {
+    if (typeof window === 'undefined') return null;
+    const nameEQ = name + "=";
+    const ca = document.cookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+      if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
     }
     return null;
+  }
+
+  private setCookie(name: string, value: string, days: number = 7): void {
+    if (typeof window === 'undefined') return;
+    const expires = new Date();
+    expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+    document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;SameSite=Lax`;
+  }
+
+  private deleteCookie(name: string): void {
+    if (typeof window === 'undefined') return;
+    document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;`;
+  }
+
+  private getAuthToken(): string | null {
+    return this.getCookie('accessToken');
   }
 
   private getRefreshToken(): string | null {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem(STORAGE_KEYS.refreshToken);
-    }
-    return null;
+    return this.getCookie('refreshToken');
   }
 
   private setAuthToken(token: string): void {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(STORAGE_KEYS.authToken, token);
-    }
+    this.setCookie('accessToken', token, 7);
   }
 
   private clearAuthTokens(): void {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem(STORAGE_KEYS.authToken);
-      localStorage.removeItem(STORAGE_KEYS.refreshToken);
-    }
+    this.deleteCookie('accessToken');
+    this.deleteCookie('refreshToken');
   }
 
   private async refreshAuthToken(refreshToken: string) {

@@ -60,10 +60,44 @@ npm run build:dev    # Development mode build
 - The app uses environment variables prefixed with `VITE_`
 - Vite config includes path aliases (@/ maps to src/)
 
+## Authentication Flow
+
+### App Initialization
+1. **Tenant Ping**: On app load, `AppInitializer` calls `appLoadService.initAppConfig()`
+   - Pings: `https://api.wajooba.me/snode/tenant/ping?name=marksampletest`
+   - Retrieves tenant details including `tenantId` (required for login)
+   - Shows screen only after successful tenant initialization
+
+### User Login Process
+2. **Login Submission**: User enters credentials and submits form
+   - Calls: `authService.login({ userId, password })`
+   - Posts to: `${baseUrl}/public/user/signin`
+   - Includes `tenantId` from app initialization
+
+3. **Token Storage**: API returns authentication response
+   - Response includes: `access_token`, `refresh_token`, and `contact` (user data)
+   - Tokens are stored in **browser cookies** with 7-day expiry (access) and 30-day expiry (refresh)
+   - Cookie name: `accessToken` (not localStorage)
+
+4. **Subsequent API Calls**: All authenticated requests include the token
+   - `api.ts` reads token from cookies via `getCookie('accessToken')`
+   - Adds to header: `Authorization: Bearer ${token}`
+   - Automatic token refresh on 401 responses using `refreshToken`
+
+### Token Management
+- **Storage Location**: HTTP cookies (SameSite=Lax)
+- **Retrieval**: `authService.accessToken` getter reads from cookies
+- **Auto-Refresh**: On 401 error, attempts refresh with `refreshToken`
+- **Logout**: Deletes both `accessToken` and `refreshToken` cookies
+
 ## Recent Changes
-- **October 30, 2025:** Initial Replit setup
+- **October 30, 2025:** Initial Replit setup & Authentication Fix
   - Configured Vite to use port 5000 with host 0.0.0.0
   - Added `allowedHosts: true` to Vite config (required for Replit proxy)
+  - Disabled HMR to fix continuous refresh issue
   - Set up development workflow
   - Configured autoscale deployment
-  - Verified app loads correctly and connects to external API
+  - **CRITICAL BUG FIX**: Fixed token storage mismatch in `api.ts`
+    - Changed from localStorage to cookies to match `authService.ts`
+    - This ensures authenticated API calls now correctly include the Authorization header
+  - Verified complete authentication flow works end-to-end
