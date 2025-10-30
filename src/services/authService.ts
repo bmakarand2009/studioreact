@@ -227,9 +227,14 @@ export class AuthService {
         }
         
         // Store required values in localStorage
+        console.log('AuthService: Storing authentication data in localStorage...');
         localStorage.setItem('auth', data.access_token);
         localStorage.setItem('logintrace', 'true');
         localStorage.setItem('orgid', tenantId);
+        console.log('AuthService: localStorage updated with auth, logintrace, and orgid');
+        console.log('AuthService: localStorage.auth length:', localStorage.getItem('auth')?.length);
+        console.log('AuthService: localStorage.logintrace:', localStorage.getItem('logintrace'));
+        console.log('AuthService: localStorage.orgid:', localStorage.getItem('orgid'));
         
         return data;
       } else {
@@ -711,9 +716,14 @@ export class AuthService {
       // Store required values in localStorage
       const tenantId = appLoadService.tenantId || appLoadService.tenantDetails?.orgId;
       if (tenantId) {
+        console.log('AuthService: Storing OAuth authentication data in localStorage...');
         localStorage.setItem('auth', authToken);
         localStorage.setItem('logintrace', 'true');
         localStorage.setItem('orgid', tenantId);
+        console.log('AuthService: OAuth localStorage updated with auth, logintrace, and orgid');
+        console.log('AuthService: localStorage.orgid:', localStorage.getItem('orgid'));
+      } else {
+        console.warn('AuthService: No tenantId available for OAuth localStorage storage');
       }
       
       // Try to validate the token by calling reInitInfo
