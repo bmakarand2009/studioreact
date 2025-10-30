@@ -1,5 +1,3 @@
-
-
 import { ReactNode, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
@@ -15,16 +13,15 @@ interface WajoobaPublicLayoutProps {
 }
 
 export default function WajoobaPublicLayout({ children }: WajoobaPublicLayoutProps) {
-  console.log('WajoobaPublicLayout: Rendering');
+  console.log('WajoobaPublicLayout: Rendering start');
+  
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const isScreenSmall = useMediaQuery('(max-width: 768px)');
   const { navigation } = useNavigation();
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  console.log('WajoobaPublicLayout: State -', { 
-    mobileMenuOpen, 
-    isScreenSmall, 
+  console.log('WajoobaPublicLayout: State loaded', { 
     hasUser: !!user, 
     hasNavigation: !!navigation,
     hasChildren: !!children 
@@ -41,11 +38,10 @@ export default function WajoobaPublicLayout({ children }: WajoobaPublicLayoutPro
     setMobileMenuOpen(!mobileMenuOpen);
   };
 
+  console.log('WajoobaPublicLayout: Rendering JSX');
+
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
-      {/* Loading Bar */}
-      
-
       {/* Header with Public Navigation */}
       <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -74,7 +70,6 @@ export default function WajoobaPublicLayout({ children }: WajoobaPublicLayoutPro
               <div className="hidden md:flex items-center space-x-3">
                 {user ? (
                   <Button variant="primary" size="sm" onClick={() => {
-                    // Redirect based on user role
                     switch (user.role) {
                       case 'ROLE_ADMIN':
                         navigate('/admin/dashboard');
@@ -93,14 +88,9 @@ export default function WajoobaPublicLayout({ children }: WajoobaPublicLayoutPro
                     Dashboard
                   </Button>
                 ) : (
-                  <>
-                    <Button variant="ghost" size="sm" onClick={() => navigate('/login')}>
-                      Sign In
-                    </Button>
-                    {/* <Button variant="primary" size="sm" onClick={() => navigate('/register')}>
-                      Get Started
-                    </Button> */}
-                  </>
+                  <Button variant="ghost" size="sm" onClick={() => navigate('/login')}>
+                    Sign In
+                  </Button>
                 )}
               </div>
 
@@ -127,12 +117,10 @@ export default function WajoobaPublicLayout({ children }: WajoobaPublicLayoutPro
                 mobile
                 onItemClick={() => setMobileMenuOpen(false)}
               />
-              {/* Mobile CTA Buttons */}
               <div className="pt-4 pb-3 border-t border-gray-200 dark:border-gray-700">
                 <div className="space-y-2">
                   {user ? (
                     <Button variant="primary" size="sm" fullWidth onClick={() => {
-                      // Redirect based on user role
                       switch (user.role) {
                         case 'ROLE_ADMIN':
                           navigate('/admin/dashboard');
@@ -151,14 +139,9 @@ export default function WajoobaPublicLayout({ children }: WajoobaPublicLayoutPro
                       Dashboard
                     </Button>
                   ) : (
-                    <>
-                      <Button variant="ghost" size="sm" fullWidth onClick={() => navigate('/login')}>
-                        Sign In
-                      </Button>
-                      {/* <Button variant="primary" size="sm" fullWidth onClick={() => navigate('/register')}>
-                        Get Started
-                      </Button> */}
-                    </>
+                    <Button variant="ghost" size="sm" fullWidth onClick={() => navigate('/login')}>
+                      Sign In
+                    </Button>
                   )}
                 </div>
               </div>
@@ -176,7 +159,6 @@ export default function WajoobaPublicLayout({ children }: WajoobaPublicLayoutPro
       <footer className="bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
         <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            {/* Company Info */}
             <div className="col-span-1 md:col-span-2">
               <div className="flex items-center">
                 <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center">
@@ -192,7 +174,6 @@ export default function WajoobaPublicLayout({ children }: WajoobaPublicLayoutPro
               </p>
             </div>
 
-            {/* Quick Links */}
             <div>
               <h3 className="text-sm font-semibold text-gray-900 dark:text-white tracking-wider uppercase">
                 Solutions
@@ -216,7 +197,6 @@ export default function WajoobaPublicLayout({ children }: WajoobaPublicLayoutPro
               </ul>
             </div>
 
-            {/* Support */}
             <div>
               <h3 className="text-sm font-semibold text-gray-900 dark:text-white tracking-wider uppercase">
                 Support
