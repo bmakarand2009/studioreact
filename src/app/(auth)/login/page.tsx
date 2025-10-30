@@ -16,6 +16,7 @@ import {
   Github
 } from 'lucide-react';
 import { authService } from '@/services/authService';
+import { useUserContext } from '@/contexts/UserContext';
 
 const loginSchema = z.object({
   userId: z.string().min(1, 'Email is required'),
@@ -31,6 +32,7 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const navigate = useNavigate();
+  const { setUser } = useUserContext();
 
   // Check if user is already authenticated on page load
   useEffect(() => {
@@ -115,9 +117,13 @@ export default function LoginPage() {
       console.log('Login result:', result);
       
       if (result.contact && result.access_token) {
-        console.log('Login successful, determining redirect path...');
+        console.log('Login successful, updating UserContext...');
         
-        // Login successful - redirect based on role
+        // CRITICAL: Update UserContext with the logged-in user
+        setUser(result.contact);
+        console.log('UserContext updated with user:', result.contact.email);
+        
+        // Determine redirect path based on role
         let redirectPath = '/dashboard'; // default fallback
         
         switch (result.contact.role) {
