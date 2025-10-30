@@ -17,11 +17,11 @@ export default defineConfig({
   },
   server: {
     host: '::',
-    port: Number(process.env.PORT || 8080),
+    port: 8080,
     open: false,
   },
   preview: {
     host: '::',
-    port: Number(process.env.PORT || 8080),
+    port: 8080,
   },
 });
