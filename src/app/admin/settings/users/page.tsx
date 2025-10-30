@@ -255,4 +255,4 @@ function UsersSettingsPage() {
   );
 }
 
-export default withRole(UsersSettingsPage, { allowedRoles: ['ROLE_ADMIN'] });
+export default withRole(UsersSettingsPage, { allowedRoles: ['ROLE_ADMIN', 'ROLE_STAFF'] });

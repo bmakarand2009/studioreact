@@ -46,15 +46,17 @@ export default function LoginPage() {
           if (currentUser) {
             let redirectPath = '/dashboard'; // default fallback
             
-            switch (currentUser.role) {
+            const normalizedRole = (currentUser.role || '').toUpperCase();
+            switch (normalizedRole) {
               case 'ROLE_ADMIN':
+              case 'ADMIN':
+              case 'ROLE_STAFF':
+              case 'STAFF':
                 redirectPath = '/admin/dashboard';
                 break;
               case 'ROLE_STUDENT':
+              case 'STUDENT':
                 redirectPath = '/student/dashboard';
-                break;
-              case 'ROLE_STAFF':
-                redirectPath = '/staff/dashboard';
                 break;
               default:
                 redirectPath = '/dashboard';
@@ -126,15 +128,17 @@ export default function LoginPage() {
         // Determine redirect path based on role
         let redirectPath = '/dashboard'; // default fallback
         
-        switch (result.contact.role) {
+        const normalizedRole = (result.contact.role || '').toUpperCase();
+        switch (normalizedRole) {
           case 'ROLE_ADMIN':
+          case 'ADMIN':
+          case 'ROLE_STAFF':
+          case 'STAFF':
             redirectPath = '/admin/dashboard';
             break;
           case 'ROLE_STUDENT':
+          case 'STUDENT':
             redirectPath = '/student/dashboard';
-            break;
-          case 'ROLE_STAFF':
-            redirectPath = '/staff/dashboard';
             break;
           default:
             redirectPath = '/dashboard';

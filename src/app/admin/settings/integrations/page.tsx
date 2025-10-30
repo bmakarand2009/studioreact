@@ -449,4 +449,4 @@ function IntegrationsSettingsPage() {
   );
 }
 
-export default withRole(IntegrationsSettingsPage, { allowedRoles: ['ROLE_ADMIN'] });
+export default withRole(IntegrationsSettingsPage, { allowedRoles: ['ROLE_ADMIN', 'ROLE_STAFF'] });

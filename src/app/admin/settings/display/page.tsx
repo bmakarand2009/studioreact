@@ -270,4 +270,4 @@ function DisplaySettingsPage() {
   );
 }
 
-export default withRole(DisplaySettingsPage, { allowedRoles: ['ROLE_ADMIN'] });
+export default withRole(DisplaySettingsPage, { allowedRoles: ['ROLE_ADMIN', 'ROLE_STAFF'] });

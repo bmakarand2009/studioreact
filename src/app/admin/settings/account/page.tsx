@@ -343,4 +343,4 @@ function AccountSettingsPage() {
   );
 }
 
-export default withRole(AccountSettingsPage, { allowedRoles: ['ROLE_ADMIN'] });
+export default withRole(AccountSettingsPage, { allowedRoles: ['ROLE_ADMIN', 'ROLE_STAFF'] });

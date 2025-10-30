@@ -51,9 +51,10 @@ export function AppInitializer() {
           let redirectPath = '/';
           const userRole = user.role || '';
           
-          if (userRole === 'ROLE_ADMIN' || userRole === 'admin' || userRole === 'ROLE_STAFF' || userRole === 'staff') {
+          const normalizedRole = userRole.toUpperCase();
+          if (normalizedRole === 'ROLE_ADMIN' || normalizedRole === 'ADMIN' || normalizedRole === 'ROLE_STAFF' || normalizedRole === 'STAFF') {
             redirectPath = '/admin/dashboard';
-          } else if (userRole === 'ROLE_STUDENT' || userRole === 'student') {
+          } else if (normalizedRole === 'ROLE_STUDENT' || normalizedRole === 'STUDENT') {
             redirectPath = '/student/dashboard';
           }
           

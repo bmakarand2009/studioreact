@@ -126,15 +126,26 @@ class UserService {
 
   /**
    * Check if user has specific role
+   * Normalizes roles to uppercase for comparison to handle both ROLE_ADMIN and admin formats
    */
   hasRole(user: UserProfile | null, role: string | string[]): boolean {
     if (!user?.role) return false;
     
+    const normalizedUserRole = user.role.toUpperCase();
+    
     if (Array.isArray(role)) {
-      return role.includes(user.role);
+      return role.some(r => {
+        const normalized = r.toUpperCase();
+        return normalizedUserRole === normalized || 
+               normalizedUserRole === `ROLE_${normalized}` ||
+               `ROLE_${normalizedUserRole}` === normalized;
+      });
     }
     
-    return user.role === role;
+    const normalizedRole = role.toUpperCase();
+    return normalizedUserRole === normalizedRole || 
+           normalizedUserRole === `ROLE_${normalizedRole}` ||
+           `ROLE_${normalizedUserRole}` === normalizedRole;
   }
 
   /**

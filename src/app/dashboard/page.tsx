@@ -11,15 +11,17 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!isLoading && user) {
       // Redirect based on user role
-      switch (user.role) {
+      const normalizedRole = (user.role || '').toUpperCase();
+      switch (normalizedRole) {
         case 'ROLE_ADMIN':
+        case 'ADMIN':
+        case 'ROLE_STAFF':
+        case 'STAFF':
           navigate('/admin/dashboard', { replace: true });
           break;
         case 'ROLE_STUDENT':
+        case 'STUDENT':
           navigate('/student/dashboard', { replace: true });
-          break;
-        case 'ROLE_STAFF':
-          navigate('/staff/dashboard', { replace: true });
           break;
         default:
           // If no role, redirect to public page

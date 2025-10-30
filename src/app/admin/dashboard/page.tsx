@@ -257,4 +257,4 @@ function AdminDashboard() {
   );
 }
 
-export default withRole(AdminDashboard, { allowedRoles: ['ROLE_ADMIN'] });
+export default withRole(AdminDashboard, { allowedRoles: ['ROLE_ADMIN', 'ROLE_STAFF'] });

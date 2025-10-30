@@ -30,7 +30,14 @@ export function withRole<P extends object>(
           
           // If in preview mode, check if the preview user has the required role
           if (isInPreviewMode && previewUser) {
-            hasRequiredRole = allowedRoles.includes(previewUser.role);
+            // Normalize preview user role for comparison
+            const normalizedPreviewRole = (previewUser.role || '').toUpperCase();
+            hasRequiredRole = allowedRoles.some(role => {
+              const normalized = role.toUpperCase();
+              return normalizedPreviewRole === normalized || 
+                     normalizedPreviewRole === `ROLE_${normalized}` ||
+                     `ROLE_${normalizedPreviewRole}` === normalized;
+            });
           } else {
             // Check the actual user's role
             hasRequiredRole = await hasRole(allowedRoles);
@@ -44,15 +51,17 @@ export function withRole<P extends object>(
               navigate(redirectTo);
             } else {
               // Default role-based redirects
-              switch (user.role) {
+              const normalizedRole = (user.role || '').toUpperCase();
+              switch (normalizedRole) {
                 case 'ROLE_ADMIN':
+                case 'ADMIN':
+                case 'ROLE_STAFF':
+                case 'STAFF':
                   navigate('/admin/dashboard');
                   break;
                 case 'ROLE_STUDENT':
+                case 'STUDENT':
                   navigate('/student/dashboard');
-                  break;
-                case 'ROLE_STAFF':
-                  navigate('/staff/dashboard');
                   break;
                 default:
                   navigate('/dashboard');

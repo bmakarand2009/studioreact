@@ -38,6 +38,25 @@ export default function WajoobaPublicLayout({ children }: WajoobaPublicLayoutPro
     setMobileMenuOpen(!mobileMenuOpen);
   };
 
+  const handleDashboardClick = () => {
+    const normalizedRole = (user?.role || '').toUpperCase();
+    switch (normalizedRole) {
+      case 'ROLE_ADMIN':
+      case 'ADMIN':
+      case 'ROLE_STAFF':
+      case 'STAFF':
+        navigate('/admin/dashboard');
+        break;
+      case 'ROLE_STUDENT':
+      case 'STUDENT':
+        navigate('/student/dashboard');
+        break;
+      default:
+        navigate('/dashboard');
+        break;
+    }
+  };
+
   console.log('WajoobaPublicLayout: Rendering JSX');
 
   return (
@@ -67,31 +86,17 @@ export default function WajoobaPublicLayout({ children }: WajoobaPublicLayoutPro
             {/* CTA Buttons & Mobile Menu */}
             <div className="flex items-center space-x-4">
               {/* CTA Buttons */}
+
               <div className="hidden md:flex items-center space-x-3">
-                {user ? (
-                  <Button variant="primary" size="sm" onClick={() => {
-                    switch (user.role) {
-                      case 'ROLE_ADMIN':
-                        navigate('/admin/dashboard');
-                        break;
-                      case 'ROLE_STUDENT':
-                        navigate('/student/dashboard');
-                        break;
-                      case 'ROLE_STAFF':
-                        navigate('/staff/dashboard');
-                        break;
-                      default:
-                        navigate('/dashboard');
-                        break;
-                    }
-                  }}>
+                {user ? 
+                  <Button variant="primary" size="sm" onClick={handleDashboardClick}>
                     Dashboard
                   </Button>
-                ) : (
+                :
                   <Button variant="ghost" size="sm" onClick={() => navigate('/login')}>
                     Sign In
                   </Button>
-                )}
+                }
               </div>
 
               {/* Mobile Menu Button */}
@@ -119,30 +124,15 @@ export default function WajoobaPublicLayout({ children }: WajoobaPublicLayoutPro
               />
               <div className="pt-4 pb-3 border-t border-gray-200 dark:border-gray-700">
                 <div className="space-y-2">
-                  {user ? (
-                    <Button variant="primary" size="sm" fullWidth onClick={() => {
-                      switch (user.role) {
-                        case 'ROLE_ADMIN':
-                          navigate('/admin/dashboard');
-                          break;
-                        case 'ROLE_STUDENT':
-                          navigate('/student/dashboard');
-                          break;
-                        case 'ROLE_STAFF':
-                          navigate('/staff/dashboard');
-                          break;
-                        default:
-                          navigate('/dashboard');
-                          break;
-                      }
-                    }}>
+                  {user ?
+                    <Button variant="primary" size="sm" fullWidth onClick={handleDashboardClick}>
                       Dashboard
                     </Button>
-                  ) : (
+                  :
                     <Button variant="ghost" size="sm" fullWidth onClick={() => navigate('/login')}>
                       Sign In
                     </Button>
-                  )}
+                  }
                 </div>
               </div>
             </div>
