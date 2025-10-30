@@ -20,6 +20,7 @@ export default defineConfig({
     port: 5000,
     open: false,
     strictPort: true,
+    allowedHosts: true,
     hmr: {
       clientPort: 5000,
     },
@@ -28,5 +29,6 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 5000,
     strictPort: true,
+    allowedHosts: true,
   },
 });

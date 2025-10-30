@@ -63,6 +63,7 @@ npm run build:dev    # Development mode build
 ## Recent Changes
 - **October 30, 2025:** Initial Replit setup
   - Configured Vite to use port 5000 with host 0.0.0.0
+  - Added `allowedHosts: true` to Vite config (required for Replit proxy)
   - Set up development workflow
   - Configured autoscale deployment
   - Verified app loads correctly and connects to external API
