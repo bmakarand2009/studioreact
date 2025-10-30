@@ -51,10 +51,17 @@ export function useAuth(): UseAuthReturn {
     }
 
     try {
-      globalAuthCheckRunning = true; // Set global flag
-      hasRunRef.current = true; // Mark as run immediately
-      isProcessingRef.current = true; // Mark as processing
-      setLoading(true);
+      // Set flags first
+      globalAuthCheckRunning = true;
+      hasRunRef.current = true;
+      isProcessingRef.current = true;
+
+      // Only show loading if we actually have a token to validate
+      const hasToken = authService.isLoggedIn() || authService.hasAuthTokenInUrl();
+      if (hasToken) {
+          setLoading(true);
+      }
+
       console.log('useAuth: Starting auth check...');
 
       // Set a timeout to reset the global flag if something goes wrong
@@ -79,7 +86,19 @@ export function useAuth(): UseAuthReturn {
       }
 
       // Try to authenticate using the auth service
-      console.log('useAuth: Checking authentication status...');
+      // If we don't have a token, skip heavy check to avoid flicker
+      if (!hasToken) {
+          // No token → not authenticated
+          setUser(null);
+          const publicRoutes = ['/login', '/forgot-password', '/sign-up', '/'];
+          if (!publicRoutes.includes(pathname)) {
+              const redirectUrl = `/login?redirect=${encodeURIComponent(pathname)}`;
+              router.push(redirectUrl);
+          }
+          return;
+      }
+
+      // We have a token, perform the check
       const authenticated = await authService.check();
 
       if (authenticated) {
