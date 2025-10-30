@@ -7,5 +7,6 @@ type Props = React.ComponentProps<typeof RouterLink> & {
 };
 
 export default function Link({ href, prefetch, ...rest }: Props) {
-  return <RouterLink to={href} {...rest} />;
+  const { to, ...otherProps } = rest as any;
+  return <RouterLink to={href} {...otherProps} />;
 }

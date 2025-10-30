@@ -138,7 +138,7 @@ class WindowReferenceService {
       if (noopener) featuresString += ',noopener=yes';
       if (noreferrer) featuresString += ',noreferrer=yes';
 
-      const newWindow = window.open(url, name, featuresString, replace);
+      const newWindow = window.open(url, name, featuresString);
       
       if (!newWindow) {
         console.warn('Failed to open window. Popup might be blocked.');

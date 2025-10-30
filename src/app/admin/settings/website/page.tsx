@@ -25,9 +25,9 @@ const websiteSchema = z.object({
   logoUrl: z.string().optional(),
   faviconUrl: z.string().optional(),
   primaryColor: z.string().min(1, 'Primary color is required'),
-  enableCustomDomain: z.boolean().default(false),
-  enableSEO: z.boolean().default(true),
-  enableAnalytics: z.boolean().default(false),
+  enableCustomDomain: z.boolean(),
+  enableSEO: z.boolean(),
+  enableAnalytics: z.boolean(),
   googleAnalyticsId: z.string().optional(),
   facebookPixelId: z.string().optional()
 });
@@ -38,13 +38,7 @@ function WebsiteSettingsPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isDirty },
-    setValue,
-    watch
-  } = useForm<WebsiteFormData>({
+  const form = useForm<WebsiteFormData>({
     resolver: zodResolver(websiteSchema),
     defaultValues: {
       customDomain: '',
@@ -61,6 +55,8 @@ function WebsiteSettingsPage() {
       facebookPixelId: ''
     }
   });
+
+  const { register, handleSubmit, formState: { errors, isDirty }, setValue, watch } = form;
 
   const watchedValues = watch();
 
