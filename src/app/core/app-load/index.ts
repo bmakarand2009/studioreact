@@ -174,7 +174,7 @@ export interface Web {
 
 // App Load Service
 export class AppLoadService {
-  private _allowedDomains = ['wajooba.me', 'onwajooba.com', 'me.com', 'localhost', '127.0.0.1', 'lovable.app', 'lovable.dev', 'gptengineer.app'];
+  private _allowedDomains = ['wajooba.me', 'onwajooba.com', 'me.com', 'localhost', '127.0.0.1', 'lovable.app', 'lovable.dev'];
   private _tenantDetails: TenantDetails | null = null;
   private _isFirstInitialization = true;
   private _isInitializing = false;
@@ -222,15 +222,11 @@ export class AppLoadService {
    */
   private async _performInitialization(): Promise<TenantDetails | null> {
     try {
-      // Check if current hostname is in allowed domains
-      // For development, allow localhost and builds with MODE=development
       const disableDomainCheck = import.meta.env.VITE_DISABLE_DOMAIN_CHECK === 'true';
-
       const isDevelopmentHostname =
         this._hostName === 'localhost' ||
         this._hostName === '127.0.0.1' ||
         this._hostName.startsWith('localhost:');
-
       const isDevelopmentMode = import.meta.env.MODE === 'development';
       const isDevelopment = isDevelopmentHostname || isDevelopmentMode;
 
