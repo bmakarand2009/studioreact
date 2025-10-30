@@ -1,3 +1,4 @@
+import React from 'react';
 import { createBrowserRouter, RouterProvider, Outlet } from 'react-router-dom';
 import { Providers } from '@/components/providers/Providers';
 import { Layout } from '@/app/layout/layout';
