@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { Link } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui';
 import { 
   Home, 
@@ -45,7 +45,8 @@ const iconMap: Record<string, React.ComponentType<any>> = {
 };
 
 export default function VerticalNavigation({ navigation, user, onLogout, onClose }: VerticalNavigationProps) {
-  const pathname = usePathname();
+  const location = useLocation();
+  const pathname = location.pathname;
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
 
   const toggleExpanded = (itemId: string) => {

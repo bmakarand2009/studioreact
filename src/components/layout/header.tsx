@@ -10,7 +10,7 @@ import {
   ArrowLeft
 } from 'lucide-react';
 import { usePreview } from '@/contexts/PreviewContext';
-import { useRouter } from 'next/navigation';
+import { useNavigate } from 'react-router-dom';
 import { authService } from '@/services/authService';
 
 interface HeaderProps {
@@ -21,13 +21,13 @@ interface HeaderProps {
 
 export default function Header({ onMenuClick, user, navigation }: HeaderProps) {
   const { isInPreviewMode, exitPreviewMode } = usePreview();
-  const router = useRouter();
+  const navigate = useNavigate();
 
   const handleBackToAdmin = () => {
     const adminToken = exitPreviewMode();
     if (adminToken) {
       authService.accessToken = adminToken;
-      router.push('/admin/dashboard');
+      navigate('/admin/dashboard');
     }
   };
 

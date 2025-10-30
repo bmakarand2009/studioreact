@@ -1,8 +1,8 @@
 'use client';
 
 import { useMemo } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { Link } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 interface NavigationItem {
   id: string;
@@ -25,7 +25,8 @@ export default function HorizontalNavigation({
   mobile = false, 
   onItemClick 
 }: HorizontalNavigationProps) {
-  const pathname = usePathname();
+  const location = useLocation();
+  const pathname = location.pathname;
 
   const isActive = (url: string) => {
     // Exact match first

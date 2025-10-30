@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -31,7 +30,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
-  const router = useRouter();
+  const navigate = useNavigate();
 
   // Check if user is already authenticated on page load
   useEffect(() => {
@@ -82,7 +81,7 @@ export default function LoginPage() {
             }
 
             console.log('Auto-login: Redirecting to:', redirectPath);
-            router.replace(redirectPath);
+            navigate(redirectPath, { replace: true });
             return;
           }
         }
@@ -95,7 +94,7 @@ export default function LoginPage() {
     };
 
     checkExistingAuth();
-  }, [router]);
+  }, [navigate]);
 
   const {
     register,
@@ -149,7 +148,7 @@ export default function LoginPage() {
         
         // Small delay to ensure authentication state is properly set
         setTimeout(() => {
-          router.replace(redirectPath);
+          navigate(redirectPath, { replace: true });
         }, 100);
       } else {
         console.error('Invalid login response:', result);

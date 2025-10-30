@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useCallback, useRef } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { userService } from '@/app/core/user';
 import { authService } from '@/services/authService';
 import { useUserContext } from '@/contexts/UserContext';
@@ -22,8 +22,9 @@ let globalAuthCheckRunning = false;
 
 export function useAuth(): UseAuthReturn {
   const { state, setUser, setLoading, setAuthenticated, logout: contextLogout } = useUserContext();
-  const router = useRouter();
-  const pathname = usePathname();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const pathname = location.pathname;
   
   // Use ref to track if auth check has already run
   const hasRunRef = useRef(false);
@@ -93,7 +94,7 @@ export function useAuth(): UseAuthReturn {
           const publicRoutes = ['/login', '/forgot-password', '/sign-up', '/'];
           if (!publicRoutes.includes(pathname)) {
               const redirectUrl = `/login?redirect=${encodeURIComponent(pathname)}`;
-              router.push(redirectUrl);
+              navigate(redirectUrl);
           }
           return;
       }
@@ -118,7 +119,7 @@ export function useAuth(): UseAuthReturn {
           console.log('useAuth: Redirecting to login from:', pathname);
           // Redirect to login with current page as redirect parameter
           const redirectUrl = `/login?redirect=${encodeURIComponent(pathname)}`;
-          router.push(redirectUrl);
+          navigate(redirectUrl);
         } else {
           console.log('useAuth: Already on public route:', pathname);
         }
@@ -135,7 +136,7 @@ export function useAuth(): UseAuthReturn {
         console.log('useAuth: Error redirecting to login from:', pathname);
         // Redirect to login with current page as redirect parameter
         const redirectUrl = `/login?redirect=${encodeURIComponent(pathname)}`;
-        router.push(redirectUrl);
+        navigate(redirectUrl);
       } else {
         console.log('useAuth: Error but already on public route:', pathname);
       }
@@ -150,7 +151,7 @@ export function useAuth(): UseAuthReturn {
         console.log('useAuth: Loading state after reset:', state.isLoading);
       }, 100);
     }
-  }, [pathname, router, setUser, setLoading, state.isLoading, state.user]);
+  }, [pathname, navigate, setUser, setLoading, state.isLoading, state.user]);
 
   useEffect(() => {
     // Only run auth check once on mount, not on every render
@@ -204,14 +205,14 @@ export function useAuth(): UseAuthReturn {
     try {
       await authService.logout();
       contextLogout();
-      router.push('/login');
+      navigate('/login');
     } catch (error) {
       console.error('useAuth: Logout error:', error);
       // Force logout even if API fails
       contextLogout();
-      router.push('/login');
+      navigate('/login');
     }
-  }, [authService, contextLogout, router]);
+  }, [authService, contextLogout, navigate]);
 
   return {
     user: state.user,

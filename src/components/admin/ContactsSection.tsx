@@ -6,7 +6,7 @@ import { Search, UserPlus, Mail, Phone, MapPin, Eye } from 'lucide-react';
 import { usePreview } from '@/contexts/PreviewContext';
 import { useAuth } from '@/hooks/useAuth';
 import { authService } from '@/services/authService';
-import { useRouter } from 'next/navigation';
+import { useNavigate } from 'react-router-dom';
 import { environment } from '@/config/environment';
 
 interface Contact {
@@ -25,7 +25,7 @@ interface Contact {
 export function ContactsSection() {
   const { enterPreviewMode } = usePreview();
   const { user } = useAuth();
-  const router = useRouter();
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [isPreviewing, setIsPreviewing] = useState(false);
   const [previewError, setPreviewError] = useState('');
@@ -77,7 +77,7 @@ export function ContactsSection() {
            );
           
           // Switch to student dashboard view
-          router.push('/student/dashboard');
+          navigate('/student/dashboard');
         }
       } catch (error) {
         console.error('Failed to enter preview mode:', error);

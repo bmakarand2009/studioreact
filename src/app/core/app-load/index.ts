@@ -174,7 +174,7 @@ export interface Web {
 
 // App Load Service
 export class AppLoadService {
-  private _allowedDomains = ['wajooba.me', 'onwajooba.com', 'me.com', 'localhost', '127.0.0.1', 'lovable.app', 'lovable.dev'];
+  private _allowedDomains = ['wajooba.me', 'onwajooba.com', 'me.com', 'localhost', '127.0.0.1', 'lovable.app', 'lovable.dev', 'gptengineer.app'];
   private _tenantDetails: TenantDetails | null = null;
   private _isFirstInitialization = true;
   private _isInitializing = false;

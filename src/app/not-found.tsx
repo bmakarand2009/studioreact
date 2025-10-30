@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui';
 import { Home, ArrowLeft, Search, AlertTriangle } from 'lucide-react';
 

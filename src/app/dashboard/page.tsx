@@ -1,36 +1,36 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function DashboardPage() {
   const { user, isLoading } = useAuth();
-  const router = useRouter();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!isLoading && user) {
       // Redirect based on user role
       switch (user.role) {
         case 'ROLE_ADMIN':
-          router.replace('/admin/dashboard');
+          navigate('/admin/dashboard', { replace: true });
           break;
         case 'ROLE_STUDENT':
-          router.replace('/student/dashboard');
+          navigate('/student/dashboard', { replace: true });
           break;
         case 'ROLE_STAFF':
-          router.replace('/staff/dashboard');
+          navigate('/staff/dashboard', { replace: true });
           break;
         default:
           // If no role, redirect to public page
-          router.replace('/');
+          navigate('/', { replace: true });
           break;
       }
     } else if (!isLoading && !user) {
       // If not authenticated, redirect to login
-      router.replace('/login');
+      navigate('/login', { replace: true });
     }
-  }, [user, isLoading, router]);
+  }, [user, isLoading, navigate]);
 
   // Show loading while checking auth or redirecting
   return (

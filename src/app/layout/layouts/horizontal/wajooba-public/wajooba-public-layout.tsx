@@ -1,7 +1,7 @@
 'use client';
 
 import { ReactNode, useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useNavigate } from 'react-router-dom';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useNavigation } from '@/hooks/useNavigation';
 import { useAuth } from '@/hooks/useAuth';
@@ -19,7 +19,7 @@ export default function WajoobaPublicLayout({ children }: WajoobaPublicLayoutPro
   const isScreenSmall = useMediaQuery('(max-width: 768px)');
   const { navigation } = useNavigation();
   const { user } = useAuth();
-  const router = useRouter();
+  const navigate = useNavigate();
 
   // Close mobile menu on screen size change
   useEffect(() => {
@@ -42,7 +42,7 @@ export default function WajoobaPublicLayout({ children }: WajoobaPublicLayoutPro
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
-            <div className="flex items-center cursor-pointer" onClick={() => router.push('/')}>
+            <div className="flex items-center cursor-pointer" onClick={() => navigate('/')}>
               <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
                 <span className="text-white text-sm font-bold">W</span>
               </div>
@@ -68,16 +68,16 @@ export default function WajoobaPublicLayout({ children }: WajoobaPublicLayoutPro
                     // Redirect based on user role
                     switch (user.role) {
                       case 'ROLE_ADMIN':
-                        router.push('/admin/dashboard');
+                        navigate('/admin/dashboard');
                         break;
                       case 'ROLE_STUDENT':
-                        router.push('/student/dashboard');
+                        navigate('/student/dashboard');
                         break;
                       case 'ROLE_STAFF':
-                        router.push('/staff/dashboard');
+                        navigate('/staff/dashboard');
                         break;
                       default:
-                        router.push('/dashboard');
+                        navigate('/dashboard');
                         break;
                     }
                   }}>
@@ -85,10 +85,10 @@ export default function WajoobaPublicLayout({ children }: WajoobaPublicLayoutPro
                   </Button>
                 ) : (
                   <>
-                    <Button variant="ghost" size="sm" onClick={() => router.push('/login')}>
+                    <Button variant="ghost" size="sm" onClick={() => navigate('/login')}>
                       Sign In
                     </Button>
-                    {/* <Button variant="primary" size="sm" onClick={() => router.push('/register')}>
+                    {/* <Button variant="primary" size="sm" onClick={() => navigate('/register')}>
                       Get Started
                     </Button> */}
                   </>
@@ -126,16 +126,16 @@ export default function WajoobaPublicLayout({ children }: WajoobaPublicLayoutPro
                       // Redirect based on user role
                       switch (user.role) {
                         case 'ROLE_ADMIN':
-                          router.push('/admin/dashboard');
+                          navigate('/admin/dashboard');
                           break;
                         case 'ROLE_STUDENT':
-                          router.push('/student/dashboard');
+                          navigate('/student/dashboard');
                           break;
                         case 'ROLE_STAFF':
-                          router.push('/staff/dashboard');
+                          navigate('/staff/dashboard');
                           break;
                         default:
-                          router.push('/dashboard');
+                          navigate('/dashboard');
                           break;
                       }
                     }}>
@@ -143,10 +143,10 @@ export default function WajoobaPublicLayout({ children }: WajoobaPublicLayoutPro
                     </Button>
                   ) : (
                     <>
-                      <Button variant="ghost" size="sm" fullWidth onClick={() => router.push('/login')}>
+                      <Button variant="ghost" size="sm" fullWidth onClick={() => navigate('/login')}>
                         Sign In
                       </Button>
-                      {/* <Button variant="primary" size="sm" fullWidth onClick={() => router.push('/register')}>
+                      {/* <Button variant="primary" size="sm" fullWidth onClick={() => navigate('/register')}>
                         Get Started
                       </Button> */}
                     </>

@@ -2,7 +2,7 @@
 
 import { useAuth } from '@/hooks/useAuth';
 import { usePreview } from '@/contexts/PreviewContext';
-import { useRouter, usePathname } from 'next/navigation';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 
 interface WithRoleProps {
@@ -17,8 +17,9 @@ export function withRole<P extends object>(
   return function WithRoleComponent(props: P) {
     const { user, isLoading, hasRole } = useAuth();
     const { isInPreviewMode, previewUser } = usePreview();
-    const router = useRouter();
-    const pathname = usePathname();
+    const navigate = useNavigate();
+    const location = useLocation();
+    const pathname = location.pathname;
     const [hasRedirected, setHasRedirected] = useState(false);
     const [roleCheckComplete, setRoleCheckComplete] = useState(false);
 
@@ -40,21 +41,21 @@ export function withRole<P extends object>(
             
             // Redirect based on user role
             if (redirectTo) {
-              router.push(redirectTo);
+              navigate(redirectTo);
             } else {
               // Default role-based redirects
               switch (user.role) {
                 case 'ROLE_ADMIN':
-                  router.push('/admin/dashboard');
+                  navigate('/admin/dashboard');
                   break;
                 case 'ROLE_STUDENT':
-                  router.push('/student/dashboard');
+                  navigate('/student/dashboard');
                   break;
                 case 'ROLE_STAFF':
-                  router.push('/staff/dashboard');
+                  navigate('/staff/dashboard');
                   break;
                 default:
-                  router.push('/dashboard');
+                  navigate('/dashboard');
                   break;
               }
             }
@@ -65,7 +66,7 @@ export function withRole<P extends object>(
       };
 
       checkRole();
-    }, [user, isLoading, hasRole, allowedRoles, redirectTo, router, hasRedirected, roleCheckComplete, isInPreviewMode, previewUser]);
+    }, [user, isLoading, hasRole, allowedRoles, redirectTo, navigate, hasRedirected, roleCheckComplete, isInPreviewMode, previewUser]);
 
     // Show loading while checking auth OR while role check is incomplete
     if (isLoading || !roleCheckComplete) {
@@ -85,7 +86,7 @@ export function withRole<P extends object>(
     if (!user && !isInPreviewMode) {
       // Redirect to login with current page as redirect parameter
       const redirectUrl = `/login?redirect=${encodeURIComponent(pathname)}`;
-      router.push(redirectUrl);
+      navigate(redirectUrl);
       return null;
     }
 

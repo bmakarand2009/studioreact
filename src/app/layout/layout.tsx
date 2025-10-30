@@ -1,7 +1,7 @@
 'use client';
 
 import { ReactNode } from 'react';
-import { usePathname } from 'next/navigation';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import EmptyLayout from './layouts/empty/empty-layout';
 import WajoobaPublicLayout from './layouts/horizontal/wajooba-public/wajooba-public-layout';
@@ -18,7 +18,8 @@ interface LayoutProps {
  * based on route paths or query parameters
  */
 export function Layout({ children }: LayoutProps) {
-  const pathname = usePathname();
+  const location = useLocation();
+  const pathname = location.pathname;
   const { isLoading, user } = useAuth();
   const layout = getRouteLayout(pathname);
 
