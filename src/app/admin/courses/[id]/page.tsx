@@ -106,6 +106,7 @@ export default function CourseDetailsPage() {
   const [sections, setSections] = useState<Section[]>(mockSections);
   const [selectedActivity, setSelectedActivity] = useState<string>('activity-2');
   const [contentTab, setContentTab] = useState<ContentTabType>('content');
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const currentActivity = sections
     .flatMap(s => s.activities)
@@ -165,19 +166,17 @@ export default function CourseDetailsPage() {
               </div>
               <Button
                 variant="outline"
-                size="lg"
-                className="gap-2 border-2"
+                className="w-11 h-11 p-0 border-2"
+                title="Edit Course"
               >
-                <Edit2 className="w-4 h-4" />
-                Edit Course
+                <Edit2 className="w-5 h-5" />
               </Button>
               <Button
                 variant="outline"
-                size="lg"
-                className="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950 border-2"
+                className="w-11 h-11 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950 border-2"
+                title="Delete Course"
               >
-                <Trash2 className="w-4 h-4" />
-                Delete
+                <Trash2 className="w-5 h-5" />
               </Button>
             </div>
           </div>
@@ -235,28 +234,46 @@ export default function CourseDetailsPage() {
       {activeTab === 'contents' && (
         <div className="flex h-[calc(100vh-280px)]">
           {/* Enhanced Left Sidebar - Sections & Activities */}
-          <div className="w-96 bg-card border-r-2 border-border overflow-y-auto shadow-sm">
+          <div className={cn(
+            "bg-card border-r-2 border-border overflow-y-auto shadow-sm transition-all duration-300 relative",
+            sidebarCollapsed ? "w-16" : "w-96"
+          )}>
+            {/* Collapse Toggle Button */}
+            <button
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              className="absolute -right-3 top-6 z-10 w-6 h-6 bg-cyan-500 hover:bg-cyan-600 text-white rounded-full flex items-center justify-center shadow-lg transition-colors"
+              title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            >
+              <ChevronRight className={cn(
+                "w-4 h-4 transition-transform",
+                !sidebarCollapsed && "rotate-180"
+              )} />
+            </button>
             <div className="p-6">
-              <div className="mb-6">
-                <h3 className="text-lg font-bold text-foreground mb-2">Course Structure</h3>
-                <p className="text-sm text-muted-foreground">Organize your course content into sections and activities</p>
-              </div>
+              {!sidebarCollapsed && (
+                <div className="mb-6">
+                  <h3 className="text-lg font-bold text-foreground mb-2">Course Structure</h3>
+                  <p className="text-sm text-muted-foreground">Organize your course content into sections and activities</p>
+                </div>
+              )}
 
               {sections.map(section => (
                 <div key={section.id} className="mb-4">
                   {/* Enhanced Section Header */}
                   <div className={cn(
-                    "flex items-center justify-between p-4 rounded-xl mb-3 group transition-all border-2",
+                    "flex items-center justify-between rounded-xl mb-3 group transition-all border-2",
                     section.isExpanded 
                       ? "bg-cyan-50 dark:bg-cyan-950/30 border-cyan-200 dark:border-cyan-800" 
-                      : "bg-muted/50 border-transparent hover:border-muted-foreground/20"
+                      : "bg-muted/50 border-transparent hover:border-muted-foreground/20",
+                    sidebarCollapsed ? "p-2" : "p-4"
                   )}>
                     <button
                       onClick={() => toggleSection(section.id)}
                       className="flex items-center gap-3 flex-1"
+                      title={sidebarCollapsed ? section.name : undefined}
                     >
                       <div className={cn(
-                        "p-1.5 rounded-lg transition-colors",
+                        "p-1.5 rounded-lg transition-colors flex-shrink-0",
                         section.isExpanded ? "bg-cyan-500 text-white" : "bg-muted text-muted-foreground"
                       )}>
                         {section.isExpanded ? (
@@ -265,23 +282,27 @@ export default function CourseDetailsPage() {
                           <ChevronRight className="w-5 h-5" />
                         )}
                       </div>
-                      <div className="flex items-center gap-2">
-                        <GripVertical className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                        <span className="font-bold text-base text-foreground">{section.name}</span>
-                      </div>
+                      {!sidebarCollapsed && (
+                        <div className="flex items-center gap-2">
+                          <GripVertical className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                          <span className="font-bold text-base text-foreground">{section.name}</span>
+                        </div>
+                      )}
                     </button>
-                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button className="p-2 hover:bg-cyan-100 dark:hover:bg-cyan-900 rounded-lg transition-colors">
-                        <Edit2 className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
-                      </button>
-                      <button className="p-2 hover:bg-red-100 dark:hover:bg-red-900 rounded-lg transition-colors">
-                        <Trash2 className="w-4 h-4 text-red-600 dark:text-red-400" />
-                      </button>
-                    </div>
+                    {!sidebarCollapsed && (
+                      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button className="p-2 hover:bg-cyan-100 dark:hover:bg-cyan-900 rounded-lg transition-colors">
+                          <Edit2 className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
+                        </button>
+                        <button className="p-2 hover:bg-red-100 dark:hover:bg-red-900 rounded-lg transition-colors">
+                          <Trash2 className="w-4 h-4 text-red-600 dark:text-red-400" />
+                        </button>
+                      </div>
+                    )}
                   </div>
 
                   {/* Enhanced Activities */}
-                  {section.isExpanded && (
+                  {section.isExpanded && !sidebarCollapsed && (
                     <div className="space-y-2 ml-4 pl-4 border-l-2 border-cyan-200 dark:border-cyan-800">
                       {section.activities.map(activity => (
                         <button
@@ -322,30 +343,32 @@ export default function CourseDetailsPage() {
               ))}
 
               {/* Enhanced Action Buttons */}
-              <div className="space-y-3 mt-8 pt-6 border-t-2 border-border">
-                <Button
-                  onClick={handleAddActivity}
-                  variant="outline"
-                  size="lg"
-                  className="w-full justify-start gap-3 h-14 text-base font-semibold border-2 border-cyan-200 dark:border-cyan-800 hover:bg-cyan-50 dark:hover:bg-cyan-950 text-cyan-600 dark:text-cyan-400"
-                >
-                  <div className="w-8 h-8 rounded-lg bg-cyan-500 flex items-center justify-center">
-                    <Plus className="w-5 h-5 text-white" />
-                  </div>
-                  Add Activity
-                </Button>
-                <Button
-                  onClick={handleAddSection}
-                  variant="outline"
-                  size="lg"
-                  className="w-full justify-start gap-3 h-14 text-base font-semibold border-2 border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-950 text-blue-600 dark:text-blue-400"
-                >
-                  <div className="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center">
-                    <Plus className="w-5 h-5 text-white" />
-                  </div>
-                  Add Section
-                </Button>
-              </div>
+              {!sidebarCollapsed && (
+                <div className="space-y-3 mt-8 pt-6 border-t-2 border-border">
+                  <Button
+                    onClick={handleAddActivity}
+                    variant="outline"
+                    size="lg"
+                    className="w-full justify-start gap-3 h-14 text-base font-semibold border-2 border-cyan-200 dark:border-cyan-800 hover:bg-cyan-50 dark:hover:bg-cyan-950 text-cyan-600 dark:text-cyan-400"
+                  >
+                    <div className="w-8 h-8 rounded-lg bg-cyan-500 flex items-center justify-center">
+                      <Plus className="w-5 h-5 text-white" />
+                    </div>
+                    Add Activity
+                  </Button>
+                  <Button
+                    onClick={handleAddSection}
+                    variant="outline"
+                    size="lg"
+                    className="w-full justify-start gap-3 h-14 text-base font-semibold border-2 border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-950 text-blue-600 dark:text-blue-400"
+                  >
+                    <div className="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center">
+                      <Plus className="w-5 h-5 text-white" />
+                    </div>
+                    Add Section
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
 
@@ -370,13 +393,19 @@ export default function CourseDetailsPage() {
                         <span className="text-sm font-medium text-foreground">Private</span>
                         <Switch checked={false} onCheckedChange={() => {}} />
                       </div>
-                      <Button variant="outline" size="lg" className="gap-2">
+                      <Button 
+                        variant="outline"
+                        className="w-11 h-11 p-0"
+                        title="Batches"
+                      >
                         <Users className="w-5 h-5" />
-                        Assign Users
                       </Button>
-                      <Button variant="outline" size="lg" className="gap-2 text-red-600 hover:text-red-700">
+                      <Button 
+                        variant="outline"
+                        className="w-11 h-11 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+                        title="Delete Activity"
+                      >
                         <Trash2 className="w-5 h-5" />
-                        Delete
                       </Button>
                     </div>
                   </div>
