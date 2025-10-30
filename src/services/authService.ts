@@ -226,6 +226,11 @@ export class AuthService {
           this.setCookie('refreshToken', data.refresh_token, 30);
         }
         
+        // Store required values in localStorage
+        localStorage.setItem('auth', data.access_token);
+        localStorage.setItem('logintrace', 'true');
+        localStorage.setItem('orgid', tenantId);
+        
         return data;
       } else {
         throw new Error('Invalid response format from server');
@@ -431,6 +436,12 @@ export class AuthService {
       this.deleteCookie('accessToken');
       this.deleteCookie('refreshToken');
       
+      // Clear localStorage values
+      localStorage.removeItem('auth');
+      localStorage.removeItem('logintrace');
+      localStorage.removeItem('orgid');
+      localStorage.removeItem('_grecaptcha');
+      
       this._authenticated = false;
       this.clearCurrentUser();
     }
@@ -619,6 +630,14 @@ export class AuthService {
 
       // Store the token temporarily
       this.accessToken = authToken;
+      
+      // Store required values in localStorage
+      const tenantId = appLoadService.tenantId || appLoadService.tenantDetails?.orgId;
+      if (tenantId) {
+        localStorage.setItem('auth', authToken);
+        localStorage.setItem('logintrace', 'true');
+        localStorage.setItem('orgid', tenantId);
+      }
       
       // Try to validate the token by calling reInitInfo
       try {

@@ -77,7 +77,11 @@ npm run build:dev    # Development mode build
 3. **Token Storage**: API returns authentication response
    - Response includes: `access_token`, `refresh_token`, and `contact` (user data)
    - Tokens are stored in **browser cookies** with 7-day expiry (access) and 30-day expiry (refresh)
-   - Cookie name: `accessToken` (not localStorage)
+   - Cookie name: `accessToken`
+   - **Additional localStorage entries** are created for compatibility:
+     - `auth` - JWT access token
+     - `logintrace` - set to "true"
+     - `orgid` - organization/tenant ID
 
 4. **Subsequent API Calls**: All authenticated requests include the token
    - `api.ts` reads token from cookies via `getCookie('accessToken')`
@@ -85,10 +89,12 @@ npm run build:dev    # Development mode build
    - Automatic token refresh on 401 responses using `refreshToken`
 
 ### Token Management
-- **Storage Location**: HTTP cookies (SameSite=Lax)
+- **Storage Location**: 
+  - Primary: HTTP cookies (SameSite=Lax) for `accessToken` and `refreshToken`
+  - Secondary: localStorage for `auth`, `logintrace`, and `orgid` (for compatibility)
 - **Retrieval**: `authService.accessToken` getter reads from cookies
 - **Auto-Refresh**: On 401 error, attempts refresh with `refreshToken`
-- **Logout**: Deletes both `accessToken` and `refreshToken` cookies
+- **Logout**: Deletes cookies and clears all localStorage entries
 
 ## Role-Based Routing System
 
@@ -115,6 +121,15 @@ The system handles role variations automatically through `UserService.hasRole()`
 - **Admin pages**: All admin routes accept both ROLE_ADMIN and ROLE_STAFF
 
 ## Recent Changes
+- **October 30, 2025:** LocalStorage Authentication Support
+  - **LocalStorage Integration**: Added localStorage entries during login for compatibility:
+    - `auth` - stores JWT access token
+    - `logintrace` - set to "true" on successful login
+    - `orgid` - stores organization/tenant ID
+  - **Logout Cleanup**: Updated logout to clear all localStorage entries
+  - **OAuth Support**: Updated OAuth callback handling to store localStorage values
+  - Cookies remain the primary storage mechanism for security
+
 - **October 30, 2025:** Role-Based Routing Implementation
   - **Unified Admin Routing**: Both ROLE_ADMIN and ROLE_STAFF users now access `/admin/dashboard`
   - **Role Normalization**: Added `UserService.hasRole()` to handle uppercase/lowercase and ROLE_ prefix variations
