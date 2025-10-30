@@ -145,7 +145,7 @@ export default function VerticalNavigation({ navigation, user, onLogout, onClose
           return (
             <div key={item.id}>
               <Link
-                href={item.url}
+                to={item.url}
                 className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors ${
                   active
                     ? 'bg-primary-600 text-white shadow-md border-l-4 border-primary-400'

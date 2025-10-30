@@ -32,13 +32,13 @@ export default function HomePage() {
               Join thousands of students and educators worldwide.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/login">
+              <Link to="/login">
                 <Button size="lg" className="text-lg px-8 py-4">
                   Get Started
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
-              <Link href="/courses">
+              <Link to="/courses">
                 <Button variant="secondary" size="lg" className="text-lg px-8 py-4">
                   <Play className="mr-2 h-5 w-5" />
                   Explore Courses
@@ -143,13 +143,13 @@ export default function HomePage() {
             Join our community of learners and educators today. Experience the difference that quality education technology makes.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/login">
+            <Link to="/login">
               <Button size="lg" className="text-lg px-8 py-4">
                 Sign Up Now
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
-            <Link href="/contact">
+            <Link to="/contact">
               <Button variant="secondary" size="lg" className="text-lg px-8 py-4">
                 Contact Us
               </Button>
@@ -177,30 +177,30 @@ export default function HomePage() {
             <div>
               <h3 className="text-lg font-semibold mb-4">Platform</h3>
               <ul className="space-y-2 text-gray-400">
-                <li><Link href="/features" className="hover:text-white transition-colors">Features</Link></li>
-                <li><Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link></li>
-                <li><Link href="/security" className="hover:text-white transition-colors">Security</Link></li>
-                <li><Link href="/api" className="hover:text-white transition-colors">API</Link></li>
+                <li><Link to="/features" className="hover:text-white transition-colors">Features</Link></li>
+                <li><Link to="/pricing" className="hover:text-white transition-colors">Pricing</Link></li>
+                <li><Link to="/security" className="hover:text-white transition-colors">Security</Link></li>
+                <li><Link to="/api" className="hover:text-white transition-colors">API</Link></li>
               </ul>
             </div>
             
             <div>
               <h3 className="text-lg font-semibold mb-4">Support</h3>
               <ul className="space-y-2 text-gray-400">
-                <li><Link href="/help" className="hover:text-white transition-colors">Help Center</Link></li>
-                <li><Link href="/contact" className="hover:text-white transition-colors">Contact Us</Link></li>
-                <li><Link href="/status" className="hover:text-white transition-colors">System Status</Link></li>
-                <li><Link href="/feedback" className="hover:text-white transition-colors">Feedback</Link></li>
+                <li><Link to="/help" className="hover:text-white transition-colors">Help Center</Link></li>
+                <li><Link to="/contact" className="hover:text-white transition-colors">Contact Us</Link></li>
+                <li><Link to="/status" className="hover:text-white transition-colors">System Status</Link></li>
+                <li><Link to="/feedback" className="hover:text-white transition-colors">Feedback</Link></li>
               </ul>
             </div>
             
             <div>
               <h3 className="text-lg font-semibold mb-4">Company</h3>
               <ul className="space-y-2 text-gray-400">
-                <li><Link href="/about" className="hover:text-white transition-colors">About Us</Link></li>
-                <li><Link href="/careers" className="hover:text-white transition-colors">Careers</Link></li>
-                <li><Link href="/blog" className="hover:text-white transition-colors">Blog</Link></li>
-                <li><Link href="/press" className="hover:text-white transition-colors">Press</Link></li>
+                <li><Link to="/about" className="hover:text-white transition-colors">About Us</Link></li>
+                <li><Link to="/careers" className="hover:text-white transition-colors">Careers</Link></li>
+                <li><Link to="/blog" className="hover:text-white transition-colors">Blog</Link></li>
+                <li><Link to="/press" className="hover:text-white transition-colors">Press</Link></li>
               </ul>
             </div>
           </div>

@@ -48,7 +48,7 @@ export default function AboutPage() {
                 We're committed to providing cutting-edge technology that enhances the learning experience, 
                 fosters collaboration, and empowers individuals to achieve their educational goals.
               </p>
-              <Link href="/courses">
+              <Link to="/courses">
                 <Button size="lg">
                   Explore Our Courses
                   <ArrowRight className="ml-2 h-5 w-5" />
@@ -164,13 +164,13 @@ export default function AboutPage() {
             Start your learning journey today and become part of our growing global community of learners and educators.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/login">
+            <Link to="/login">
               <Button size="lg" className="text-lg px-8 py-4">
                 Get Started
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
-            <Link href="/contact">
+            <Link to="/contact">
               <Button variant="secondary" size="lg" className="text-lg px-8 py-4">
                 Contact Us
               </Button>

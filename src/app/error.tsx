@@ -53,7 +53,7 @@ export default function Error({ error, reset }: ErrorProps) {
             Try Again
           </Button>
           
-          <Link href="/" className="block">
+          <Link to="/" className="block">
             <Button variant="ghost" size="lg" className="w-full">
               <Home className="h-5 w-5 mr-2" />
               Go Home
@@ -67,10 +67,10 @@ export default function Error({ error, reset }: ErrorProps) {
             If this error continues, please:
           </p>
           <div className="flex justify-center space-x-4 text-sm">
-            <Link href="/contact" className="text-primary hover:text-primary-dark transition-colors">
+            <Link to="/contact" className="text-primary hover:text-primary-dark transition-colors">
               Contact Support
             </Link>
-            <Link href="/help" className="text-primary hover:text-primary-dark transition-colors">
+            <Link to="/help" className="text-primary hover:text-primary-dark transition-colors">
               Check Help Center
             </Link>
           </div>

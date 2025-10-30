@@ -72,7 +72,7 @@ export default function HorizontalNavigation({
         {useMemo(() => navigation.map((item) => (
           <Link
             key={item.id}
-            href={item.url}
+            to={item.url}
             onClick={handleItemClick}
             className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
               isActive(item.url)
@@ -92,7 +92,7 @@ export default function HorizontalNavigation({
       {useMemo(() => navigation.map((item) => (
         <Link
           key={item.id}
-          href={item.url}
+          to={item.url}
           className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
             isActive(item.url)
               ? 'bg-primary-600 text-white shadow-md'

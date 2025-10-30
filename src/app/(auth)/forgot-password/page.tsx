@@ -75,7 +75,7 @@ export default function ForgotPasswordPage() {
               </p>
               
               <div className="space-y-4">
-                <Link href="/login">
+                <Link to="/login">
                   <Button variant="primary" fullWidth className="h-12">
                     Back to sign in
                   </Button>
@@ -185,7 +185,7 @@ export default function ForgotPasswordPage() {
           {/* Back to Login */}
           <div className="text-center mt-6">
             <Link
-              href="/login"
+              to="/login"
               className="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />

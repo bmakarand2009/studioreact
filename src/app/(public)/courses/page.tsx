@@ -200,7 +200,7 @@ export default function CourseCatalogPage() {
                   <span className="text-sm text-gray-500 dark:text-gray-400">
                     by {course.instructor}
                   </span>
-                  <Link href={`/courses/${course.id}`}>
+                  <Link to={`/courses/${course.id}`}>
                     <Button size="sm" variant="secondary">
                       <Play className="h-4 w-4 mr-1" />
                       Learn More
@@ -230,18 +230,18 @@ export default function CourseCatalogPage() {
            <p className="text-lg text-primary-100 mb-6">
              Contact our team to discuss custom course development or specific learning needs.
            </p>
-           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-             <Link href="/contact">
-               <Button variant="secondary" size="sm" className="px-6 py-2">
-                 Contact Us
-               </Button>
-             </Link>
-             <Link href="/login">
-               <Button size="sm" className="px-6 py-2 bg-white text-primary-600 hover:bg-gray-100">
-                 Sign Up for Updates
-               </Button>
-             </Link>
-           </div>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link to="/contact">
+                <Button variant="secondary" size="sm" className="px-6 py-2">
+                  Contact Us
+                </Button>
+              </Link>
+              <Link to="/login">
+                <Button size="sm" className="px-6 py-2 bg-white text-primary-600 hover:bg-gray-100">
+                  Sign Up for Updates
+                </Button>
+              </Link>
+            </div>
          </div>
        </div>
     </div>

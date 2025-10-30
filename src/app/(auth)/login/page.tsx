@@ -277,7 +277,7 @@ export default function LoginPage() {
                 className="-ml-2"
               />
               <Link
-                href="/forgot-password"
+                to="/forgot-password"
                 className="text-sm font-medium text-deep-600 hover:text-deep-700 dark:text-deep-400 dark:hover:text-deep-300 transition-colors whitespace-nowrap"
               >
                 Forgot password?
@@ -336,7 +336,7 @@ export default function LoginPage() {
             <p className="text-gray-600 dark:text-gray-400">
               Don't have an account?{' '}
               <Link
-                href="/sign-up"
+                to="/sign-up"
                 className="font-medium text-deep-600 hover:text-deep-700 dark:text-deep-400 dark:hover:text-deep-300 transition-colors"
               >
                 Sign up
