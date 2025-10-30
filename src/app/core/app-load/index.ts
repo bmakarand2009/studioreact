@@ -174,7 +174,7 @@ export interface Web {
 
 // App Load Service
 export class AppLoadService {
-  private _allowedDomains = ['wajooba.me', 'onwajooba.com', 'me.com', 'localhost', '127.0.0.1'];
+  private _allowedDomains = ['wajooba.me', 'onwajooba.com', 'me.com', 'localhost', '127.0.0.1', 'lovable.app', 'lovable.dev'];
   private _tenantDetails: TenantDetails | null = null;
   private _isFirstInitialization = true;
   private _isInitializing = false;
@@ -223,12 +223,17 @@ export class AppLoadService {
   private async _performInitialization(): Promise<TenantDetails | null> {
     try {
       // Check if current hostname is in allowed domains
-      // For development, allow localhost and 127.0.0.1
-      const isDevelopment = this._hostName === 'localhost' || this._hostName === '127.0.0.1' || this._hostName.startsWith('localhost:');
+      // For development, allow localhost and builds with MODE=development
+      const isDevelopmentHostname =
+        this._hostName === 'localhost' ||
+        this._hostName === '127.0.0.1' ||
+        this._hostName.startsWith('localhost:');
+      const isDevelopmentMode = import.meta.env.MODE === 'development';
+      const isDevelopment = isDevelopmentHostname || isDevelopmentMode;
+
       const isAllowedDomain = this._allowedDomains.some((domain) => this._hostName.endsWith(domain));
-      
       console.log(`AppLoadService: Domain check - isDevelopment: ${isDevelopment}, isAllowedDomain: ${isAllowedDomain}`);
-      
+
       if (!isDevelopment && !isAllowedDomain) {
         console.log('AppLoadService: Domain not allowed, aborting initialization');
         this._isInitializing = false;
