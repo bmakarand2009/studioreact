@@ -16,12 +16,17 @@ export default defineConfig({
     'process.env': {},
   },
   server: {
-    host: '::',
-    port: 8080,
+    host: '0.0.0.0',
+    port: 5000,
     open: false,
+    strictPort: true,
+    hmr: {
+      clientPort: 5000,
+    },
   },
   preview: {
-    host: '::',
-    port: 8080,
+    host: '0.0.0.0',
+    port: 5000,
+    strictPort: true,
   },
 });
