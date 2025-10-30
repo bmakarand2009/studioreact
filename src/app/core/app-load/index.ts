@@ -239,7 +239,8 @@ export class AppLoadService {
         return null;
       }
 
-      const url = `${environment.api.baseUrl}/snode/tenant/ping?name=${this._hostId}`;
+      // const url = `${environment.api.baseUrl}/snode/tenant/ping?name=${this._hostId}`;
+      const url = `${environment.api.baseUrl}/snode/tenant/ping?name=marksampletest`;
       console.log(`AppLoadService: Making ping request to: ${url}`);
       
       const response = await fetch(url);
