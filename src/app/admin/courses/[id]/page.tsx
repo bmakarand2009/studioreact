@@ -337,6 +337,15 @@ export default function CourseDetailsPage() {
                           )} />
                         </button>
                       ))}
+                      
+                      {/* Add Activity Button - Inside Section */}
+                      <button
+                        onClick={handleAddActivity}
+                        className="w-full flex items-center gap-2 p-3 rounded-lg text-left transition-colors border-2 border-dashed border-cyan-300 dark:border-cyan-700 hover:bg-cyan-50 dark:hover:bg-cyan-950 text-cyan-600 dark:text-cyan-400"
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span className="text-sm font-medium">Add Activity</span>
+                      </button>
                     </div>
                   )}
                 </div>
@@ -345,17 +354,6 @@ export default function CourseDetailsPage() {
               {/* Enhanced Action Buttons */}
               {!sidebarCollapsed && (
                 <div className="space-y-3 mt-8 pt-6 border-t-2 border-border">
-                  <Button
-                    onClick={handleAddActivity}
-                    variant="outline"
-                    size="lg"
-                    className="w-full justify-start gap-3 h-14 text-base font-semibold border-2 border-cyan-200 dark:border-cyan-800 hover:bg-cyan-50 dark:hover:bg-cyan-950 text-cyan-600 dark:text-cyan-400"
-                  >
-                    <div className="w-8 h-8 rounded-lg bg-cyan-500 flex items-center justify-center">
-                      <Plus className="w-5 h-5 text-white" />
-                    </div>
-                    Add Activity
-                  </Button>
                   <Button
                     onClick={handleAddSection}
                     variant="outline"
@@ -554,67 +552,67 @@ export default function CourseDetailsPage() {
                     </div>
                     Activity Settings
                   </h3>
-                  <div className="space-y-5">
-                    <label className="flex items-start gap-4 cursor-pointer p-5 rounded-xl hover:bg-muted/50 transition-colors border-2 border-transparent hover:border-muted-foreground/20">
+                  <div className="space-y-3">
+                    <label className="flex items-start gap-3 cursor-pointer p-4 rounded-lg hover:bg-muted/50 transition-colors">
                       <Checkbox 
                         checked={currentActivity.settings.trackActivity}
-                        className="mt-1 w-6 h-6"
+                        className="mt-0.5 w-5 h-5 flex-shrink-0"
                       />
-                      <div className="flex-1">
-                        <div className="font-bold text-base text-foreground mb-2">Track Activity Completion</div>
-                        <div className="text-sm text-muted-foreground leading-relaxed">
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold text-sm text-foreground mb-1">Track Activity Completion</div>
+                        <div className="text-xs text-muted-foreground leading-relaxed">
                           Students will be able to mark this lesson as complete. This helps track their progress through the course.
                         </div>
                       </div>
                     </label>
 
-                    <label className="flex items-start gap-4 cursor-pointer p-5 rounded-xl hover:bg-muted/50 transition-colors border-2 border-transparent hover:border-muted-foreground/20">
+                    <label className="flex items-start gap-3 cursor-pointer p-4 rounded-lg hover:bg-muted/50 transition-colors">
                       <Checkbox 
                         checked={currentActivity.settings.hideOnTOC}
-                        className="mt-1 w-6 h-6"
+                        className="mt-0.5 w-5 h-5 flex-shrink-0"
                       />
-                      <div className="flex-1">
-                        <div className="font-bold text-base text-foreground mb-2">Hide from Table of Contents</div>
-                        <div className="text-sm text-muted-foreground leading-relaxed">
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold text-sm text-foreground mb-1">Hide from Table of Contents</div>
+                        <div className="text-xs text-muted-foreground leading-relaxed">
                           This activity will not appear in the course table of contents. Useful for bonus or hidden content.
                         </div>
                       </div>
                     </label>
 
-                    <label className="flex items-start gap-4 cursor-pointer p-5 rounded-xl hover:bg-muted/50 transition-colors border-2 border-transparent hover:border-muted-foreground/20">
+                    <label className="flex items-start gap-3 cursor-pointer p-4 rounded-lg hover:bg-muted/50 transition-colors">
                       <Checkbox 
                         checked={currentActivity.settings.repeatActivity}
-                        className="mt-1 w-6 h-6"
+                        className="mt-0.5 w-5 h-5 flex-shrink-0"
                       />
-                      <div className="flex-1">
-                        <div className="font-bold text-base text-foreground mb-2">Allow Multiple Attempts</div>
-                        <div className="text-sm text-muted-foreground leading-relaxed">
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold text-sm text-foreground mb-1">Allow Multiple Attempts</div>
+                        <div className="text-xs text-muted-foreground leading-relaxed">
                           Students can complete this assessment, activity, or form multiple times. Great for practice exercises.
                         </div>
                       </div>
                     </label>
 
-                    <label className="flex items-start gap-4 cursor-pointer p-5 rounded-xl hover:bg-muted/50 transition-colors border-2 border-transparent hover:border-muted-foreground/20">
+                    <label className="flex items-start gap-3 cursor-pointer p-4 rounded-lg hover:bg-muted/50 transition-colors">
                       <Checkbox 
                         checked={currentActivity.settings.allowHomeworkUploads}
-                        className="mt-1 w-6 h-6"
+                        className="mt-0.5 w-5 h-5 flex-shrink-0"
                       />
-                      <div className="flex-1">
-                        <div className="font-bold text-base text-foreground mb-2">Enable Homework Uploads</div>
-                        <div className="text-sm text-muted-foreground leading-relaxed">
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold text-sm text-foreground mb-1">Enable Homework Uploads</div>
+                        <div className="text-xs text-muted-foreground leading-relaxed">
                           Students will be prompted to upload a file or video to complete this activity. Perfect for assignments.
                         </div>
                       </div>
                     </label>
 
-                    <label className="flex items-start gap-4 cursor-pointer p-5 rounded-xl hover:bg-muted/50 transition-colors border-2 border-transparent hover:border-muted-foreground/20">
+                    <label className="flex items-start gap-3 cursor-pointer p-4 rounded-lg hover:bg-muted/50 transition-colors">
                       <Checkbox 
                         checked={currentActivity.settings.allowDemoActivity}
-                        className="mt-1 w-6 h-6"
+                        className="mt-0.5 w-5 h-5 flex-shrink-0"
                       />
-                      <div className="flex-1">
-                        <div className="font-bold text-base text-foreground mb-2">Show in Demo Access</div>
-                        <div className="text-sm text-muted-foreground leading-relaxed">
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold text-sm text-foreground mb-1">Show in Demo Access</div>
+                        <div className="text-xs text-muted-foreground leading-relaxed">
                           Students with demo access will be able to see and access this activity as a preview.
                         </div>
                       </div>
