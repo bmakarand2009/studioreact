@@ -8,6 +8,7 @@ import HomePage from '@/app/page';
 import LoginPage from '@/app/(auth)/login/page';
 import ForgotPasswordPage from '@/app/(auth)/forgot-password/page';
 import AdminDashboardPage from '@/app/admin/dashboard/page';
+import AdminCoursesPage from '@/app/admin/courses/page';
 import DashboardPage from '@/app/dashboard/page';
 import StudentDashboardPage from '@/app/student/dashboard/page';
 import StudentAssessmentsPage from '@/app/student/assessments/page';
@@ -42,6 +43,7 @@ const router = createBrowserRouter(
         // Dashboards
         { path: '/dashboard', element: <DashboardPage /> },
         { path: '/admin/dashboard', element: <AdminDashboardPage /> },
+        { path: '/admin/courses', element: <AdminCoursesPage /> },
 
         // Student
         { path: '/student/dashboard', element: <StudentDashboardPage /> },
