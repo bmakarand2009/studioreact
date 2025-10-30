@@ -7,11 +7,14 @@ import {
   SearchIcon, 
   GlobeIcon,
   MaximizeIcon,
-  ArrowLeft
+  ArrowLeft,
+  SunIcon,
+  MoonIcon
 } from 'lucide-react';
 import { usePreview } from '@/contexts/PreviewContext';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '@/services/authService';
+import { useUIStore } from '@/stores/uiStore';
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -22,6 +25,7 @@ interface HeaderProps {
 export default function Header({ onMenuClick, user, navigation }: HeaderProps) {
   const { isInPreviewMode, exitPreviewMode } = usePreview();
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useUIStore();
 
   const handleBackToAdmin = () => {
     const adminToken = exitPreviewMode();
@@ -77,6 +81,21 @@ export default function Header({ onMenuClick, user, navigation }: HeaderProps) {
           {/* Search */}
           <Button variant="ghost" size="sm" className="hidden md:flex">
             <SearchIcon className="h-4 w-4" />
+          </Button>
+
+          {/* Dark Mode Toggle */}
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={toggleTheme}
+            className="relative"
+            aria-label="Toggle dark mode"
+          >
+            {theme === 'dark' ? (
+              <SunIcon className="h-4 w-4" />
+            ) : (
+              <MoonIcon className="h-4 w-4" />
+            )}
           </Button>
 
           {/* Notifications */}

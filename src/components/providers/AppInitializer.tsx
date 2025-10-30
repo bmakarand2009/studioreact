@@ -1,10 +1,22 @@
 import { useEffect, useRef } from 'react';
 import { appLoadService } from '@/app/core/app-load';
 import { authService } from '@/services/authService';
+import { useUIStore } from '@/stores/uiStore';
 
 export function AppInitializer() {
   // Use ref to prevent multiple initializations
   const hasInitializedRef = useRef(false);
+  const { theme } = useUIStore();
+  
+  // Apply theme class to HTML element
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === 'dark') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+  }, [theme]);
   
   const initializeApp = async () => {
     try {
