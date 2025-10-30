@@ -1,5 +1,5 @@
 /**
- * Environment Configuration
+ * Environment Configuration (Vite)
  * 
  * This file contains environment-specific configuration values.
  * This is a PURE FRONTEND application with no backend dependencies.
@@ -15,23 +15,23 @@
 export const environment = {
   // API Configuration
   api: {
-    baseUrl: process.env.NEXT_PUBLIC_API_URL || 'https://api.wajooba.me',
-    timeout: 30000, // 30 seconds
+    baseUrl: import.meta.env.VITE_API_URL || 'https://api.wajooba.me',
+    timeout: 30000,
     retryAttempts: 3,
   },
 
   // Application Configuration
   app: {
     name: 'Wajooba LMS',
-    version: process.env.NEXT_PUBLIC_APP_VERSION || '1.0.0',
-    environment: process.env.NODE_ENV || 'development',
+    version: import.meta.env.VITE_APP_VERSION || '1.0.0',
+    environment: import.meta.env.MODE || (import.meta.env.DEV ? 'development' : 'production'),
   },
 
   // Feature Flags
   features: {
-    enableAnalytics: process.env.NEXT_PUBLIC_ENABLE_ANALYTICS === 'true',
-    enableDebugMode: process.env.NODE_ENV === 'development',
-    enableMockData: process.env.NEXT_PUBLIC_ENABLE_MOCK_DATA === 'true',
+    enableAnalytics: import.meta.env.VITE_ENABLE_ANALYTICS === 'true',
+    enableDebugMode: import.meta.env.DEV,
+    enableMockData: import.meta.env.VITE_ENABLE_MOCK_DATA === 'true',
   },
 
   // Authentication Configuration
@@ -57,12 +57,12 @@ export const environment = {
   // External Services
   external: {
     googleAnalytics: {
-      id: process.env.NEXT_PUBLIC_GA_ID,
-      enabled: process.env.NEXT_PUBLIC_ENABLE_ANALYTICS === 'true',
+      id: import.meta.env.VITE_GA_ID,
+      enabled: import.meta.env.VITE_ENABLE_ANALYTICS === 'true',
     },
     sentry: {
-      dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
-      enabled: process.env.NEXT_PUBLIC_ENABLE_SENTRY === 'true',
+      dsn: import.meta.env.VITE_SENTRY_DSN,
+      enabled: import.meta.env.VITE_ENABLE_SENTRY === 'true',
     },
   },
 };
@@ -87,7 +87,8 @@ export const isFeatureEnabled = (feature: keyof typeof environment.features): bo
 
 // Helper function to get environment variable with fallback
 export const getEnvVar = (key: string, fallback: string = ''): string => {
-  return process.env[key] || fallback;
+  const env = import.meta.env as Record<string, string>;
+  return env[key] || fallback;
 };
 
 // Export default environment

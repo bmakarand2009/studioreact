@@ -1,11 +1,10 @@
 // Application constants and configuration
-
 export const APP_CONFIG = {
   name: 'Wisely-React',
   version: '1.0.0',
   description: 'Enterprise-Grade Learning Management System',
-  apiBaseUrl: process.env.NEXT_PUBLIC_API_URL || 'https://api.wajooba.me',
-  environment: process.env.NODE_ENV || 'development',
+  apiBaseUrl: import.meta.env.VITE_API_URL || 'https://api.wajooba.me',
+  environment: import.meta.env.MODE || (import.meta.env.DEV ? 'development' : 'production'),
 } as const;
 
 export const API_ENDPOINTS = {

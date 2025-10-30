@@ -5,7 +5,7 @@
 
 // API Configuration
 export const API_CONFIG = {
-  BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'https://api.wajooba.me',
+  BASE_URL: import.meta.env.VITE_API_URL || 'https://api.wajooba.me',
   TIMEOUT: 30000,
   RETRY_ATTEMPTS: 3,
 } as const;
