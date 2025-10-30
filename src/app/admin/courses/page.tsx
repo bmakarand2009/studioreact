@@ -1,10 +1,11 @@
-import { useState } from 'react';
-import { Plus, Search, Grid3x3, List, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, DollarSign, Check } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { Plus, Search, Grid3x3, List, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, DollarSign, Check, Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui';
 import { Input } from '@/components/ui/Input';
 import { Switch } from '@/components/ui/Switch';
 import { Card } from '@/components/ui/Card';
 import { cn } from '@/lib/utils';
+import { courseService, CourseListItem } from '@/services/courseService';
 
 interface Course {
   id: string;
@@ -21,116 +22,76 @@ export default function CoursesPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(50);
+  
+  // API state
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [totalCourses, setTotalCourses] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Mock course data
-  const [courses, setCourses] = useState<Course[]>([
-    {
-      id: '1',
-      title: 'dfdf sending',
-      description: 'test',
-      isPaid: false,
-      isPublished: true,
-    },
-    {
-      id: '2',
-      title: 'diwali devent',
-      description: 'jhjhjhjj',
-      isPaid: false,
-      isPublished: true,
-    },
-    {
-      id: '3',
-      title: 'enviromer safety course',
-      description: 'this is a safety course',
-      isPaid: true,
-      isPublished: true,
-    },
-    {
-      id: '4',
-      title: 'test 1333',
-      description: 'jkhjjk',
-      isPaid: true,
-      isPublished: false,
-    },
-    {
-      id: '5',
-      title: 'dfdfd some simple',
-      description: 'dfd',
-      isPaid: false,
-      isPublished: true,
-    },
-    {
-      id: '6',
-      title: 'product category testing',
-      description: 'hjkj',
-      isPaid: false,
-      isPublished: true,
-    },
-    {
-      id: '7',
-      title: 'aa',
-      description: 'ghfhjj',
-      isPaid: false,
-      isPublished: true,
-    },
-    {
-      id: '8',
-      title: 'physics course jjjj',
-      description: 'short descriptionkkklkl',
-      isPaid: false,
-      isPublished: true,
-    },
-    {
-      id: '9',
-      title: 'GK1 Event',
-      description: 'General knowledge quiz event',
-      imageUrl: 'https://images.unsplash.com/photo-1606326608606-aa0b62935f2b?w=480&h=320&fit=crop',
-      isPaid: true,
-      isPublished: true,
-    },
-    {
-      id: '10',
-      title: 'template test 2',
-      description: 'sort',
-      isPaid: false,
-      isPublished: true,
-    },
-    {
-      id: '11',
-      title: 'testing',
-      description: '',
-      isPaid: false,
-      isPublished: true,
-    },
-    {
-      id: '12',
-      title: 'Champions-Test',
-      description: 'short description of the test course',
-      isPaid: true,
-      isPublished: true,
-    },
-    {
-      id: '13',
-      title: 'Free Sample2',
-      description: 'this is a free course',
-      isPaid: true,
-      isPublished: true,
-    },
-    {
-      id: '14',
-      title: 'testdfdfd',
-      description: 'dfdsfd',
-      isPaid: false,
-      isPublished: true,
-    },
-  ]);
+  // Fetch courses from API
+  const fetchCourses = async () => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const start = (currentPage - 1) * itemsPerPage;
+      const response = await courseService.getCourses(start, itemsPerPage);
+      
+      // Map API response to local Course interface
+      const mappedCourses: Course[] = response.data.map((item: CourseListItem) => ({
+        id: item.id,
+        title: item.name,
+        description: item.shortDescription || '',
+        imageUrl: item.image1 || undefined,
+        isPaid: item.paymentType === 'PAID',
+        isPublished: item.isShowOnWebsite,
+      }));
+      
+      setCourses(mappedCourses);
+      setTotalCourses(response.recordsFiltered || response.recordsTotal);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch courses');
+      console.error('Error fetching courses:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  const totalCourses = 190; // Mock total count
+  // Fetch courses on mount and when pagination changes
+  useEffect(() => {
+    fetchCourses();
+  }, [currentPage, itemsPerPage]);
 
-  const handleTogglePublish = (courseId: string) => {
-    setCourses(courses.map(course =>
-      course.id === courseId ? { ...course, isPublished: !course.isPublished } : course
+  // Filter courses locally based on search
+  const filteredCourses = useMemo(() => {
+    if (!searchQuery) return courses;
+    
+    const query = searchQuery.toLowerCase();
+    return courses.filter(course =>
+      course.title.toLowerCase().includes(query) ||
+      course.description.toLowerCase().includes(query)
+    );
+  }, [courses, searchQuery]);
+
+  const handleTogglePublish = async (courseId: string) => {
+    const course = courses.find(c => c.id === courseId);
+    if (!course) return;
+
+    // Optimistic update
+    setCourses(courses.map(c =>
+      c.id === courseId ? { ...c, isPublished: !c.isPublished } : c
     ));
+
+    try {
+      await courseService.toggleCourseVisibility(courseId, !course.isPublished);
+    } catch (err) {
+      // Revert on error
+      setCourses(courses.map(c =>
+        c.id === courseId ? { ...c, isPublished: course.isPublished } : c
+      ));
+      console.error('Error updating course visibility:', err);
+    }
   };
 
   const handleAddCourse = () => {
@@ -138,10 +99,6 @@ export default function CoursesPage() {
     // TODO: Navigate to create course page
   };
 
-  const filteredCourses = courses.filter(course =>
-    course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    course.description.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -207,12 +164,59 @@ export default function CoursesPage() {
           </div>
         </div>
 
+        {/* Loading State */}
+        {isLoading && (
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="w-8 h-8 animate-spin text-cyan-500" />
+            <span className="ml-3 text-muted-foreground">Loading courses...</span>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && !isLoading && (
+          <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-6 mb-6">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="w-6 h-6 text-destructive flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <h3 className="font-semibold text-destructive mb-1">Error Loading Courses</h3>
+                <p className="text-sm text-destructive/80">{error}</p>
+                <Button
+                  onClick={fetchCourses}
+                  variant="outline"
+                  className="mt-3"
+                  size="sm"
+                >
+                  Try Again
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!isLoading && !error && filteredCourses.length === 0 && (
+          <div className="text-center py-20">
+            <div className="text-muted-foreground text-lg mb-2">
+              {searchQuery ? 'No courses found matching your search' : 'No courses available'}
+            </div>
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="text-cyan-500 hover:underline text-sm"
+              >
+                Clear search
+              </button>
+            )}
+          </div>
+        )}
+
         {/* Course Grid */}
-        <div className={cn(
-          "grid gap-6 mb-6",
-          viewMode === 'grid' ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "grid-cols-1"
-        )}>
-          {filteredCourses.map((course) => (
+        {!isLoading && !error && filteredCourses.length > 0 && (
+          <div className={cn(
+            "grid gap-6 mb-6",
+            viewMode === 'grid' ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "grid-cols-1"
+          )}>
+            {filteredCourses.map((course) => (
             <Card
               key={course.id}
               className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group"
@@ -266,8 +270,9 @@ export default function CoursesPage() {
                 </div>
               </div>
             </Card>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
         {/* Pagination */}
         <div className="bg-card border border-border rounded-lg p-4">
