@@ -115,6 +115,8 @@ export default function LoginPage() {
       console.log('Login result:', result);
       
       if (result.contact && result.access_token) {
+        console.log('Login successful, determining redirect path...');
+        
         // Login successful - redirect based on role
         let redirectPath = '/dashboard'; // default fallback
         
@@ -133,23 +135,26 @@ export default function LoginPage() {
             break;
         }
 
+        console.log('Role-based redirect path:', redirectPath);
+
         // Check if there's a return URL from query params
         const urlParams = new URLSearchParams(window.location.search);
         const returnUrl = urlParams.get('redirect') || urlParams.get('redirectURL');
         
         if (returnUrl && returnUrl !== '/login' && returnUrl !== '/') {
           redirectPath = returnUrl;
-          console.log('Redirecting to original requested page:', redirectPath);
+          console.log('Using return URL from query params:', redirectPath);
         } else {
-          console.log('Redirecting to default dashboard:', redirectPath);
+          console.log('No valid return URL, using role-based path');
         }
 
-        console.log('Redirecting to:', redirectPath);
+        console.log('Final redirect path:', redirectPath);
+        console.log('Calling navigate with path:', redirectPath);
         
-        // Small delay to ensure authentication state is properly set
-        setTimeout(() => {
-          navigate(redirectPath, { replace: true });
-        }, 100);
+        // Navigate immediately
+        navigate(redirectPath, { replace: true });
+        
+        console.log('Navigate called successfully');
       } else {
         console.error('Invalid login response:', result);
         setError('Invalid login credentials. Please try again.');
