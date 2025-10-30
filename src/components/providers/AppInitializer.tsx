@@ -10,16 +10,8 @@ export function AppInitializer() {
     try {
       console.log('AppInitializer: Starting app initialization...');
       
-      // Add timeout to prevent infinite loading
-      const timeout = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Initialization timeout')), 10000)
-      );
-      
-      // Initialize app configuration (tenant details) with timeout
-      const tenantDetails = await Promise.race([
-        appLoadService.initAppConfig(),
-        timeout
-      ]).catch((error) => {
+      // Initialize app configuration (tenant details) - don't block on failure
+      const tenantDetails = await appLoadService.initAppConfig().catch((error) => {
         console.warn('AppInitializer: Tenant details fetch failed, continuing anyway:', error);
         return null;
       });
@@ -31,17 +23,17 @@ export function AppInitializer() {
       
       console.log('AppInitializer: Successfully initialized with tenant details');
       
-      // Now that app is initialized, check for auth tokens
+      // Check for auth tokens - don't block on failure
       console.log('AppInitializer: Checking for auth tokens...');
-      console.log('AppInitializer: Current URL:', window.location.href);
-      console.log('AppInitializer: URL search params:', window.location.search);
-      
-      const authTokenSuccess = await authService.checkAuthTokenInUrl();
+      const authTokenSuccess = await authService.checkAuthTokenInUrl().catch((error) => {
+        console.warn('AppInitializer: Auth token check failed:', error);
+        return false;
+      });
       
       if (authTokenSuccess) {
         console.log('AppInitializer: Auth token found and validated');
         // Get user details to determine redirect path
-        const user = await authService.getCurrentUser();
+        const user = await authService.getCurrentUser().catch(() => null);
         if (user) {
           // Determine redirect path based on user role
           let redirectPath = '/';
@@ -54,8 +46,6 @@ export function AppInitializer() {
           }
           
           console.log(`AppInitializer: Redirecting user with role '${userRole}' to: ${redirectPath}`);
-          
-          // Use window.location.replace for direct navigation
           window.location.replace(redirectPath);
         }
       }
@@ -63,8 +53,8 @@ export function AppInitializer() {
       console.log('AppInitializer: App initialization complete');
       
     } catch (error) {
-      console.error('App initialization error:', error);
-      console.warn('AppInitializer: Continuing despite initialization error');
+      console.error('AppInitializer: Initialization error (non-blocking):', error);
+      // Continue - don't block the app from rendering
     }
   };
 
