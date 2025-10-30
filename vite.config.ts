@@ -17,7 +17,7 @@ export default defineConfig({
   },
   server: {
     host: true,
-    port: Number(process.env.PORT || 5173),
+    port: 8080,
     open: false,
   },
   preview: {
