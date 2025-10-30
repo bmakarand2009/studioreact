@@ -15,11 +15,20 @@ interface WajoobaPublicLayoutProps {
 }
 
 export default function WajoobaPublicLayout({ children }: WajoobaPublicLayoutProps) {
+  console.log('WajoobaPublicLayout: Rendering');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const isScreenSmall = useMediaQuery('(max-width: 768px)');
   const { navigation } = useNavigation();
   const { user } = useAuth();
   const navigate = useNavigate();
+
+  console.log('WajoobaPublicLayout: State -', { 
+    mobileMenuOpen, 
+    isScreenSmall, 
+    hasUser: !!user, 
+    hasNavigation: !!navigation,
+    hasChildren: !!children 
+  });
 
   // Close mobile menu on screen size change
   useEffect(() => {

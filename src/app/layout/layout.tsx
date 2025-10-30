@@ -23,6 +23,8 @@ export function Layout({ children }: LayoutProps) {
   const { isLoading, user } = useAuth();
   const layout = getRouteLayout(pathname);
 
+  console.log('Layout: Rendering with', { pathname, isLoading, hasUser: !!user, layout });
+
   // Use ref to track previous values and detect changes
   const prevValuesRef = useRef({ pathname, isLoading, hasUser: !!user, layout });
 
@@ -32,6 +34,12 @@ export function Layout({ children }: LayoutProps) {
       prevValues.isLoading !== isLoading || 
       prevValues.hasUser !== !!user || 
       prevValues.layout !== layout) {
+    console.log('Layout: State changed', {
+      pathnameChanged: prevValues.pathname !== pathname,
+      isLoadingChanged: prevValues.isLoading !== isLoading,
+      userChanged: prevValues.hasUser !== !!user,
+      layoutChanged: prevValues.layout !== layout
+    });
     prevValuesRef.current = { pathname, isLoading, hasUser: !!user, layout };
   }
 
@@ -39,12 +47,15 @@ export function Layout({ children }: LayoutProps) {
   // Only show loading when checking for auth tokens on the root route
   const shouldShowLoading = isLoading && pathname === '/';
 
+  console.log('Layout: shouldShowLoading =', shouldShowLoading);
+
   // Additional check: if we have a user, we should never show loading
   if (user && isLoading) {
     console.warn('Layout: WARNING - User exists but still loading! This should not happen.');
   }
 
   if (shouldShowLoading) {
+    console.log('Layout: Rendering loading screen');
     return (
       <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
@@ -54,6 +65,8 @@ export function Layout({ children }: LayoutProps) {
       </div>
     );
   }
+
+  console.log('Layout: Rendering layout', layout);
 
   // Render the appropriate layout based on the route
   switch (layout) {
