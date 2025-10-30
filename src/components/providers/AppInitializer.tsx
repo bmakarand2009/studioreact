@@ -12,16 +12,27 @@ export function AppInitializer() {
   const [isInitializing, setIsInitializing] = useState(true);
   const [connectionError, setConnectionError] = useState<string | null>(null);
   
-    const initializeApp = async () => {
+  const initializeApp = async () => {
     try {
       console.log('AppInitializer: Starting app initialization...');
       
-      // Initialize app configuration (tenant details)
-      const tenantDetails = await appLoadService.initAppConfig();
+      // Add timeout to prevent infinite loading
+      const timeout = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Initialization timeout')), 10000)
+      );
+      
+      // Initialize app configuration (tenant details) with timeout
+      const tenantDetails = await Promise.race([
+        appLoadService.initAppConfig(),
+        timeout
+      ]).catch((error) => {
+        console.warn('AppInitializer: Tenant details fetch failed, continuing anyway:', error);
+        return null;
+      });
       
       if (!tenantDetails) {
-        console.error('AppInitializer: Failed to get tenant details - connection issue');
-        setConnectionError('Unable to connect to Wajooba servers. Please check your internet connection and try again.');
+        console.warn('AppInitializer: No tenant details, but continuing app load');
+        // Don't block the app, just continue
         setIsInitializing(false);
         return;
       }
@@ -61,7 +72,8 @@ export function AppInitializer() {
       
     } catch (error) {
       console.error('App initialization error:', error);
-      setConnectionError('Unable to connect to Wajooba servers. Please check your internet connection and try again.');
+      // Don't block the app with an error screen, just log and continue
+      console.warn('AppInitializer: Continuing despite initialization error');
       setIsInitializing(false);
     }
   };
