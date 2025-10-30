@@ -224,17 +224,20 @@ export class AppLoadService {
     try {
       // Check if current hostname is in allowed domains
       // For development, allow localhost and builds with MODE=development
+      const disableDomainCheck = import.meta.env.VITE_DISABLE_DOMAIN_CHECK === 'true';
+
       const isDevelopmentHostname =
         this._hostName === 'localhost' ||
         this._hostName === '127.0.0.1' ||
         this._hostName.startsWith('localhost:');
+
       const isDevelopmentMode = import.meta.env.MODE === 'development';
       const isDevelopment = isDevelopmentHostname || isDevelopmentMode;
 
       const isAllowedDomain = this._allowedDomains.some((domain) => this._hostName.endsWith(domain));
       console.log(`AppLoadService: Domain check - isDevelopment: ${isDevelopment}, isAllowedDomain: ${isAllowedDomain}`);
 
-      if (!isDevelopment && !isAllowedDomain) {
+      if (!disableDomainCheck && !isDevelopment && !isAllowedDomain) {
         console.log('AppLoadService: Domain not allowed, aborting initialization');
         this._isInitializing = false;
         return null;
