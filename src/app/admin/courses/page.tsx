@@ -215,6 +215,7 @@ export default function CoursesPage() {
             {filteredCourses.map((course) => (
             <Card
               key={course.id}
+              onClick={() => window.location.href = `/admin/courses/${course.id}`}
               className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group"
             >
               {/* Course Image */}
