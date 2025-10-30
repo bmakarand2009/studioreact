@@ -23,45 +23,63 @@ export default function CoursesPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(50);
   
-  // API state
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [totalCourses, setTotalCourses] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
+  // Mock courses data
+  const mockCourses: Course[] = [
+    {
+      id: '1',
+      title: 'Introduction to React',
+      description: 'Learn the fundamentals of React including components, props, and state management.',
+      imageUrl: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&q=80',
+      isPaid: true,
+      isPublished: true,
+    },
+    {
+      id: '2',
+      title: 'Advanced TypeScript',
+      description: 'Master TypeScript with advanced types, generics, and design patterns.',
+      imageUrl: 'https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=800&q=80',
+      isPaid: true,
+      isPublished: true,
+    },
+    {
+      id: '3',
+      title: 'Web Design Fundamentals',
+      description: 'Create beautiful and responsive web designs with modern CSS techniques.',
+      imageUrl: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&q=80',
+      isPaid: false,
+      isPublished: false,
+    },
+    {
+      id: '4',
+      title: 'Node.js Backend Development',
+      description: 'Build scalable backend applications with Node.js and Express.',
+      imageUrl: 'https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=800&q=80',
+      isPaid: true,
+      isPublished: true,
+    },
+    {
+      id: '5',
+      title: 'Database Design with PostgreSQL',
+      description: 'Learn database design principles and master PostgreSQL.',
+      imageUrl: 'https://images.unsplash.com/photo-1544383835-bda2bc66a55d?w=800&q=80',
+      isPaid: true,
+      isPublished: false,
+    },
+    {
+      id: '6',
+      title: 'UI/UX Design Principles',
+      description: 'Master the art of creating intuitive and engaging user experiences.',
+      imageUrl: 'https://images.unsplash.com/photo-1561070791-36c11767b26a?w=800&q=80',
+      isPaid: false,
+      isPublished: true,
+    },
+  ];
+
+  const [courses, setCourses] = useState<Course[]>(mockCourses);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch courses from API
-  const fetchCourses = async () => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      const start = (currentPage - 1) * itemsPerPage;
-      const response = await courseService.getCourses(start, itemsPerPage);
-      
-      // Map API response to local Course interface
-      const mappedCourses: Course[] = response.data.map((item: CourseListItem) => ({
-        id: item.id,
-        title: item.name,
-        description: item.shortDescription || '',
-        imageUrl: item.image1 || undefined,
-        isPaid: item.paymentType === 'PAID',
-        isPublished: item.isShowOnWebsite,
-      }));
-      
-      setCourses(mappedCourses);
-      setTotalCourses(response.recordsFiltered || response.recordsTotal);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch courses');
-      console.error('Error fetching courses:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Fetch courses on mount and when pagination changes
-  useEffect(() => {
-    fetchCourses();
-  }, [currentPage, itemsPerPage]);
+  const totalCourses = mockCourses.length;
 
   // Filter courses locally based on search
   const filteredCourses = useMemo(() => {
@@ -74,24 +92,10 @@ export default function CoursesPage() {
     );
   }, [courses, searchQuery]);
 
-  const handleTogglePublish = async (courseId: string) => {
-    const course = courses.find(c => c.id === courseId);
-    if (!course) return;
-
-    // Optimistic update
+  const handleTogglePublish = (courseId: string) => {
     setCourses(courses.map(c =>
       c.id === courseId ? { ...c, isPublished: !c.isPublished } : c
     ));
-
-    try {
-      await courseService.toggleCourseVisibility(courseId, !course.isPublished);
-    } catch (err) {
-      // Revert on error
-      setCourses(courses.map(c =>
-        c.id === courseId ? { ...c, isPublished: course.isPublished } : c
-      ));
-      console.error('Error updating course visibility:', err);
-    }
   };
 
   const handleAddCourse = () => {
@@ -180,14 +184,6 @@ export default function CoursesPage() {
               <div className="flex-1">
                 <h3 className="font-semibold text-destructive mb-1">Error Loading Courses</h3>
                 <p className="text-sm text-destructive/80">{error}</p>
-                <Button
-                  onClick={fetchCourses}
-                  variant="outline"
-                  className="mt-3"
-                  size="sm"
-                >
-                  Try Again
-                </Button>
               </div>
             </div>
           </div>
