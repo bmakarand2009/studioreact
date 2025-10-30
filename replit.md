@@ -90,7 +90,39 @@ npm run build:dev    # Development mode build
 - **Auto-Refresh**: On 401 error, attempts refresh with `refreshToken`
 - **Logout**: Deletes both `accessToken` and `refreshToken` cookies
 
+## Role-Based Routing System
+
+### Unified Admin Access
+The application implements a unified admin interface where both ROLE_ADMIN and ROLE_STAFF users access the same admin dashboard and features.
+
+**Role Routing Rules:**
+- **ROLE_ADMIN** → `/admin/dashboard` (full admin access)
+- **ROLE_STAFF** → `/admin/dashboard` (unified admin access)
+- **ROLE_STUDENT** → `/student/dashboard` (student portal)
+
+### Role Normalization
+The system handles role variations automatically through `UserService.hasRole()`:
+- Accepts uppercase: `ROLE_ADMIN`, `ROLE_STAFF`, `ROLE_STUDENT`
+- Accepts lowercase: `admin`, `staff`, `student`
+- Handles with/without `ROLE_` prefix
+- Preview mode users can simulate any role for testing
+
+### Implementation Details
+- **Login redirect** (`login/page.tsx`): Routes based on normalized role
+- **Dashboard redirect** (`dashboard/page.tsx`): Central routing logic
+- **Route guards** (`withRole.tsx`): Protects routes with role verification
+- **Navigation** (`wajooba-public-layout.tsx`): Dashboard buttons route correctly
+- **Admin pages**: All admin routes accept both ROLE_ADMIN and ROLE_STAFF
+
 ## Recent Changes
+- **October 30, 2025:** Role-Based Routing Implementation
+  - **Unified Admin Routing**: Both ROLE_ADMIN and ROLE_STAFF users now access `/admin/dashboard`
+  - **Role Normalization**: Added `UserService.hasRole()` to handle uppercase/lowercase and ROLE_ prefix variations
+  - **Updated Route Guards**: All admin route guards now accept both ROLE_ADMIN and ROLE_STAFF
+  - **Fixed Navigation**: Dashboard buttons in public layout correctly handle all role variations
+  - **JSX Syntax Fix**: Refactored wajooba-public-layout to extract helper function for better esbuild compatibility
+  - All changes architect-reviewed and verified working
+
 - **October 30, 2025:** Initial Replit setup & Authentication Fix
   - Configured Vite to use port 5000 with host 0.0.0.0
   - Added `allowedHosts: true` to Vite config (required for Replit proxy)
