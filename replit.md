@@ -96,6 +96,15 @@ npm run build:dev    # Development mode build
 - **Auto-Refresh**: On 401 error, attempts refresh with `refreshToken`
 - **Logout**: Deletes cookies and clears all localStorage entries
 
+### Session Persistence (Auto-Reinitialization)
+On every page refresh, the app checks for an existing session:
+1. **Check logintrace**: If `logintrace === 'true'` in localStorage, proceed
+2. **Call reInit API**: `GET /rest/reInitInfo?preview=false` with Bearer token
+3. **Update session**: Restores user data and refreshes tokens if provided
+4. **Update context**: Updates UserContext with restored user information
+
+This ensures users stay logged in across page refreshes without re-entering credentials.
+
 ## Role-Based Routing System
 
 ### Unified Admin Access

@@ -2,11 +2,13 @@ import { useEffect, useRef } from 'react';
 import { appLoadService } from '@/app/core/app-load';
 import { authService } from '@/services/authService';
 import { useUIStore } from '@/stores/uiStore';
+import { useUserContext } from '@/contexts/UserContext';
 
 export function AppInitializer() {
   // Use ref to prevent multiple initializations
   const hasInitializedRef = useRef(false);
   const { theme } = useUIStore();
+  const { setUser } = useUserContext();
   
   // Apply theme class to HTML element
   useEffect(() => {
@@ -35,8 +37,27 @@ export function AppInitializer() {
       
       console.log('AppInitializer: Successfully initialized with tenant details');
       
-      // Check for auth tokens - don't block on failure
-      console.log('AppInitializer: Checking for auth tokens...');
+      // PRIORITY 1: Auto-reinitialize session from localStorage if logintrace exists
+      console.log('AppInitializer: Checking for existing session...');
+      const sessionRestored = await authService.autoReinitializeSession().catch((error) => {
+        console.warn('AppInitializer: Session restoration failed:', error);
+        return false;
+      });
+      
+      if (sessionRestored) {
+        console.log('AppInitializer: Session restored successfully from localStorage');
+        // Update UserContext with the restored user
+        const user = await authService.getCurrentUser().catch(() => null);
+        if (user) {
+          console.log('AppInitializer: Updating UserContext with restored user:', user.email);
+          setUser(user);
+        }
+        // Session was restored, user is authenticated
+        // Note: We don't redirect here - let the routes handle it naturally
+      }
+      
+      // PRIORITY 2: Check for auth tokens in URL (OAuth callback)
+      console.log('AppInitializer: Checking for auth tokens in URL...');
       const authTokenSuccess = await authService.checkAuthTokenInUrl().catch((error) => {
         console.warn('AppInitializer: Auth token check failed:', error);
         return false;

@@ -450,12 +450,22 @@ export class AuthService {
   /**
    * Sign in using token (reInitInfo)
    */
-  async signInUsingToken(): Promise<any> {
+  async signInUsingToken(preview: boolean = false): Promise<any> {
     try {
-      const response = await fetch(`${this.baseUrl}/rest/reInitInfo`, {
+      // Get token from cookies first, then fallback to localStorage
+      let token = this.accessToken;
+      if (!token) {
+        token = localStorage.getItem('auth') || '';
+      }
+
+      if (!token) {
+        throw new Error('No authentication token available');
+      }
+
+      const response = await fetch(`${this.baseUrl}/rest/reInitInfo?preview=${preview}`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${this.accessToken}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
@@ -468,6 +478,73 @@ export class AuthService {
       return data;
     } catch (error) {
       throw error;
+    }
+  }
+
+  /**
+   * Auto-reinitialize session from localStorage on page refresh
+   * Checks for logintrace flag and calls reInitInfo API if present
+   */
+  async autoReinitializeSession(): Promise<boolean> {
+    try {
+      console.log('AuthService: Checking for auto-reinitialization...');
+      
+      // Check if logintrace is true in localStorage
+      const loginTrace = localStorage.getItem('logintrace');
+      if (loginTrace !== 'true') {
+        console.log('AuthService: No logintrace found, skipping auto-reinitialization');
+        return false;
+      }
+
+      console.log('AuthService: logintrace found, attempting to reinitialize session...');
+
+      // Get token from localStorage or cookies
+      let token = localStorage.getItem('auth') || this.accessToken;
+      if (!token) {
+        console.log('AuthService: No token found for reinitialization');
+        return false;
+      }
+
+      // Ensure token is in cookies if it's only in localStorage
+      if (!this.accessToken && token) {
+        console.log('AuthService: Restoring token from localStorage to cookies');
+        this.accessToken = token;
+      }
+
+      // Call reInitInfo API to get fresh user data
+      const data = await this.signInUsingToken(false);
+      
+      if (data && data.contact) {
+        console.log('AuthService: Session reinitialized successfully');
+        
+        // Update auth state
+        this._authenticated = true;
+        this.setCurrentUser(data.contact);
+        
+        // If API returns a new token, update it
+        if (data.access_token) {
+          console.log('AuthService: Updating token from reInit response');
+          this.accessToken = data.access_token;
+          localStorage.setItem('auth', data.access_token);
+        }
+        
+        // Update refresh token if provided
+        if (data.refresh_token) {
+          this.setCookie('refreshToken', data.refresh_token, 30);
+        }
+        
+        return true;
+      } else {
+        console.log('AuthService: Invalid reInit response, clearing session');
+        // Invalid response, clear everything
+        await this.logout();
+        return false;
+      }
+    } catch (error) {
+      console.error('AuthService: Auto-reinitialization failed:', error);
+      // On error, clear the session to force re-login
+      await this.logout();
+      return false;
     }
   }
 
