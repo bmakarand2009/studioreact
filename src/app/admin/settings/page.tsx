@@ -1,4 +1,4 @@
-'use client';
+
 
 import { withRole } from '@/components/guards/withRole';
 import { 

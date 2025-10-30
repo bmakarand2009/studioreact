@@ -1,5 +1,3 @@
-'use client';
-
 import { useEffect, useRef } from 'react';
 import { appLoadService } from '@/app/core/app-load';
 import { authService } from '@/services/authService';

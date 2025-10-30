@@ -1,4 +1,4 @@
-'use client';
+
 
 import { useAuth } from '@/hooks/useAuth';
 import { usePreview } from '@/contexts/PreviewContext';

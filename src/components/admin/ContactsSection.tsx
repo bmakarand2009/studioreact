@@ -1,4 +1,4 @@
-'use client';
+
 
 import { useState } from 'react';
 import { Button, Input, Alert, AlertTitle, AlertDescription } from '@/components/ui';

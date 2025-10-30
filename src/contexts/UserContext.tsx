@@ -1,4 +1,4 @@
-'use client';
+
 
 import React, { createContext, useContext, useReducer, ReactNode, useCallback, useMemo } from 'react';
 import type { UserProfile } from '@/app/core/user';

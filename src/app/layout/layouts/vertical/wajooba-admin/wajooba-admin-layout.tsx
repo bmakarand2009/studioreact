@@ -1,4 +1,4 @@
-'use client';
+
 
 import { ReactNode, useState, useEffect, useMemo } from 'react';
 import { useMediaQuery } from '@/hooks/useMediaQuery';

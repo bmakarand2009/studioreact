@@ -1,5 +1,3 @@
-'use client';
-
 import { ReactNode } from 'react';
 import { UserProvider } from '@/contexts/UserContext';
 import { PreviewProvider } from '@/contexts/PreviewContext';
