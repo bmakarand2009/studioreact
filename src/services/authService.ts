@@ -184,8 +184,10 @@ export class AuthService {
    * Sign in the user
    */
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
+    // If already authenticated, clear the state first to allow re-login
     if (this._authenticated) {
-      throw new Error('User is already authenticated');
+      console.log('User already authenticated, clearing state for fresh login...');
+      await this.logout();
     }
 
     try {
