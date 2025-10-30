@@ -21,6 +21,7 @@ export interface SelectTriggerProps
 export interface SelectContentProps {
   children: React.ReactNode;
   className?: string;
+  onSelect?: (value: string, label: string) => void;
 }
 
 export interface SelectItemProps {
@@ -28,9 +29,10 @@ export interface SelectItemProps {
   children: React.ReactNode;
   className?: string;
   disabled?: boolean;
+  onSelect?: (value: string, label: string) => void;
 }
 
-export interface SelectValueProps {
+export interface SelectValueProps extends React.HTMLAttributes<HTMLSpanElement> {
   placeholder?: string;
   children?: React.ReactNode;
 }
@@ -46,10 +48,10 @@ const Select = React.forwardRef<HTMLDivElement, SelectProps>(
         setSelectedValue(value);
         // Find the label for the selected value
         React.Children.forEach(children, (child) => {
-          if (React.isValidElement(child) && child.type === SelectContent) {
+          if (React.isValidElement<SelectContentProps>(child) && child.type === SelectContent) {
             React.Children.forEach(child.props.children, (item) => {
-              if (React.isValidElement(item) && item.type === SelectItem && item.props.value === value) {
-                setSelectedLabel(item.props.children);
+              if (React.isValidElement<SelectItemProps>(item) && item.type === SelectItem && item.props.value === value) {
+                setSelectedLabel(String(item.props.children));
               }
             });
           }
@@ -67,19 +69,19 @@ const Select = React.forwardRef<HTMLDivElement, SelectProps>(
     return (
       <div className={cn('relative', className)} ref={ref} {...props}>
         {React.Children.map(children, (child) => {
-          if (React.isValidElement(child) && child.type === SelectTrigger) {
+          if (React.isValidElement<SelectTriggerProps>(child) && child.type === SelectTrigger) {
             return React.cloneElement(child, {
               onClick: () => !disabled && setIsOpen(!isOpen),
               disabled,
               'aria-expanded': isOpen,
-              'aria-haspopup': 'listbox',
-              role: 'combobox',
-            });
+              'aria-haspopup': 'listbox' as const,
+              role: 'combobox' as const,
+            } as any);
           }
-          if (React.isValidElement(child) && child.type === SelectContent && isOpen) {
+          if (React.isValidElement<SelectContentProps>(child) && child.type === SelectContent && isOpen) {
             return React.cloneElement(child, {
               onSelect: handleSelect,
-            });
+            } as any);
           }
           return null;
         })}
@@ -116,10 +118,10 @@ const SelectContent = React.forwardRef<HTMLDivElement, SelectContentProps>(
       {...props}
     >
       {React.Children.map(children, (child) => {
-        if (React.isValidElement(child) && child.type === SelectItem) {
+        if (React.isValidElement<SelectItemProps>(child) && child.type === SelectItem) {
           return React.cloneElement(child, {
             onSelect,
-          });
+          } as any);
         }
         return child;
       })}
@@ -136,7 +138,7 @@ const SelectItem = React.forwardRef<HTMLDivElement, SelectItemProps>(
         disabled && 'cursor-not-allowed opacity-50 hover:bg-transparent',
         className
       )}
-      onClick={() => !disabled && onSelect?.(value, children as string)}
+      onClick={() => !disabled && onSelect?.(value, String(children))}
       role="option"
       aria-selected={false}
       {...props}
@@ -147,13 +149,13 @@ const SelectItem = React.forwardRef<HTMLDivElement, SelectItemProps>(
 );
 
 const SelectValue = React.forwardRef<HTMLSpanElement, SelectValueProps>(
-  ({ placeholder, children, ...props }, ref) => (
+  ({ placeholder, children, className, ...props }, ref) => (
     <span
       ref={ref}
       className={cn(
         'block truncate',
         !children && 'text-gray-400',
-        props.className
+        className
       )}
       {...props}
     >

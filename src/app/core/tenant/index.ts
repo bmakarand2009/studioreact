@@ -237,7 +237,7 @@ class TenantService {
    */
   isSettingEnabled(setting: keyof TenantSettings): boolean {
     if (!this.currentTenant) return false;
-    return this.currentTenant.settings[setting];
+    return Boolean(this.currentTenant.settings[setting]);
   }
 
   /**

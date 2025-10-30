@@ -16,7 +16,7 @@ export default defineConfig({
     'process.env': {}, // safety guard if any stray usage remains
   },
   server: {
-    port: 5173,
+    port: 8080,
     open: true,
   },
 });
