@@ -33,6 +33,9 @@ export function AppInitializer() {
       
       // Now that app is initialized, check for auth tokens
       console.log('AppInitializer: Checking for auth tokens...');
+      console.log('AppInitializer: Current URL:', window.location.href);
+      console.log('AppInitializer: URL search params:', window.location.search);
+      
       const authTokenSuccess = await authService.checkAuthTokenInUrl();
       
       if (authTokenSuccess) {

@@ -606,9 +606,16 @@ export class AuthService {
    */
   async checkAuthTokenInUrl(): Promise<boolean> {
     try {
+      console.log('checkAuthTokenInUrl: Checking for auth token in URL...');
+      console.log('checkAuthTokenInUrl: Current URL:', typeof window !== 'undefined' ? window.location.href : 'N/A');
+      console.log('checkAuthTokenInUrl: Search params:', typeof window !== 'undefined' ? window.location.search : 'N/A');
+      
       const authToken = this.getQueryParameter('auth');
       
+      console.log('checkAuthTokenInUrl: Auth token extracted:', authToken ? 'YES (token present)' : 'NO');
+      
       if (!authToken) {
+        console.log('checkAuthTokenInUrl: No auth token found, returning false');
         return false;
       }
 
