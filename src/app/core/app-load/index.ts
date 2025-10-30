@@ -239,10 +239,16 @@ export class AppLoadService {
         this._hostName.startsWith('localhost:');
 
       const isDevelopmentMode = import.meta.env.MODE === 'development';
-      const isDevelopment = isDevelopmentHostname || isDevelopmentMode;
+      
+      // Check if we're on Lovable preview
+      const isLovablePreview = this._hostName.includes('lovableproject.com') || 
+                               this._hostName.includes('lovable.app') || 
+                               this._hostName.includes('lovable.dev');
+      
+      const isDevelopment = isDevelopmentHostname || isDevelopmentMode || isLovablePreview;
 
       const isAllowedDomain = this._allowedDomains.some((domain) => this._hostName.endsWith(domain));
-      console.log(`AppLoadService: Domain check - isDevelopment: ${isDevelopment}, isAllowedDomain: ${isAllowedDomain}`);
+      console.log(`AppLoadService: Domain check - isDevelopment: ${isDevelopment}, isAllowedDomain: ${isAllowedDomain}, isLovablePreview: ${isLovablePreview}`);
 
       if (!disableDomainCheck && !isDevelopment && !isAllowedDomain) {
         console.log('AppLoadService: Domain not allowed, aborting initialization');
