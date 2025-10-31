@@ -133,6 +133,6 @@ export const STORAGE_KEYS = {
 
 export const NOTIFICATION_DURATION = {
   short: 3000,
-  medium: 5000,
+  medium: 3500,
   long: 8000,
 } as const;

@@ -30,7 +30,7 @@ This is the Wajooba Learning Management System (LMS) frontend application. It's 
 - **Production API:** https://api.onwajooba.com
 
 ### Replit Setup
-- **Port:** 5000 (configured for Replit webview)
+- **Port:** 3500 (configured for Replit webview)
 - **Host:** 0.0.0.0 (allows proxy access)
 - **Workflow:** `npm run dev` starts the development server
 - **Deployment:** Configured for autoscale deployment with build step
@@ -46,7 +46,7 @@ This is the Wajooba Learning Management System (LMS) frontend application. It's 
 ## Development
 
 ### Running the App
-The app runs automatically via the configured workflow. The development server starts on port 5000.
+The app runs automatically via the configured workflow. The development server starts on port 3500.
 
 ### Building for Production
 ```bash
@@ -148,7 +148,7 @@ The system handles role variations automatically through `UserService.hasRole()`
   - All changes architect-reviewed and verified working
 
 - **October 30, 2025:** Initial Replit setup & Authentication Fix
-  - Configured Vite to use port 5000 with host 0.0.0.0
+  - Configured Vite to use port 3500 with host 0.0.0.0
   - Added `allowedHosts: true` to Vite config (required for Replit proxy)
   - Disabled HMR to fix continuous refresh issue
   - Set up development workflow
