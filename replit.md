@@ -30,7 +30,7 @@ This is the Wajooba Learning Management System (LMS) frontend application. It's 
 - **Production API:** https://api.onwajooba.com
 
 ### Replit Setup
-- **Port:** 3500 (configured for Replit webview)
+- **Port:** 5000 (required for Replit webview)
 - **Host:** 0.0.0.0 (allows proxy access)
 - **Workflow:** `npm run dev` starts the development server
 - **Deployment:** Configured for autoscale deployment with build step
@@ -46,7 +46,7 @@ This is the Wajooba Learning Management System (LMS) frontend application. It's 
 ## Development
 
 ### Running the App
-The app runs automatically via the configured workflow. The development server starts on port 3500.
+The app runs automatically via the configured workflow. The development server starts on port 5000.
 
 ### Building for Production
 ```bash
@@ -130,6 +130,16 @@ The system handles role variations automatically through `UserService.hasRole()`
 - **Admin pages**: All admin routes accept both ROLE_ADMIN and ROLE_STAFF
 
 ## Recent Changes
+- **October 31, 2025:** Student Courses Page Implementation
+  - **Created Student Courses Page**: Added `/student/courses` route with full functionality
+    - Responsive grid layout (1-4 columns based on screen size)
+    - Search functionality to filter courses by title and description
+    - Course cards with thumbnail images, titles, date badges, progress bars, and descriptions
+    - 8 mock courses for demonstration
+    - Protected with role-based authentication (ROLE_STUDENT and ROLE_ADMIN)
+  - **Port Configuration**: Corrected port from 3500 to 5000 (required for Replit webview)
+  - **Route Registration**: Added StudentCoursesPage to App.tsx router configuration
+
 - **October 30, 2025:** LocalStorage Authentication Support
   - **LocalStorage Integration**: Added localStorage entries during login for compatibility:
     - `auth` - stores JWT access token
@@ -148,7 +158,7 @@ The system handles role variations automatically through `UserService.hasRole()`
   - All changes architect-reviewed and verified working
 
 - **October 30, 2025:** Initial Replit setup & Authentication Fix
-  - Configured Vite to use port 3500 with host 0.0.0.0
+  - Configured Vite to use port 5000 with host 0.0.0.0 (required for Replit webview)
   - Added `allowedHosts: true` to Vite config (required for Replit proxy)
   - Disabled HMR to fix continuous refresh issue
   - Set up development workflow
