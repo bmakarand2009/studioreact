@@ -15,6 +15,7 @@ import StudentDashboardPage from '@/app/student/dashboard/page';
 import StudentAssessmentsPage from '@/app/student/assessments/page';
 import StudentCalendarPage from '@/app/student/calendar/page';
 import StudentStorePage from '@/app/student/store/page';
+import StudentCoursesPage from '@/app/student/courses/page';
 import PublicAboutPage from '@/app/(public)/about/page';
 import PublicContactPage from '@/app/(public)/contact/page';
 import PublicCoursesPage from '@/app/(public)/courses/page';
@@ -49,6 +50,7 @@ const router = createBrowserRouter(
 
         // Student
         { path: '/student/dashboard', element: <StudentDashboardPage /> },
+        { path: '/student/courses', element: <StudentCoursesPage /> },
         { path: '/student/assessments', element: <StudentAssessmentsPage /> },
         { path: '/student/calendar', element: <StudentCalendarPage /> },
         { path: '/student/store', element: <StudentStorePage /> },
