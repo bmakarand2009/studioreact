@@ -256,9 +256,15 @@ export class AppLoadService {
       //   return null;
       // }
 
-      // const url = `${environment.api.baseUrl}/snode/tenant/ping?name=${this._hostId}`;
-      const url = `${environment.api.baseUrl}/snode/tenant/ping?name=marksampletest`;
-      console.log(`AppLoadService: Making ping request to: ${url}`);
+      // Check if dev mode is enabled via environment variable
+      const isDevMode = import.meta.env.VITE_IS_DEV_MODE === 'true';
+      const devTenantName = import.meta.env.VITE_DEV_TENANT_NAME || 'marksampletest';
+      
+      // Use dev tenant name if in dev mode, otherwise use hostname-based tenant ID
+      const tenantName = isDevMode ? devTenantName : this._hostId;
+      
+      const url = `${environment.api.baseUrl}/snode/tenant/ping?name=${tenantName}`;
+      console.log(`AppLoadService: Making ping request to: ${url} (DevMode: ${isDevMode})`);
       
       const response = await fetch(url);
       
