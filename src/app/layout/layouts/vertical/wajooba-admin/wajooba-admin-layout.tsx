@@ -127,7 +127,7 @@ export default function WajoobaAdminLayout({ children }: WajoobaAdminLayoutProps
         />
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900 p-4 md:p-6">
+        <main className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900">
           {children}
         </main>
 

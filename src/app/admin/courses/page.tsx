@@ -1,331 +1,351 @@
-import { useState, useEffect, useMemo } from 'react';
-import { Plus, Search, Grid3x3, List, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, DollarSign, Check, Loader2, AlertCircle } from 'lucide-react';
-import { Button } from '@/components/ui';
-import { Input } from '@/components/ui/Input';
-import { Switch } from '@/components/ui/Switch';
-import { Card } from '@/components/ui/Card';
-import { cn } from '@/lib/utils';
-import { courseService, CourseListItem } from '@/services/courseService';
+import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { 
+  Plus, 
+  Search, 
+  BookOpen, 
+  Clock,
+  Loader2,
+  AlertCircle
+} from 'lucide-react';
+import { Button, Pagination } from '@/components/ui';
+import { courseService } from '@/services/courseService';
+import { Course } from '@/types/course';
+import { ImageUtils } from '@/utils/imageUtils';
+import { appLoadService } from '@/app/core/app-load';
 
-interface Course {
-  id: string;
-  title: string;
-  description: string;
-  imageUrl?: string;
-  isPaid: boolean;
-  isPublished: boolean;
-}
-
-export default function CoursesPage() {
+export default function CoursesListPage() {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [showArchived, setShowArchived] = useState(false);
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(50);
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(50);
   
-  // Mock courses data
-  const mockCourses: Course[] = [
-    {
-      id: '1',
-      title: 'Introduction to React',
-      description: 'Learn the fundamentals of React including components, props, and state management.',
-      imageUrl: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&q=80',
-      isPaid: true,
-      isPublished: true,
-    },
-    {
-      id: '2',
-      title: 'Advanced TypeScript',
-      description: 'Master TypeScript with advanced types, generics, and design patterns.',
-      imageUrl: 'https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=800&q=80',
-      isPaid: true,
-      isPublished: true,
-    },
-    {
-      id: '3',
-      title: 'Web Design Fundamentals',
-      description: 'Create beautiful and responsive web designs with modern CSS techniques.',
-      imageUrl: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&q=80',
-      isPaid: false,
-      isPublished: false,
-    },
-    {
-      id: '4',
-      title: 'Node.js Backend Development',
-      description: 'Build scalable backend applications with Node.js and Express.',
-      imageUrl: 'https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=800&q=80',
-      isPaid: true,
-      isPublished: true,
-    },
-    {
-      id: '5',
-      title: 'Database Design with PostgreSQL',
-      description: 'Learn database design principles and master PostgreSQL.',
-      imageUrl: 'https://images.unsplash.com/photo-1544383835-bda2bc66a55d?w=800&q=80',
-      isPaid: true,
-      isPublished: false,
-    },
-    {
-      id: '6',
-      title: 'UI/UX Design Principles',
-      description: 'Master the art of creating intuitive and engaging user experiences.',
-      imageUrl: 'https://images.unsplash.com/photo-1561070791-36c11767b26a?w=800&q=80',
-      isPaid: false,
-      isPublished: true,
-    },
-  ];
-
-  const [courses, setCourses] = useState<Course[]>(mockCourses);
-  const [isLoading, setIsLoading] = useState(false);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [totalRecords, setTotalRecords] = useState(0);
+  
+  // Get tenant config for cloudinary
+  const [cloudName, setCloudName] = useState<string>('');
 
-  const totalCourses = mockCourses.length;
+  useEffect(() => {
+    const loadTenantConfig = async () => {
+      const tenantDetails = await appLoadService.initAppConfig();
+      if (tenantDetails?.cloudName) {
+        setCloudName(tenantDetails.cloudName);
+      }
+    };
+    loadTenantConfig();
+  }, []);
 
-  // Filter courses locally based on search
-  const filteredCourses = useMemo(() => {
-    if (!searchQuery) return courses;
-    
-    const query = searchQuery.toLowerCase();
-    return courses.filter(course =>
-      course.title.toLowerCase().includes(query) ||
-      course.description.toLowerCase().includes(query)
-    );
-  }, [courses, searchQuery]);
+  /**
+   * Fetch courses from API
+   */
+  const fetchCourses = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
 
-  const handleTogglePublish = (courseId: string) => {
-    setCourses(courses.map(c =>
-      c.id === courseId ? { ...c, isPublished: !c.isPublished } : c
-    ));
-  };
+      const response = await courseService.getCourses({
+        start: pageIndex * pageSize,
+        max: pageSize,
+        search: searchQuery || undefined,
+        isShowArchived: showArchived,
+      });
 
+      setCourses(response.data);
+      setTotalRecords(response.recordsTotal);
+    } catch (err: any) {
+      console.error('Failed to fetch courses:', err);
+      setError(err.message || 'Failed to load courses. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [pageIndex, pageSize, searchQuery, showArchived]);
+
+  /**
+   * Initial load and when filters change
+   */
+  useEffect(() => {
+    fetchCourses();
+  }, [fetchCourses]);
+
+  /**
+   * Search with debounce
+   */
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setPageIndex(0); // Reset to first page on search
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  /**
+   * Reset page when archived filter changes
+   */
+  useEffect(() => {
+    setPageIndex(0);
+  }, [showArchived]);
+
+
+  /**
+   * Navigate to add course page
+   */
   const handleAddCourse = () => {
+    // TODO: Implement navigation to add course page
     console.log('Add new course');
-    // TODO: Navigate to create course page
   };
 
+  /**
+   * Navigate to course details
+   */
+  const handleCourseClick = (courseId: string) => {
+    navigate(`/admin/courses/${courseId}`);
+  };
+
+  /**
+   * Get course image URL
+   */
+  const getCourseImage = (course: Course) => {
+    return ImageUtils.getCourseCardImage(course, cloudName);
+  };
+
+
+  const totalPages = Math.ceil(totalRecords / pageSize);
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="mx-auto px-4 py-6">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-cyan-500 rounded-lg flex items-center justify-center">
-              <div className="w-6 h-6 border-2 border-white rounded" />
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Header */}
+      <div className="bg-white dark:bg-gray-800 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-brand-500 rounded-xl flex items-center justify-center shadow-lg">
+                <BookOpen className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Courses</h1>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  Manage your course catalog
+                </p>
+              </div>
             </div>
-            <h1 className="text-3xl font-semibold text-foreground">Courses</h1>
+            <Button
+              onClick={handleAddCourse}
+              className="bg-gradient-to-r from-primary-600 to-brand-600 hover:from-primary-700 hover:to-brand-700 text-white shadow-lg hover:shadow-xl transition-all"
+            >
+              <Plus className="h-5 w-5 mr-2" />
+              Add Course
+            </Button>
           </div>
-          <Button
-            onClick={handleAddCourse}
-            className="bg-cyan-500 hover:bg-cyan-600 text-white rounded-full w-12 h-12 p-0 flex items-center justify-center"
-          >
-            <Plus className="w-6 h-6" />
-          </Button>
         </div>
+      </div>
 
-        {/* Search and Filters */}
-        <div className="bg-card border border-border rounded-lg p-4 mb-6">
-          <div className="flex items-center gap-4 flex-wrap">
-            <div className="flex-1 min-w-[300px] relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-              <Input
+      {/* Search and Filters */}
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
+            {/* Search */}
+            <div className="relative flex-1 max-w-md w-full">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <input
                 type="text"
-                placeholder="Search for Courses"
+                placeholder="Search courses..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-background"
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white placeholder-gray-400"
               />
             </div>
 
-            <div className="flex items-center gap-2">
-              <Switch
-                checked={showArchived}
-                onCheckedChange={setShowArchived}
-              />
-              <span className="text-sm text-foreground whitespace-nowrap">Show Archived</span>
-            </div>
-
-            <div className="flex items-center gap-1 bg-muted rounded-lg p-1">
-              <button
-                onClick={() => setViewMode('grid')}
-                className={cn(
-                  "p-2 rounded transition-colors",
-                  viewMode === 'grid' ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <Grid3x3 className="w-5 h-5" />
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={cn(
-                  "p-2 rounded transition-colors",
-                  viewMode === 'list' ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <List className="w-5 h-5" />
-              </button>
+            {/* Filters */}
+            <div className="flex items-center gap-3">
+              <label className="flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={showArchived}
+                  onChange={(e) => setShowArchived(e.target.checked)}
+                  className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                />
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                  Show Archived
+                </span>
+              </label>
             </div>
           </div>
         </div>
+      </div>
 
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Loading State */}
         {isLoading && (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 animate-spin text-cyan-500" />
-            <span className="ml-3 text-muted-foreground">Loading courses...</span>
+          <div className="flex flex-col items-center justify-center py-20">
+            <div className="relative">
+              <div className="w-16 h-16 border-4 border-gray-200 dark:border-gray-700 rounded-full"></div>
+              <div className="w-16 h-16 border-4 border-primary-600 border-t-transparent rounded-full animate-spin absolute top-0 left-0"></div>
+            </div>
+            <p className="mt-4 text-gray-600 dark:text-gray-300 font-medium">Loading courses...</p>
           </div>
         )}
 
         {/* Error State */}
         {error && !isLoading && (
-          <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-6 mb-6">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="w-6 h-6 text-destructive flex-shrink-0 mt-0.5" />
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-6 mb-6">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 w-10 h-10 bg-red-100 dark:bg-red-900/50 rounded-full flex items-center justify-center">
+                <AlertCircle className="w-6 h-6 text-red-600 dark:text-red-400" />
+              </div>
               <div className="flex-1">
-                <h3 className="font-semibold text-destructive mb-1">Error Loading Courses</h3>
-                <p className="text-sm text-destructive/80">{error}</p>
+                <h3 className="text-lg font-semibold text-red-900 dark:text-red-100 mb-1">
+                  Error Loading Courses
+                </h3>
+                <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
+                <Button 
+                  onClick={() => fetchCourses()} 
+                  variant="secondary" 
+                  size="sm" 
+                  className="mt-4"
+                >
+                  Try Again
+                </Button>
               </div>
             </div>
           </div>
         )}
 
         {/* Empty State */}
-        {!isLoading && !error && filteredCourses.length === 0 && (
+        {!isLoading && !error && courses.length === 0 && (
           <div className="text-center py-20">
-            <div className="text-muted-foreground text-lg mb-2">
-              {searchQuery ? 'No courses found matching your search' : 'No courses available'}
+            <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+              <BookOpen className="w-10 h-10 text-gray-400 dark:text-gray-600" />
             </div>
-            {searchQuery && (
-              <button
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+              {searchQuery ? 'No courses found' : 'No courses available'}
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              {searchQuery 
+                ? 'Try adjusting your search terms' 
+                : 'Get started by creating your first course'
+              }
+            </p>
+            {searchQuery ? (
+              <Button
                 onClick={() => setSearchQuery('')}
-                className="text-cyan-500 hover:underline text-sm"
+                variant="secondary"
+                size="sm"
               >
                 Clear search
-              </button>
+              </Button>
+            ) : (
+              <Button
+                onClick={handleAddCourse}
+                className="bg-gradient-to-r from-primary-600 to-brand-600"
+              >
+                <Plus className="h-5 w-5 mr-2" />
+                Add Your First Course
+              </Button>
             )}
           </div>
         )}
 
         {/* Course Grid */}
-        {!isLoading && !error && filteredCourses.length > 0 && (
-          <div className={cn(
-            "grid gap-6 mb-6",
-            viewMode === 'grid' ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "grid-cols-1"
-          )}>
-            {filteredCourses.map((course) => (
-            <Card
-              key={course.id}
-              onClick={() => window.location.href = `/admin/courses/${course.id}`}
-              className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group"
-            >
-              {/* Course Image */}
-              <div className="relative aspect-[3/2] bg-gray-200 dark:bg-gray-700 overflow-hidden">
-                {course.imageUrl ? (
+        {!isLoading && !error && courses.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+            {courses.map((course) => (
+              <div
+                key={course.guId}
+                onClick={() => handleCourseClick(course.guId)}
+                className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 cursor-pointer group flex flex-col"
+              >
+                {/* Course Image */}
+                <div className="relative aspect-[3/2] bg-gradient-to-br from-primary-100 to-brand-100 dark:from-primary-900/30 dark:to-brand-900/30 overflow-hidden">
                   <img
-                    src={course.imageUrl}
-                    alt={course.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    src={getCourseImage(course)}
+                    alt={course.name}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    onError={(e) => {
+                      e.currentTarget.src = ImageUtils.buildCloudinaryUrl('', '', 480, 320);
+                    }}
                   />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-500">
-                    <div className="text-center">
-                      <div className="text-6xl mb-2">○</div>
-                      <div className="text-sm font-medium">3 : 2</div>
-                      <div className="text-xs">Ratio</div>
-                      <div className="text-xs">OR</div>
-                      <div className="text-xs">480" X 320"</div>
-                      <div className="mt-4 w-0 h-0 border-l-[60px] border-l-transparent border-r-[60px] border-r-transparent border-b-[40px] border-b-gray-300 dark:border-b-gray-600 mx-auto" />
-                    </div>
-                  </div>
-                )}
-              </div>
+                </div>
 
-              {/* Course Info */}
-              <div className="p-4">
-                <div className="flex items-start justify-between gap-2 mb-2">
-                  <h3 className="font-semibold text-foreground line-clamp-1">{course.title}</h3>
-                  <div className="flex-shrink-0">
-                    {course.isPaid ? (
-                      <DollarSign className="w-5 h-5 text-foreground" />
-                    ) : (
-                      <Check className="w-5 h-5 text-foreground" />
+                {/* Course Content */}
+                <div className="p-4 pt-2 flex flex-col flex-grow">
+                  {/* Payment Type Badge */}
+                  <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+                    {course.paymentType === 'FREE' ? (
+                      <span className="inline-flex items-center justify-center h-5 px-2.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-[10px] font-semibold rounded-full">
+                        FREE
+                      </span>
+                    ) : course.paymentType === 'PAID' ? (
+                      <span className="inline-flex items-center justify-center h-5 px-2.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-[10px] font-semibold rounded-full">
+                        PAID
+                      </span>
+                    ) : course.paymentType === 'DONATION' ? (
+                      <span className="inline-flex items-center justify-center h-5 px-2.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 text-[10px] font-semibold rounded-full">
+                        DONATION
+                      </span>
+                    ) : course.paymentType === 'EXTERNAL' ? (
+                      <span className="inline-flex items-center justify-center h-5 px-2.5 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 text-[10px] font-semibold rounded-full">
+                        EXTERNAL
+                      </span>
+                    ) : null}
+                  </div>
+
+                  {/* Course Title */}
+                  <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-1.5 line-clamp-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                    {course.name}
+                  </h3>
+
+                  {/* Description */}
+                  {course.shortDescription && (
+                    <p className="text-gray-600 dark:text-gray-300 mb-3 line-clamp-2 text-xs flex-grow">
+                      {course.shortDescription}
+                    </p>
+                  )}
+
+                  {/* Course Meta */}
+                  <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 pt-3 border-t border-gray-100 dark:border-gray-700 mt-auto">
+                    <div className="flex items-center gap-2">
+                        <span className="flex items-center">
+                          <Clock className="h-3 w-3 mr-1" />
+                          {course?.durationStr ? course.durationStr : '30 minutes'}
+                        </span>
+                    </div>
+                    {course.isShowOnWebsite && (
+                      <span className="flex items-center text-green-600 dark:text-green-400 text-[10px] font-medium">
+                        <div className="w-1.5 h-1.5 bg-green-500 rounded-full mr-1 animate-pulse"></div>
+                        Published
+                      </span>
                     )}
                   </div>
                 </div>
-
-                {course.description && (
-                  <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                    {course.description}
-                  </p>
-                )}
-
-                <div className="flex items-center justify-end">
-                  <Switch
-                    checked={course.isPublished}
-                    onCheckedChange={() => handleTogglePublish(course.id)}
-                  />
-                </div>
               </div>
-            </Card>
             ))}
           </div>
         )}
 
         {/* Pagination */}
-        <div className="bg-card border border-border rounded-lg p-4">
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">Items per page:</span>
-              <select
-                value={itemsPerPage}
-                onChange={(e) => setItemsPerPage(Number(e.target.value))}
-                className="bg-background border border-border rounded px-3 py-1 text-sm text-foreground"
-              >
-                <option value={25}>25</option>
-                <option value={50}>50</option>
-                <option value={100}>100</option>
-              </select>
-            </div>
-
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-foreground">
-                {(currentPage - 1) * itemsPerPage + 1} - {Math.min(currentPage * itemsPerPage, totalCourses)} of {totalCourses}
-              </span>
-
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={() => setCurrentPage(1)}
-                  disabled={currentPage === 1}
-                  className="p-2 text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  <ChevronsLeft className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                  disabled={currentPage === 1}
-                  className="p-2 text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  <ChevronLeft className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={() => setCurrentPage(currentPage + 1)}
-                  disabled={currentPage * itemsPerPage >= totalCourses}
-                  className="p-2 text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  <ChevronRight className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={() => setCurrentPage(Math.ceil(totalCourses / itemsPerPage))}
-                  disabled={currentPage * itemsPerPage >= totalCourses}
-                  className="p-2 text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  <ChevronsRight className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        {!isLoading && totalRecords > 0 && (
+          <Pagination
+            currentPage={pageIndex}
+            totalPages={totalPages}
+            totalRecords={totalRecords}
+            pageSize={pageSize}
+            onPageChange={(page) => setPageIndex(page)}
+            onPageSizeChange={(size) => {
+              setPageSize(size);
+              setPageIndex(0);
+            }}
+            isLoading={isLoading}
+            pageSizeOptions={[25, 50, 100, 200]}
+            showPageSize={true}
+          />
+        )}
       </div>
     </div>
   );
 }
+

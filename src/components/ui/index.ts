@@ -12,4 +12,7 @@ export { Switch } from './Switch';
 export { Textarea } from './Textarea';
 export { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from './Select';
 
+// Pagination Components
+export { Pagination } from './Pagination';
+
 
