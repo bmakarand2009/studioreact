@@ -81,6 +81,13 @@ function getDefaultAdminNavigation(): NavigationItem[] {
       url: '/admin/courses',
     },
     {
+      id: 'events',
+      title: 'Events',
+      type: 'item',
+      icon: 'calendar',
+      url: '/admin/events',
+    },
+    {
       id: 'reports',
       title: 'Reports',
       type: 'item',

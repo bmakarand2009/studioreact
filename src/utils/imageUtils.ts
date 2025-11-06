@@ -78,5 +78,31 @@ export class ImageUtils {
   static getCourseHeroImage(course: Course | { image1?: string }, cloudName?: string): string {
     return this.getCourseImage(course, cloudName, 1200, 600);
   }
+
+  /**
+   * Get event image with fallback
+   * Event images use h_200,w_310 sizing and different field name
+   * @param event - Event object with imageUrl property
+   * @param cloudName - Cloudinary cloud name (optional)
+   * @returns Cloudinary URL or placeholder
+   */
+  static getEventCardImage(event: { imageUrl?: string }, cloudName?: string): string {
+    if (!event.imageUrl) {
+      return this.PLACEHOLDER;
+    }
+
+    // If URL already includes http, use as-is (external URL)
+    if (event.imageUrl.includes('http')) {
+      return event.imageUrl;
+    }
+
+    if (cloudName) {
+      // Remove leading slash if present
+      const cleanPath = event.imageUrl.startsWith('/') ? event.imageUrl.substring(1) : event.imageUrl;
+      return `https://res.cloudinary.com/${cloudName}/image/upload/h_200,w_310/${cleanPath}`;
+    }
+
+    return this.PLACEHOLDER;
+  }
 }
 
