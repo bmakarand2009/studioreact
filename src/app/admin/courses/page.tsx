@@ -94,15 +94,14 @@ export default function CoursesListPage() {
    * Navigate to add course page
    */
   const handleAddCourse = () => {
-    // TODO: Implement navigation to add course page
-    console.log('Add new course');
+    navigate('/admin/courses/add');
   };
 
   /**
    * Navigate to course details
    */
   const handleCourseClick = (courseId: string) => {
-    navigate(`/admin/courses/${courseId}`);
+    navigate(`/admin/courses/edit/${courseId}`);
   };
 
   /**

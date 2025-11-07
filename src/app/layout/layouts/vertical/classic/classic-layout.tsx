@@ -60,6 +60,8 @@ export default function ClassicLayout({ children }: ClassicLayoutProps) {
         {/* Header */}
         <Header
           onMenuClick={toggleSidebar}
+        onTogglePin={() => {}}
+        sidebarPinned={true}
           user={user}
           navigation={navigation}
         />

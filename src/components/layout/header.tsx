@@ -9,7 +9,8 @@ import {
   MaximizeIcon,
   ArrowLeft,
   SunIcon,
-  MoonIcon
+  MoonIcon,
+  Pin
 } from 'lucide-react';
 import { usePreview } from '@/contexts/PreviewContext';
 import { useNavigate } from 'react-router-dom';
@@ -18,11 +19,13 @@ import { useUIStore } from '@/stores/uiStore';
 
 interface HeaderProps {
   onMenuClick: () => void;
+  onTogglePin: () => void;
+  sidebarPinned: boolean;
   user: any;
   navigation: any;
 }
 
-export default function Header({ onMenuClick, user, navigation }: HeaderProps) {
+export default function Header({ onMenuClick, onTogglePin, sidebarPinned, user, navigation }: HeaderProps) {
   const { isInPreviewMode, exitPreviewMode } = usePreview();
   const navigate = useNavigate();
   const { theme, toggleTheme } = useUIStore();
@@ -66,8 +69,20 @@ export default function Header({ onMenuClick, user, navigation }: HeaderProps) {
           <div className="hidden md:block">
             <nav className="flex" aria-label="Breadcrumb">
               <ol className="flex items-center space-x-2">
-                <li>
-                  <span className="text-sm text-gray-500 dark:text-gray-400">
+                <li className="flex items-center gap-2">
+                  <button
+                    onClick={onTogglePin}
+                    className={`hidden md:inline-flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
+                      sidebarPinned
+                        ? 'bg-cyan-500 text-white hover:bg-cyan-600'
+                        : 'bg-gray-200 text-gray-600 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+                    }`}
+                    aria-label={sidebarPinned ? 'Unpin sidebar' : 'Pin sidebar'}
+                    title={sidebarPinned ? 'Unpin sidebar' : 'Pin sidebar'}
+                  >
+                    <Pin className={`h-4 w-4 transition-transform ${sidebarPinned ? 'rotate-0' : 'rotate-45'}`} />
+                  </button>
+                  <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
                     Dashboard
                   </span>
                 </li>

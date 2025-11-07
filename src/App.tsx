@@ -9,7 +9,7 @@ import LoginPage from '@/app/(auth)/login/page';
 import ForgotPasswordPage from '@/app/(auth)/forgot-password/page';
 import AdminDashboardPage from '@/app/admin/dashboard/page';
 import AdminCoursesPage from '@/app/admin/courses/page';
-import CourseDetailsPage from '@/app/admin/courses/[id]/page';
+import AddEditCoursePage from '@/app/admin/courses/[id]/page';
 import AdminEventsPage from '@/app/admin/events/page';
 import DashboardPage from '@/app/dashboard/page';
 import StudentDashboardPage from '@/app/student/dashboard/page';
@@ -47,7 +47,8 @@ const router = createBrowserRouter(
         { path: '/dashboard', element: <DashboardPage /> },
         { path: '/admin/dashboard', element: <AdminDashboardPage /> },
         { path: '/admin/courses', element: <AdminCoursesPage /> },
-        { path: '/admin/courses/:id', element: <CourseDetailsPage /> },
+        { path: '/admin/courses/add', element: <AddEditCoursePage /> },
+        { path: '/admin/courses/edit/:id', element: <AddEditCoursePage /> },
         { path: '/admin/events', element: <AdminEventsPage /> },
 
         // Student

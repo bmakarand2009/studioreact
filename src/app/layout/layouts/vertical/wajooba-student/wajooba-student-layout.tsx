@@ -77,6 +77,8 @@ export default function WajoobaStudentLayout({ children }: WajoobaStudentLayoutP
         {/* Header */}
         <Header
           onMenuClick={toggleSidebar}
+        onTogglePin={() => {}}
+        sidebarPinned={false}
           user={isInPreviewMode ? previewUser : user}
           navigation={memoizedNavigation}
         />

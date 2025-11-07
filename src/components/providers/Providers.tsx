@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 import { UserProvider } from '@/contexts/UserContext';
 import { PreviewProvider } from '@/contexts/PreviewContext';
+import { ToastProvider } from '@/components/ui/ToastProvider';
 import { AppInitializer } from './AppInitializer';
 
 interface ProvidersProps {
@@ -11,8 +12,10 @@ export function Providers({ children }: ProvidersProps) {
   return (
     <UserProvider>
       <PreviewProvider>
-        <AppInitializer />
-        {children}
+        <ToastProvider>
+          <AppInitializer />
+          {children}
+        </ToastProvider>
       </PreviewProvider>
     </UserProvider>
   );

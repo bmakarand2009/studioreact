@@ -1,659 +1,1221 @@
-import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { 
-  ChevronDown, 
-  ChevronRight,
-  Edit2, 
-  Trash2, 
-  Plus,
-  Eye,
-  Copy,
-  Users,
-  Smile,
-  FileText,
-  ClipboardCheck,
-  ListChecks,
-  Upload,
-  Download,
-  GripVertical,
-  Info,
-  ArrowLeft
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import {
+  ArrowLeft,
+  ChevronDown,
+  ChevronUp,
+  Loader2,
+  PlusCircle,
+  RefreshCcw,
+  Tag,
+  User,
+  UploadCloud,
+  Wand2,
 } from 'lucide-react';
+
 import { Button } from '@/components/ui';
-import { Input } from '@/components/ui/Input';
-import { Textarea } from '@/components/ui/Textarea';
-import { Switch } from '@/components/ui/Switch';
-import { Checkbox } from '@/components/ui/Checkbox';
-import { cn } from '@/lib/utils';
+import appLoadService, { TenantDetails } from '@/app/core/app-load';
+import {
+  CourseCategory,
+  CourseSavePayload,
+  courseDetailService,
+  StaffMember,
+} from '@/services/courseDetailService';
+import { courseAiService } from '@/services/courseAiService';
+import { useToast } from '@/components/ui/ToastProvider';
 
-interface Activity {
-  id: string;
+type Step = 0 | 1;
+
+interface CourseFormState {
   name: string;
-  type: 'content' | 'assessment' | 'form';
-  shortDescription?: string;
-  mobileSlug?: string;
-  dateSlug?: string;
-  settings: {
-    trackActivity: boolean;
-    hideOnTOC: boolean;
-    repeatActivity: boolean;
-    allowHomeworkUploads: boolean;
-    allowDemoActivity: boolean;
-  };
+  shortDescription: string;
+  longDescription: string;
+  authorType: 'organization' | 'teacher';
+  authorId: string;
+  durationStr: string;
+  image1: string;
+  productTagList: string[];
+  productCategoryId: string[];
+  price?: string;
 }
 
-interface Section {
-  id: string;
-  name: string;
-  activities: Activity[];
-  isExpanded: boolean;
-}
+const PLACEHOLDER_IMAGE =
+  'https://res.cloudinary.com/wajooba/image/upload/v1744785332/master/fbyufuhlihaqumx1yegb.svg';
 
-const mockCourse = {
-  id: '1',
-  title: 'Mastering Rider Skills',
-  isPrivate: false,
-  isFree: true,
-  currentBatch: 'current',
-  previewUrl: 'mastering-rider-skills',
-};
-
-const mockSections: Section[] = [
-  {
-    id: 'section-1',
-    name: 'Section 1',
-    isExpanded: true,
-    activities: [
-      {
-        id: 'new-activity',
-        name: 'New Activity',
-        type: 'content',
-        settings: {
-          trackActivity: true,
-          hideOnTOC: false,
-          repeatActivity: false,
-          allowHomeworkUploads: false,
-          allowDemoActivity: false,
-        },
-      },
-      {
-        id: 'activity-2',
-        name: 'Activity 2',
-        type: 'content',
-        shortDescription: '',
-        mobileSlug: '',
-        dateSlug: '',
-        settings: {
-          trackActivity: true,
-          hideOnTOC: false,
-          repeatActivity: false,
-          allowHomeworkUploads: false,
-          allowDemoActivity: false,
-        },
-      },
-    ],
-  },
+const DURATION_OPTIONS = [
+  { value: '5', label: '5 minutes' },
+  { value: '30', label: '30 minutes' },
+  { value: '60', label: '1 hour' },
+  { value: '120', label: '2 hours' },
+  { value: '360', label: '6 hours' },
+  { value: '720', label: '12 hours' },
+  { value: '1440', label: '1 day' },
+  { value: '2880', label: '2 days' },
+  { value: '8640', label: '6 days' },
+  { value: '10080', label: '1 week' },
+  { value: '20160', label: '2 weeks' },
+  { value: '43200', label: '1 month' },
+  { value: '129600', label: '3 months' },
+  { value: '259200', label: '6 months' },
+  { value: '525600', label: '1 year' },
 ];
 
-type TabType = 'contents' | 'attendees' | 'pricing' | 'activities' | 'setup';
-type ContentTabType = 'content' | 'assessment' | 'form';
+const DEFAULT_TEMPLATE_HTML = `<section style="font-family: 'Inter', system-ui; max-width: 720px; margin: 0 auto; padding: 48px;">
+  <h1 style="font-size: 36px; margin-bottom: 16px; color: #0f172a;">Your Course Headline</h1>
+  <p style="font-size: 18px; color: #475569; line-height: 1.6;">
+    Use this area to highlight the most compelling outcomes of your course. Explain who it's for, what they will accomplish, and why they should join now.
+  </p>
+  <ul style="margin-top: 24px; color: #334155;">
+    <li>✔️ Structured lessons with guided practice</li>
+    <li>✔️ Templates, worksheets, & support resources</li>
+    <li>✔️ Expert instructor feedback on milestones</li>
+  </ul>
+</section>`;
 
-export default function CourseDetailsPage() {
-  const { id } = useParams();
+const initialFormState: CourseFormState = {
+  name: '',
+  shortDescription: '',
+  longDescription: '',
+  authorType: 'organization',
+  authorId: '',
+  durationStr: '30',
+  image1: '',
+  productTagList: [],
+  productCategoryId: [],
+  price: '',
+};
+
+const sparkleStyles = `
+@keyframes sparkle-burst {
+  0%, 100% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  45% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  70% {
+    transform: scale(0.8);
+    opacity: 0.6;
+  }
+}
+
+.sparkle-star {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  opacity: 0;
+}
+
+.sparkle-star polygon {
+  fill: currentColor;
+}
+`;
+
+const AddEditCoursePage = () => {
+  const { id } = useParams<{ id?: string }>();
   const navigate = useNavigate();
-  
-  const [activeTab, setActiveTab] = useState<TabType>('contents');
-  const [sections, setSections] = useState<Section[]>(mockSections);
-  const [selectedActivity, setSelectedActivity] = useState<string>('activity-2');
-  const [contentTab, setContentTab] = useState<ContentTabType>('content');
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const toast = useToast();
 
-  const currentActivity = sections
-    .flatMap(s => s.activities)
-    .find(a => a.id === selectedActivity);
+  const [tenantDetails, setTenantDetails] = useState<TenantDetails | null>(null);
+  const [formState, setFormState] = useState<CourseFormState>(initialFormState);
+  const [productTags, setProductTags] = useState<string[]>([]);
+  const [productCategories, setProductCategories] = useState<string[]>([]);
+  const [staffList, setStaffList] = useState<StaffMember[]>([]);
+  const [existingCategories, setExistingCategories] = useState<CourseCategory[]>([]);
+  const [filteredCategories, setFilteredCategories] = useState<CourseCategory[]>([]);
+  const [categorySearchQuery, setCategorySearchQuery] = useState<string>('');
+  const [categoryDropdownOpen, setCategoryDropdownOpen] = useState<boolean>(false);
+  const [isAddCategoryOpen, setIsAddCategoryOpen] = useState<boolean>(false);
+  const [newCategoryName, setNewCategoryName] = useState<string>('');
+  const [newCategoryDescription, setNewCategoryDescription] = useState<string>('');
 
-  const toggleSection = (sectionId: string) => {
-    setSections(sections.map(s => 
-      s.id === sectionId ? { ...s, isExpanded: !s.isExpanded } : s
-    ));
+  const [activeStep, setActiveStep] = useState<Step>(0);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const [isPageLoading, setIsPageLoading] = useState<boolean>(true);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [isTemplateSaving, setIsTemplateSaving] = useState<boolean>(false);
+  const [aiLoadingField, setAiLoadingField] = useState<'name' | 'shortDescription' | 'longDescription' | null>(null);
+
+  const [courseData, setCourseData] = useState<any>(null);
+  const [templateState, setTemplateState] = useState<{
+    html: string;
+    json: Record<string, any>;
+    templateId?: string;
+  }>({
+    html: DEFAULT_TEMPLATE_HTML,
+    json: {},
+    templateId: undefined,
+  });
+
+  const courseGuId = useMemo(() => {
+    if (id) {
+      return id;
+    }
+    if (courseData?.guId) {
+      return courseData.guId;
+    }
+    return null;
+  }, [courseData, id]);
+
+  const isExistingCourse = Boolean(courseGuId);
+
+  const setFormValues = useCallback((values: Partial<CourseFormState>) => {
+    setFormState((prev) => ({ ...prev, ...values }));
+  }, []);
+
+  const durationLabel = useCallback((value: string) => {
+    const match = DURATION_OPTIONS.find((option) => option.value === value);
+    return match ? match.label : `${value} minutes`;
+  }, []);
+
+  const bannerImageUrl = useMemo(() => {
+    if (!formState.image1) {
+      return PLACEHOLDER_IMAGE;
+    }
+    if (formState.image1.startsWith('http')) {
+      return formState.image1;
+    }
+    if (tenantDetails?.cloudName) {
+      return `https://res.cloudinary.com/${tenantDetails.cloudName}/image/upload/c_fill,h_320,w_480/${formState.image1}`;
+    }
+    return PLACEHOLDER_IMAGE;
+  }, [formState.image1, tenantDetails]);
+
+  const aiContext = useMemo(() => {
+    const instructorName =
+      formState.authorType === 'teacher'
+        ? staffList.find((staff) => staff.guId === formState.authorId)?.name || 'Course Instructor'
+        : tenantDetails?.name || 'Organization';
+
+    return {
+      courseName: formState.name || 'Course Name',
+      shortDescription: formState.shortDescription || '',
+      longDescription: formState.longDescription || '',
+      authorName: instructorName,
+      durationText: durationLabel(formState.durationStr),
+      priceText: formState.price ? `$${formState.price}` : 'Free',
+    };
+  }, [durationLabel, formState, staffList, tenantDetails]);
+
+  useEffect(() => {
+    setFilteredCategories((prev) => {
+      if (!categorySearchQuery) {
+        return [...existingCategories];
+      }
+      const lower = categorySearchQuery.toLowerCase();
+      return existingCategories.filter((category) =>
+        category.name.toLowerCase().includes(lower),
+      );
+    });
+  }, [categorySearchQuery, existingCategories]);
+
+  const hydrateFormFromCourse = useCallback(
+    (course: any) => {
+      if (!course) {
+        return;
+      }
+
+      const wemail = course?.wemail || {};
+      const existingTags =
+        Array.isArray(wemail?.productTagList) && wemail.productTagList.length
+          ? wemail.productTagList
+          : Array.isArray(course?.productTagList)
+          ? course.productTagList
+          : [];
+
+      const existingCategoriesIds: string[] = Array.isArray(course?.productCategoryList)
+        ? course.productCategoryList.map((category: any) => category?.id || category?.guId || category)
+        : Array.isArray(course?.productCategory)
+        ? course.productCategory.map((category: any) => category?.id || category?.guId || category)
+        : [];
+
+      setFormState({
+        name: course?.name || '',
+        shortDescription: course?.shortDescription || '',
+        longDescription: wemail?.longDescription || course?.longDescription || '',
+        authorType: wemail?.authorType || course?.authorType || 'organization',
+        authorId: wemail?.authorId || course?.authorId || '',
+        durationStr: wemail?.durationStr || course?.durationStr || '30',
+        image1: course?.image1 || '',
+        productTagList: existingTags,
+        productCategoryId: existingCategoriesIds,
+        price: course?.price || '',
+      });
+
+      setProductTags(existingTags);
+      setProductCategories(existingCategoriesIds);
+    },
+    [],
+  );
+
+  const loadInitialData = useCallback(async () => {
+    setIsPageLoading(true);
+    try {
+      const tenant = await appLoadService.initAppConfig();
+      setTenantDetails(tenant);
+
+      const [staff, categories] = await Promise.all([
+        courseDetailService.getStaffList(),
+        tenant?.tenantId ? courseDetailService.getCategories(tenant.tenantId) : Promise.resolve([]),
+      ]);
+
+      setStaffList(staff);
+      setExistingCategories(categories);
+      setFilteredCategories(categories);
+
+      if (id) {
+        const response = await courseDetailService.getCourseDetail(id);
+        const course = response?.data || response;
+        setCourseData(course);
+        hydrateFormFromCourse(course);
+
+        const template =
+          response?.template ||
+          course?.template ||
+          response?.data?.template ||
+          null;
+
+        if (template) {
+          setTemplateState({
+            html: template?.unhtml || DEFAULT_TEMPLATE_HTML,
+            json: template?.unjson || {},
+            templateId: template?._id || template?.id,
+          });
+        }
+      }
+    } catch (error: any) {
+      console.error('[AddEditCoursePage] Initialization failed', error);
+      toast.error(error?.message || 'Failed to load course details.');
+    } finally {
+      setIsPageLoading(false);
+    }
+  }, [hydrateFormFromCourse, id, toast]);
+
+  useEffect(() => {
+    loadInitialData();
+  }, [loadInitialData]);
+
+  useEffect(() => {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'course-detail-sparkle-keyframes';
+    styleEl.innerHTML = sparkleStyles;
+    document.head.appendChild(styleEl);
+    return () => {
+      if (styleEl.parentElement) {
+        styleEl.parentElement.removeChild(styleEl);
+      }
+    };
+  }, []);
+
+  const validateStepOne = useCallback(() => {
+    const validationErrors: Record<string, string> = {};
+    if (!formState.name.trim()) {
+      validationErrors.name = 'Course name is required.';
+    }
+    if (!formState.shortDescription.trim()) {
+      validationErrors.shortDescription = 'Short description is required.';
+    }
+    if (formState.authorType === 'teacher' && !formState.authorId) {
+      validationErrors.authorId = 'Please select a teacher.';
+    }
+    if (!productCategories.length) {
+      validationErrors.productCategoryId = 'Select at least one category.';
+    }
+    setErrors(validationErrors);
+    return Object.keys(validationErrors).length === 0;
+  }, [formState, productCategories.length]);
+
+  const buildCoursePayload = useCallback((): CourseSavePayload => {
+    const isTeacher = formState.authorType === 'teacher';
+    const existing = courseData || {};
+
+    const base: CourseSavePayload = {
+      categoryType: existing.categoryType || 'SERVICE',
+      descriptionEditor: existing.descriptionEditor || '',
+      donationId: existing.donationId || '',
+      externalLink: existing.externalLink || '',
+      guId: courseGuId || existing.guId,
+      host: existing.host || '',
+      image2: existing.image2 || '',
+      image3: existing.image3 || '',
+      imageOrVideoRadio: existing.imageOrVideoRadio || 'image',
+      isAllowDemoChapters: existing.isAllowDemoChapters || false,
+      isCOPPACompliant: existing.isCOPPACompliant || false,
+      isFranchiseCourse: existing.isFranchiseCourse || false,
+      isMandatory: existing.isMandatory || false,
+      isTeacher,
+      longDescription: formState.longDescription,
+      membershipType: existing.membershipType || '',
+      seoKeywords: existing.seoKeywords || '',
+      teacherId: isTeacher ? formState.authorId : null,
+      title: formState.name,
+      videoUrl: existing.videoUrl || '',
+      authorId: isTeacher ? formState.authorId : null,
+      authorType: formState.authorType,
+      classColor: existing.classColor || '',
+      image1: formState.image1,
+      name: formState.name,
+      shortDescription: formState.shortDescription,
+      paymentType: existing.paymentType || 'FREE',
+      memberships: existing.memberships || [],
+      highlightsList: existing.highlightsList || [],
+      registrationFormId: existing.registrationFormId || '',
+      productTagList: [...formState.productTagList],
+      durationStr: formState.durationStr,
+      productCategoryId: [...formState.productCategoryId],
+      productCategory: [...formState.productCategoryId],
+      wemail: {
+        ...(existing.wemail || {}),
+        authorType: formState.authorType,
+        authorId: isTeacher ? formState.authorId : null,
+        longDescription: formState.longDescription,
+        shortDescription: formState.shortDescription,
+        productTagList: [...formState.productTagList],
+        durationStr: formState.durationStr,
+      },
+    };
+
+    if (formState.price !== undefined) {
+      base.price = formState.price;
+    }
+
+    return base;
+  }, [courseData, courseGuId, formState]);
+
+  const handleNextStep = useCallback(async () => {
+    if (!validateStepOne()) {
+      return;
+    }
+
+    // Auto-generate long description if empty but short description exists.
+    if (!formState.longDescription.trim() && formState.shortDescription.trim()) {
+      try {
+        setAiLoadingField('longDescription');
+        const generated = await courseAiService.generateField('longDescription', aiContext);
+        setFormValues({ longDescription: generated });
+      } catch (error: any) {
+        console.error('[AddEditCoursePage] Failed to generate long description', error);
+        toast.error(error?.message || 'Unable to generate a long description.');
+        setAiLoadingField(null);
+        return;
+      } finally {
+        setAiLoadingField(null);
+      }
+    }
+
+    try {
+      setIsSaving(true);
+      const payload = buildCoursePayload();
+      const response = isExistingCourse && courseGuId
+        ? await courseDetailService.updateCourse(courseGuId, payload)
+        : await courseDetailService.createCourse(payload);
+
+      const saved = response?.data || response;
+      setCourseData(saved);
+      if (!id && saved?.guId) {
+        navigate(`/admin/courses/edit/${saved.guId}`, { replace: true });
+      }
+      toast.success('Course details saved successfully.');
+      setActiveStep(1);
+    } catch (error: any) {
+      console.error('[AddEditCoursePage] Failed to save course', error);
+      toast.error(error?.message || 'Failed to save course information.');
+    } finally {
+      setIsSaving(false);
+    }
+  }, [
+    aiContext,
+    buildCoursePayload,
+    courseGuId,
+    formState.longDescription,
+    formState.shortDescription,
+    id,
+    isExistingCourse,
+    navigate,
+    toast,
+    setFormValues,
+    validateStepOne,
+  ]);
+
+  const handleTemplateSave = useCallback(
+    async (redirectAfterSave = false) => {
+      if (!tenantDetails?.orgId) {
+        toast.error('Tenant configuration is required before saving templates.');
+        return;
+      }
+
+      if (!courseGuId) {
+        toast.error('Save the course information before updating the template.');
+        return;
+      }
+
+      try {
+        setIsTemplateSaving(true);
+        const result = await courseDetailService.saveTemplate({
+          courseGuId: courseGuId,
+          name: formState.name || courseData?.name || 'Course',
+          orgId: tenantDetails.orgId,
+          url: courseData?.url || '',
+          unhtml: templateState.html,
+          unjson: templateState.json,
+          templateId: templateState.templateId,
+        });
+
+        const updatedTemplate = result?.data || result;
+        if (updatedTemplate?._id || updatedTemplate?.id) {
+          setTemplateState((prev) => ({
+            ...prev,
+            templateId: updatedTemplate?._id || updatedTemplate?.id,
+          }));
+        }
+
+        toast.success('Template saved successfully.');
+
+        if (redirectAfterSave) {
+          navigate('/admin/courses');
+        }
+      } catch (error: any) {
+        console.error('[AddEditCoursePage] Failed to save template', error);
+        toast.error(error?.message || 'Failed to save template.');
+      } finally {
+        setIsTemplateSaving(false);
+      }
+    },
+    [
+      courseData?.name,
+      courseData?.url,
+      courseGuId,
+      formState.name,
+      navigate,
+      toast,
+      templateState.html,
+      templateState.json,
+      templateState.templateId,
+      tenantDetails?.orgId,
+    ],
+  );
+
+  const handleAiGenerate = useCallback(
+    async (field: 'name' | 'shortDescription') => {
+      try {
+        setAiLoadingField(field);
+        const generated = await courseAiService.generateField(field, aiContext);
+        setFormValues({ [field]: generated } as Partial<CourseFormState>);
+        if (field === 'shortDescription' && !formState.longDescription) {
+          setFormValues({ longDescription: generated });
+        }
+        toast.success(`AI suggestion applied to ${field === 'name' ? 'course name' : 'short description'}.`);
+      } catch (error: any) {
+        console.error('[AddEditCoursePage] AI generation failed', error);
+        toast.error(error?.message || 'Unable to generate content with AI.');
+      } finally {
+        setAiLoadingField(null);
+      }
+    },
+    [aiContext, formState.longDescription, setFormValues, toast],
+  );
+
+  const handleTagKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key !== 'Enter') {
+      return;
+    }
+    const value = event.currentTarget.value.trim();
+    if (!value || productTags.includes(value)) {
+      event.preventDefault();
+      event.currentTarget.value = '';
+      return;
+    }
+    const updated = [...productTags, value];
+    setProductTags(updated);
+    setFormValues({ productTagList: updated });
+    event.preventDefault();
+    event.currentTarget.value = '';
   };
 
-  const handleActivityClick = (activityId: string) => {
-    setSelectedActivity(activityId);
+  const removeTag = (tag: string) => {
+    const updated = productTags.filter((existing) => existing !== tag);
+    setProductTags(updated);
+    setFormValues({ productTagList: updated });
   };
 
-  const handleAddActivity = () => {
-    console.log('Add activity');
+  const toggleCategorySelection = (categoryId: string) => {
+    const updated = productCategories.includes(categoryId)
+      ? productCategories.filter((id) => id !== categoryId)
+      : [...productCategories, categoryId];
+    setProductCategories(updated);
+    setFormValues({ productCategoryId: updated });
+    setErrors((prev) => {
+      const next = { ...prev };
+      delete next.productCategoryId;
+      return next;
+    });
   };
 
-  const handleAddSection = () => {
-    console.log('Add section');
+  const handleAddCategory = async () => {
+    if (!tenantDetails?.tenantId) {
+      toast.error('Tenant configuration is missing.');
+      return;
+    }
+    if (!newCategoryName.trim()) {
+      return;
+    }
+    try {
+      const created = await courseDetailService.createCategory(tenantDetails.tenantId, {
+        name: newCategoryName.trim(),
+        description: newCategoryDescription.trim() || undefined,
+      });
+
+      setExistingCategories((prev) => [...prev, created]);
+      setFilteredCategories((prev) => [...prev, created]);
+      toggleCategorySelection(created.id);
+      setNewCategoryName('');
+      setNewCategoryDescription('');
+      setIsAddCategoryOpen(false);
+      toast.success('Category added successfully.');
+    } catch (error: any) {
+      console.error('[AddEditCoursePage] Failed to create category', error);
+      toast.error(error?.message || 'Failed to create category.');
+    }
   };
 
-  return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
-      {/* Enhanced Header */}
-      <div className="bg-card border-b-2 border-border shadow-sm">
-        <div className="px-6 py-5">
-          {/* Back Button & Title Row */}
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-4">
-              <button 
-                onClick={() => navigate('/admin/courses')}
-                className="p-2 hover:bg-muted rounded-lg transition-colors"
-              >
-                <ArrowLeft className="w-5 h-5 text-muted-foreground" />
-              </button>
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-                  <Smile className="w-7 h-7 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-2xl font-bold text-foreground">{mockCourse.title}</h1>
-                  <p className="text-sm text-muted-foreground mt-0.5">Course Management</p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-3 px-4 py-2 bg-muted/50 rounded-lg">
-                <span className="text-sm font-medium text-foreground">Private</span>
-                <Switch 
-                  checked={!mockCourse.isPrivate} 
-                  onCheckedChange={() => {}}
-                  className="data-[state=checked]:bg-green-500" 
-                />
-              </div>
-              <Button
-                variant="outline"
-                className="w-11 h-11 p-0 border-2"
-                title="Edit Course"
-              >
-                <Edit2 className="w-5 h-5" />
-              </Button>
-              <Button
-                variant="outline"
-                className="w-11 h-11 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950 border-2"
-                title="Delete Course"
-              >
-                <Trash2 className="w-5 h-5" />
-              </Button>
-            </div>
-          </div>
+  const renderTagChips = () => (
+    <div className="flex flex-wrap gap-2">
+      {productTags.map((tag) => (
+        <span
+          key={tag}
+          className="inline-flex items-center gap-1 rounded-full bg-primary-100 px-3 py-1 text-xs font-semibold text-primary-700 dark:bg-primary-900/30 dark:text-primary-300"
+        >
+          {tag}
+          <button
+            type="button"
+            className="text-primary-700 hover:text-primary-900 dark:text-primary-300 dark:hover:text-primary-100"
+            onClick={() => removeTag(tag)}
+            aria-label={`Remove ${tag}`}
+          >
+            ×
+          </button>
+        </span>
+      ))}
+    </div>
+  );
 
-          {/* Info Badges */}
-          <div className="flex items-center gap-4 flex-wrap">
-            <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-950 rounded-lg border border-blue-200 dark:border-blue-800">
-              <Users className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-              <span className="text-sm font-medium text-blue-900 dark:text-blue-100">
-                Current Batch: {mockCourse.currentBatch}
-              </span>
-            </div>
-            <div className="flex items-center gap-2 px-4 py-2 bg-green-50 dark:bg-green-950 rounded-lg border border-green-200 dark:border-green-800">
-              <Info className="w-4 h-4 text-green-600 dark:text-green-400" />
-              <span className="text-sm font-medium text-green-900 dark:text-green-100">Free Course</span>
-            </div>
-            <div className="flex items-center gap-2 px-4 py-2 bg-purple-50 dark:bg-purple-950 rounded-lg border border-purple-200 dark:border-purple-800">
-              <Eye className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-              <span className="text-sm text-purple-900 dark:text-purple-100">Preview:</span>
-              <a href="#" className="text-sm font-medium text-purple-600 dark:text-purple-400 hover:underline">
-                {mockCourse.previewUrl}
-              </a>
-              <button className="p-1 hover:bg-purple-100 dark:hover:bg-purple-900 rounded">
-                <Copy className="w-3 h-3 text-purple-600 dark:text-purple-400" />
-              </button>
-            </div>
-          </div>
-        </div>
+  const renderCategoryChips = () => (
+    <div className="flex flex-wrap gap-2">
+      {productCategories.map((categoryId) => {
+        const category = existingCategories.find((item) => item.id === categoryId);
+        return (
+          <span
+            key={categoryId}
+            className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300"
+          >
+            {category?.name || categoryId}
+            <button
+              type="button"
+              className="text-emerald-700 hover:text-emerald-900 dark:text-emerald-300 dark:hover:text-emerald-100"
+              onClick={() => toggleCategorySelection(categoryId)}
+              aria-label={`Remove ${category?.name || categoryId}`}
+            >
+              ×
+            </button>
+          </span>
+        );
+      })}
+    </div>
+  );
 
-        {/* Enhanced Tabs */}
-        <div className="border-t border-border">
-          <div className="flex gap-2 px-6">
-            {(['contents', 'attendees', 'pricing', 'activities', 'setup'] as TabType[]).map(tab => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={cn(
-                  "px-8 py-4 text-base font-semibold capitalize transition-all relative",
-                  activeTab === tab
-                    ? "text-cyan-600 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-950/50"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                )}
-              >
-                {tab}
-                {activeTab === tab && (
-                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-cyan-500 rounded-t-full" />
-                )}
-              </button>
-            ))}
-          </div>
+  if (isPageLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
+          <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Loading course details...</p>
         </div>
       </div>
+    );
+  }
 
-      {/* Contents Tab */}
-      {activeTab === 'contents' && (
-        <div className="flex h-[calc(100vh-280px)]">
-          {/* Enhanced Left Sidebar - Sections & Activities */}
-          <div className={cn(
-            "bg-card border-r-2 border-border overflow-y-auto shadow-sm transition-all duration-300 relative",
-            sidebarCollapsed ? "w-16" : "w-96"
-          )}>
-            {/* Collapse Toggle Button */}
+  return (
+    <div className="min-h-screen bg-slate-50 pb-8 dark:bg-slate-950">
+      <header className="border-b border-slate-200 bg-white/80 backdrop-blur dark:border-slate-800 dark:bg-slate-900/70">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-6 lg:px-10">
+          <div className="flex items-center gap-4">
             <button
-              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              className="absolute -right-3 top-6 z-10 w-6 h-6 bg-cyan-500 hover:bg-cyan-600 text-white rounded-full flex items-center justify-center shadow-lg transition-colors"
-              title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              type="button"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm hover:text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+              onClick={() => navigate('/admin/courses')}
+              aria-label="Back to courses"
             >
-              <ChevronRight className={cn(
-                "w-4 h-4 transition-transform",
-                !sidebarCollapsed && "rotate-180"
-              )} />
+              <ArrowLeft className="h-5 w-5" />
             </button>
-            <div className="p-6">
-              {!sidebarCollapsed && (
-                <div className="mb-6">
-                  <h3 className="text-lg font-bold text-foreground mb-2">Course Structure</h3>
-                  <p className="text-sm text-muted-foreground">Organize your course content into sections and activities</p>
-                </div>
-              )}
+            <div>
+              <h1 className="text-xl font-bold text-slate-900 dark:text-white">
+                Course Details
+              </h1>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <span
+              className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold ${
+                activeStep === 0
+                  ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300'
+                  : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+              }`}
+            >
+              {activeStep === 0 ? 'Step 1 of 2 · Basic Info' : 'Step 2 of 2 · Sales Page'}
+            </span>
+          </div>
+        </div>
+      </header>
 
-              {sections.map(section => (
-                <div key={section.id} className="mb-4">
-                  {/* Enhanced Section Header */}
-                  <div className={cn(
-                    "flex items-center justify-between rounded-xl mb-3 group transition-all border-2",
-                    section.isExpanded 
-                      ? "bg-cyan-50 dark:bg-cyan-950/30 border-cyan-200 dark:border-cyan-800" 
-                      : "bg-muted/50 border-transparent hover:border-muted-foreground/20",
-                    sidebarCollapsed ? "p-2" : "p-4"
-                  )}>
-                    <button
-                      onClick={() => toggleSection(section.id)}
-                      className="flex items-center gap-3 flex-1"
-                      title={sidebarCollapsed ? section.name : undefined}
-                    >
-                      <div className={cn(
-                        "p-1.5 rounded-lg transition-colors flex-shrink-0",
-                        section.isExpanded ? "bg-cyan-500 text-white" : "bg-muted text-muted-foreground"
-                      )}>
-                        {section.isExpanded ? (
-                          <ChevronDown className="w-5 h-5" />
+      <main className="mx-auto mt-8 max-w-5xl px-6 lg:px-8">
+        <div className="space-y-8">
+          {activeStep === 0 && (
+            <section className="rounded-3xl border border-slate-200 bg-white p-8 shadow-xl shadow-primary-500/5 dark:border-slate-800 dark:bg-slate-900">
+              <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_320px]">
+                <div className="space-y-8">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                        Course Name
+                      </label>
+                      <button
+                        type="button"
+                        className="relative inline-flex h-8 w-8 items-center justify-center rounded-md bg-transparent text-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-300 dark:text-primary-300 disabled:cursor-not-allowed"
+                        onClick={() => handleAiGenerate('name')}
+                        disabled={aiLoadingField === 'name'}
+                        aria-label="Generate course name with AI"
+                      >
+                        {aiLoadingField === 'name' ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
                         ) : (
-                          <ChevronRight className="w-5 h-5" />
+                          <span className="relative flex items-center justify-center">
+                            <Wand2 className="h-4 w-4 drop-shadow-sm" />
+                            <svg
+                              className="sparkle-star"
+                              style={{ top: '-14px', right: '-2px', animation: 'sparkle-burst 2.2s ease-in-out infinite' }}
+                              viewBox="0 0 10 10"
+                            >
+                              <polygon points="5 0 6.5 3.5 10 5 6.5 6.5 5 10 3.5 6.5 0 5 3.5 3.5" />
+                            </svg>
+                            <svg
+                              className="sparkle-star"
+                              style={{ bottom: '-14px', left: '-2px', animation: 'sparkle-burst 2.5s ease-in-out infinite 0.8s' }}
+                              viewBox="0 0 10 10"
+                            >
+                              <polygon points="5 0 6.5 3.5 10 5 6.5 6.5 5 10 3.5 6.5 0 5 3.5 3.5" />
+                            </svg>
+                          </span>
                         )}
-                      </div>
-                      {!sidebarCollapsed && (
-                        <div className="flex items-center gap-2">
-                          <GripVertical className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                          <span className="font-bold text-base text-foreground">{section.name}</span>
-                        </div>
+                      </button>
+                    </div>
+                    <div className="relative">
+                       <input
+                        type="text"
+                        value={formState.name}
+                        onChange={(event) => setFormValues({ name: event.target.value })}
+                        placeholder="Enter course name"
+                        className={`w-full rounded-lg border bg-slate-50 px-4 py-3 text-sm font-medium text-slate-900 transition focus:border-primary-400 focus:bg-white focus:ring-2 focus:ring-primary-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:bg-slate-900 ${
+                          errors.name ? 'border-red-400 focus:ring-red-200' : 'border-slate-200'
+                        }`}
+                      />
+                    </div>
+                    {errors.name && (
+                      <p className="text-xs font-medium text-red-500">{errors.name}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                        Short Description
+                      </label>
+                      <button
+                        type="button"
+                        className="relative inline-flex h-8 w-8 items-center justify-center rounded-md bg-transparent text-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-300 dark:text-primary-300 disabled:cursor-not-allowed"
+                        onClick={() => handleAiGenerate('shortDescription')}
+                        disabled={aiLoadingField === 'shortDescription'}
+                        aria-label="Generate short description with AI"
+                      >
+                        {aiLoadingField === 'shortDescription' ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <span className="relative flex items-center justify-center">
+                            <Wand2 className="h-4 w-4 drop-shadow-sm" />
+                            <svg
+                              className="sparkle-star"
+                              style={{ top: '-14px', left: '-2px', animation: 'sparkle-burst 2.1s ease-in-out infinite 0.3s' }}
+                              viewBox="0 0 10 10"
+                            >
+                              <polygon points="5 0 6.5 3.5 10 5 6.5 6.5 5 10 3.5 6.5 0 5 3.5 3.5" />
+                            </svg>
+                            <svg
+                              className="sparkle-star"
+                              style={{ bottom: '-14px', right: '-2px', animation: 'sparkle-burst 2.6s ease-in-out infinite 1s' }}
+                              viewBox="0 0 10 10"
+                            >
+                              <polygon points="5 0 6.5 3.5 10 5 6.5 6.5 5 10 3.5 6.5 0 5 3.5 3.5" />
+                            </svg>
+                          </span>
+                        )}
+                      </button>
+                    </div>
+                    <div className="rounded-xl border border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800">
+                      <textarea
+                        value={formState.shortDescription}
+                        onChange={(event) => setFormValues({ shortDescription: event.target.value })}
+                        placeholder="Describe your course in a short, engaging way."
+                        maxLength={600}
+                        rows={4}
+                        className="w-full rounded-lg border-0 bg-transparent px-4 py-3 text-sm text-slate-900 focus:ring-0 dark:text-slate-100"
+                      />
+                    </div>
+                    <div className="flex items-center justify-between text-xs font-medium text-slate-500">
+                      <span className={formState.shortDescription.length > 255 ? 'text-red-500' : ''}>
+                        {formState.shortDescription.length}/255 characters
+                      </span>
+                      {errors.shortDescription && (
+                        <span className="text-red-500">{errors.shortDescription}</span>
                       )}
-                    </button>
-                    {!sidebarCollapsed && (
-                      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button className="p-2 hover:bg-cyan-100 dark:hover:bg-cyan-900 rounded-lg transition-colors">
-                          <Edit2 className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
+                    </div>
+                  </div>
+
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800">
+                    <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                      Author
+                    </p>
+                    <p className="mt-1 text-xs text-slate-500">
+                      Choose whether this course is hosted by the organization or a teacher.
+                    </p>
+                    <div className="mt-4 inline-flex rounded-full bg-white p-1 shadow-inner dark:bg-slate-900">
+                      {(['organization', 'teacher'] as const).map((option) => (
+                        <button
+                          key={option}
+                          type="button"
+                          onClick={() => setFormValues({ authorType: option, authorId: '' })}
+                          className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition ${
+                            formState.authorType === option
+                              ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30'
+                              : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+                          }`}
+                        >
+                          <User className="h-4 w-4" />
+                          {option === 'organization' ? 'Organization' : 'Teacher'}
                         </button>
-                        <button className="p-2 hover:bg-red-100 dark:hover:bg-red-900 rounded-lg transition-colors">
-                          <Trash2 className="w-4 h-4 text-red-600 dark:text-red-400" />
-                        </button>
+                      ))}
+                    </div>
+
+                    {formState.authorType === 'teacher' && (
+                      <div className="mt-4 space-y-2">
+                        <label className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                          Select Teacher
+                        </label>
+                        <div className="relative">
+                          <select
+                            value={formState.authorId}
+                            onChange={(event) => setFormValues({ authorId: event.target.value })}
+                            className={`w-full appearance-none rounded-lg border bg-white px-4 py-3 pr-10 text-sm font-medium text-slate-900 shadow-sm transition focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 ${
+                              errors.authorId ? 'border-red-400 focus:ring-red-200' : ''
+                            }`}
+                          >
+                            <option value="">Select teacher</option>
+                            {staffList.map((staff) => (
+                              <option key={staff.guId} value={staff.guId}>
+                                {staff.name}
+                              </option>
+                            ))}
+                          </select>
+                          <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                        </div>
+                        {errors.authorId && (
+                          <p className="text-xs font-medium text-red-500">{errors.authorId}</p>
+                        )}
                       </div>
                     )}
                   </div>
 
-                  {/* Enhanced Activities */}
-                  {section.isExpanded && !sidebarCollapsed && (
-                    <div className="space-y-2 ml-4 pl-4 border-l-2 border-cyan-200 dark:border-cyan-800">
-                      {section.activities.map(activity => (
-                        <button
-                          key={activity.id}
-                          onClick={() => handleActivityClick(activity.id)}
-                          className={cn(
-                            "w-full flex items-center justify-between p-4 rounded-xl text-left transition-all group border-2",
-                            selectedActivity === activity.id
-                              ? "bg-cyan-500 text-white shadow-lg shadow-cyan-500/20 border-cyan-600"
-                              : "bg-card hover:bg-muted border-transparent hover:border-muted-foreground/20"
-                          )}
-                        >
-                          <div className="flex items-center gap-3 flex-1">
-                            <GripVertical className={cn(
-                              "w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity",
-                              selectedActivity === activity.id ? "text-white/70" : "text-muted-foreground"
-                            )} />
-                            <FileText className={cn(
-                              "w-5 h-5",
-                              selectedActivity === activity.id ? "text-white" : "text-cyan-500"
-                            )} />
-                            <span className={cn(
-                              "font-medium text-base",
-                              selectedActivity === activity.id ? "text-white" : "text-foreground"
-                            )}>
-                              {activity.name}
-                            </span>
-                          </div>
-                          <Edit2 className={cn(
-                            "w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity",
-                            selectedActivity === activity.id ? "text-white/70" : "text-cyan-500"
-                          )} />
-                        </button>
-                      ))}
-                      
-                      {/* Add Activity Button - Inside Section */}
-                      <button
-                        onClick={handleAddActivity}
-                        className="w-full flex items-center gap-2 p-3 rounded-lg text-left transition-colors border-2 border-dashed border-cyan-300 dark:border-cyan-700 hover:bg-cyan-50 dark:hover:bg-cyan-950 text-cyan-600 dark:text-cyan-400"
-                      >
-                        <Plus className="w-4 h-4" />
-                        <span className="text-sm font-medium">Add Activity</span>
-                      </button>
+                  <div className="space-y-3">
+                    <label className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                      Product Tags
+                    </label>
+                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800">
+                      <div className="flex items-center gap-3">
+                        <Tag className="h-5 w-5 text-slate-400" />
+                        <input
+                          type="text"
+                          placeholder="Add tag and press Enter"
+                          onKeyDown={handleTagKeyDown}
+                          className="flex-1 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-900 focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-200 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+                        />
+                      </div>
+                      <div className="mt-4">{renderTagChips()}</div>
                     </div>
-                  )}
+                  </div>
                 </div>
-              ))}
 
-              {/* Enhanced Action Buttons */}
-              {!sidebarCollapsed && (
-                <div className="mt-6 pt-4 border-t border-border">
-                  <button
-                    onClick={handleAddSection}
-                    className="w-full flex items-center gap-2 p-3 rounded-lg text-left transition-colors border-2 border-dashed border-blue-300 dark:border-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950 text-blue-600 dark:text-blue-400"
-                  >
-                    <Plus className="w-4 h-4" />
-                    <span className="text-sm font-medium">Add Section</span>
-                  </button>
+                <aside className="space-y-8">
+                  <div className="rounded-3xl border border-slate-200 bg-slate-100 p-4 dark:border-slate-700 dark:bg-slate-800">
+                    <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
+                      <img
+                        src={bannerImageUrl}
+                        alt="Course banner"
+                        className="h-48 w-full rounded-2xl object-cover"
+                        onError={(event) => {
+                          event.currentTarget.src = PLACEHOLDER_IMAGE;
+                        }}
+                      />
+                      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900/70 to-transparent p-4">
+                        <p className="text-sm font-semibold text-white">Course Banner</p>
+                        <p className="text-xs text-slate-200">Recommended ratio 3:2</p>
+                      </div>
+                    </div>
+                    <div className="mt-3 flex items-center gap-2">
+                      <Button
+                        variant="secondary"
+                        className="flex-1 justify-center rounded-xl bg-white text-slate-600 shadow-sm hover:bg-slate-100 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+                        onClick={() => {
+                          const newPublicId = prompt(
+                            'Enter Cloudinary public ID or image URL',
+                            formState.image1,
+                          );
+                          if (newPublicId !== null) {
+                            setFormValues({ image1: newPublicId.trim() });
+                          }
+                        }}
+                      >
+                        <UploadCloud className="mr-2 h-4 w-4" />
+                        Change Image
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <label className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                      Duration
+                    </label>
+                    <div className="relative">
+                      <select
+                        value={formState.durationStr}
+                        onChange={(event) => setFormValues({ durationStr: event.target.value })}
+                        className="w-full appearance-none rounded-lg border border-slate-200 bg-white px-4 py-3 pr-10 text-sm font-medium text-slate-900 shadow-sm focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                      >
+                        {DURATION_OPTIONS.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <label className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                      Product Categories
+                    </label>
+                    <div className="relative">
+                      <button
+                        type="button"
+                        className="flex w-full items-center justify-between rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-900 shadow-sm transition focus:outline-none focus:ring-2 focus:ring-primary-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                        onClick={() => setCategoryDropdownOpen((prev) => !prev)}
+                        aria-expanded={categoryDropdownOpen}
+                      >
+                        <span className="truncate">
+                          {productCategories.length ? `${productCategories.length} selected` : 'Select categories'}
+                        </span>
+                      </button>
+                      <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-slate-400">
+                        {categoryDropdownOpen ? (
+                          <ChevronUp className="h-4 w-4" />
+                        ) : (
+                          <ChevronDown className="h-4 w-4" />
+                        )}
+                      </div>
+                    </div>
+                      {categoryDropdownOpen && (
+                      <div className="mt-3 rounded-lg border border-slate-200 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-900">
+                          <div className="border-b border-slate-200 px-4 py-2 dark:border-slate-700">
+                            <input
+                              type="text"
+                              placeholder="Search categories..."
+                              value={categorySearchQuery}
+                              onChange={(event) => setCategorySearchQuery(event.target.value)}
+                              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-200 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+                            />
+                          </div>
+                          <div className="max-h-56 overflow-y-auto px-4 py-3">
+                            {filteredCategories.length === 0 ? (
+                              <p className="text-xs text-slate-400">No categories found.</p>
+                            ) : (
+                              filteredCategories.map((category) => (
+                                <label
+                                  key={category.id}
+                                  className="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-2 text-sm text-slate-600 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
+                                >
+                                  <input
+                                    type="checkbox"
+                                    className="h-4 w-4 rounded border-slate-300 text-primary-500 focus:ring-primary-500"
+                                    checked={productCategories.includes(category.id)}
+                                    onChange={() => toggleCategorySelection(category.id)}
+                                  />
+                                  <div>
+                                    <p className="font-semibold text-slate-700 dark:text-slate-100">
+                                      {category.name}
+                                    </p>
+                                    {category.description && (
+                                      <p className="text-xs text-slate-400">{category.description}</p>
+                                    )}
+                                  </div>
+                                </label>
+                              ))
+                            )}
+                          </div>
+                          <div className="flex border-t border-slate-200 px-4 py-3 dark:border-slate-700">
+                            <Button
+                              variant="secondary"
+                              className="w-full justify-center rounded-xl border border-dashed border-primary-400 bg-primary-50 text-primary-600 hover:bg-primary-100 dark:border-primary-700 dark:bg-primary-900/20 dark:text-primary-300 dark:hover:bg-primary-900/30"
+                              onClick={() => setIsAddCategoryOpen(true)}
+                            >
+                              <PlusCircle className="mr-2 h-4 w-4" />
+                              Add New Category
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                      <div className="mt-4 space-y-2">
+                        {renderCategoryChips()}
+                        {errors.productCategoryId && (
+                          <p className="text-xs font-medium text-red-500">
+                            {errors.productCategoryId}
+                          </p>
+                        )}
+                      </div>
+                  </div>
+
+                </aside>
+              </div>
+
+              <div className="mt-10 flex items-center justify-end gap-3">
+                <Button
+                  variant="secondary"
+                  className="rounded-xl border border-slate-200 bg-white px-6 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+                  onClick={() => navigate('/admin/courses')}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="rounded-xl bg-primary-600 px-6 py-2 text-sm font-semibold text-white shadow-md shadow-primary-500/30 transition hover:bg-primary-700"
+                  onClick={handleNextStep}
+                  disabled={isSaving || aiLoadingField === 'longDescription'}
+                >
+                  {isSaving ? (
+                    <span className="flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Saving...
+                    </span>
+                  ) : (
+                    'Save & Continue'
+                  )}
+                </Button>
+              </div>
+            </section>
+          )}
+
+          {activeStep === 1 && (
+            <section className="space-y-8">
+              <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-xl shadow-primary-500/5 dark:border-slate-800 dark:bg-slate-900">
+                <header className="flex flex-wrap items-center justify-between gap-4">
+                  <div>
+                    <p className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-400">
+                      Sales Page
+                    </p>
+                    <h2 className="mt-1 text-2xl font-bold text-slate-900 dark:text-white">
+                      Template Preview
+                    </h2>
+                    <p className="text-sm text-slate-500 dark:text-slate-300">
+                      Customize the course landing page content. Editor integration will be added soon.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="secondary"
+                      className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+                      onClick={() => setActiveStep(0)}
+                    >
+                      Back to Basic Info
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      className="rounded-xl border border-primary-200 bg-primary-50 px-4 py-2 text-sm font-semibold text-primary-600 hover:bg-primary-100 dark:border-primary-800 dark:bg-primary-900/20 dark:text-primary-300 dark:hover:bg-primary-900/30"
+                      onClick={async () => {
+                        toast.info('Template regeneration is coming soon. Using placeholder template for now.');
+                        setTemplateState({
+                          html: DEFAULT_TEMPLATE_HTML,
+                          json: {},
+                          templateId: templateState.templateId,
+                        });
+                      }}
+                    >
+                      <RefreshCcw className="mr-2 h-4 w-4" />
+                      Regenerate Template
+                    </Button>
+                  </div>
+                </header>
+
+                <div className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 dark:border-slate-700 dark:bg-slate-800/60">
+                  <textarea
+                    value={templateState.html}
+                    onChange={(event) =>
+                      setTemplateState((prev) => ({ ...prev, html: event.target.value }))
+                    }
+                    rows={14}
+                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm leading-relaxed text-slate-800 shadow-sm focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                    placeholder="Paste or compose HTML template here..."
+                  />
+                  <p className="mt-2 text-xs text-slate-400">
+                    Use this area as a temporary editor until the GrapesJS designer is integrated.
+                  </p>
                 </div>
-              )}
+
+                <div className="mt-6">
+                  <label className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">
+                    Template Metadata (JSON)
+                  </label>
+                  <textarea
+                    value={JSON.stringify(templateState.json, null, 2)}
+                    onChange={(event) => {
+                      try {
+                        const parsed = JSON.parse(event.target.value);
+                        setTemplateState((prev) => ({ ...prev, json: parsed }));
+                        toast.success('Template structure updated.');
+                      } catch (error) {
+                        toast.error('Invalid JSON structure.');
+                      }
+                    }}
+                    rows={6}
+                    className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 font-mono text-xs leading-6 text-slate-700 shadow-sm focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                    placeholder="{ }"
+                  />
+                </div>
+
+                <div className="mt-8 flex flex-wrap items-center justify-end gap-3">
+                  <Button
+                    variant="secondary"
+                    className="rounded-xl border border-slate-200 bg-white px-6 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+                    onClick={() => setActiveStep(0)}
+                  >
+                    Previous
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    className="rounded-xl border border-primary-200 bg-primary-50 px-6 py-2 text-sm font-semibold text-primary-600 hover:bg-primary-100 dark:border-primary-800 dark:bg-primary-900/20 dark:text-primary-300 dark:hover:bg-primary-900/30"
+                    onClick={() => handleTemplateSave(false)}
+                    disabled={isTemplateSaving}
+                  >
+                    {isTemplateSaving ? (
+                      <span className="flex items-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Saving...
+                      </span>
+                    ) : (
+                      'Save'
+                    )}
+                  </Button>
+                  <Button
+                    className="rounded-xl bg-primary-600 px-6 py-2 text-sm font-semibold text-white shadow-md shadow-primary-500/30 transition hover:bg-primary-700"
+                    onClick={() => handleTemplateSave(true)}
+                    disabled={isTemplateSaving}
+                  >
+                    {isTemplateSaving ? (
+                      <span className="flex items-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Publishing...
+                      </span>
+                    ) : (
+                      'Submit Course'
+                    )}
+                  </Button>
+                </div>
+              </div>
+
+              <div className="rounded-3xl border border-slate-200 bg-white p-8 text-sm text-slate-500 shadow-xl shadow-primary-500/5 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
+                <h3 className="text-lg font-semibold text-slate-800 dark:text-white">
+                  What happens next?
+                </h3>
+                <ul className="mt-3 list-disc space-y-2 pl-5">
+                  <li>
+                    We’ll integrate the full GrapesJS experience in this panel. The save/submit buttons already call the real template APIs so your data model is in place.
+                  </li>
+                  <li>
+                    When the designer is ready, plug the HTML and JSON outputs into the same state setter used above.
+                  </li>
+                  <li>
+                    You can revisit the basic information at any time by using the “Back to Basic Info” button.
+                  </li>
+                </ul>
+              </div>
+            </section>
+          )}
+        </div>
+      </main>
+
+      {isAddCategoryOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur">
+          <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900">
+            <h3 className="text-xl font-semibold text-slate-900 dark:text-white">Add Category</h3>
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-300">
+              Create a category to keep related courses grouped together.
+            </p>
+            <div className="mt-4 space-y-4">
+              <div>
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                  Category Name
+                </label>
+                <input
+                  type="text"
+                  value={newCategoryName}
+                  onChange={(event) => setNewCategoryName(event.target.value)}
+                  className="mt-2 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 focus:border-primary-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                  Description <span className="text-xs text-slate-400">(optional)</span>
+                </label>
+                <textarea
+                  value={newCategoryDescription}
+                  onChange={(event) => setNewCategoryDescription(event.target.value)}
+                  rows={3}
+                  className="mt-2 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 focus:border-primary-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                />
+              </div>
+            </div>
+            <div className="mt-6 flex items-center justify-end gap-3">
+              <Button
+                variant="secondary"
+                className="rounded-xl border border-slate-200 bg-white px-6 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+                onClick={() => {
+                  setIsAddCategoryOpen(false);
+                  setNewCategoryName('');
+                  setNewCategoryDescription('');
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                className="rounded-xl bg-primary-600 px-6 py-2 text-sm font-semibold text-white shadow-md shadow-primary-500/30 transition hover:bg-primary-700"
+                onClick={handleAddCategory}
+              >
+                Save Category
+              </Button>
             </div>
           </div>
-
-          {/* Enhanced Right Panel - Activity Details */}
-          <div className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-950">
-            {currentActivity ? (
-              <div className="p-8 max-w-6xl mx-auto">
-                {/* Enhanced Activity Header */}
-                <div className="bg-card border-2 border-border rounded-2xl p-6 mb-6 shadow-sm">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
-                        <FileText className="w-7 h-7 text-white" />
-                      </div>
-                      <div>
-                        <h2 className="text-2xl font-bold text-foreground">{currentActivity.name}</h2>
-                        <p className="text-sm text-muted-foreground mt-1">Activity Configuration</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center gap-3 px-4 py-2 bg-muted/50 rounded-lg">
-                        <span className="text-sm font-medium text-foreground">Private</span>
-                        <Switch checked={false} onCheckedChange={() => {}} />
-                      </div>
-                      <Button 
-                        variant="outline"
-                        className="w-11 h-11 p-0"
-                        title="Batches"
-                      >
-                        <Users className="w-5 h-5" />
-                      </Button>
-                      <Button 
-                        variant="outline"
-                        className="w-11 h-11 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
-                        title="Delete Activity"
-                      >
-                        <Trash2 className="w-5 h-5" />
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-950 rounded-lg border border-blue-200 dark:border-blue-800 w-fit">
-                    <Info className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                    <span className="text-sm font-medium text-blue-900 dark:text-blue-100">
-                      Current Batch: Current
-                    </span>
-                  </div>
-                </div>
-
-                {/* Enhanced Basic Info Section */}
-                <div className="bg-card border-2 border-border rounded-2xl p-6 mb-6 shadow-sm">
-                  <h3 className="text-lg font-bold text-foreground mb-5 flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-cyan-100 dark:bg-cyan-900 flex items-center justify-center">
-                      <Edit2 className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
-                    </div>
-                    Basic Information
-                  </h3>
-                  <div className="space-y-5">
-                    <div>
-                      <label className="block text-sm font-bold text-foreground mb-2">
-                        Activity Name <span className="text-red-500">*</span>
-                      </label>
-                      <Input
-                        type="text"
-                        value={currentActivity.name}
-                        className="bg-background h-12 text-base border-2"
-                        placeholder="Enter activity name visible to members"
-                      />
-                      <p className="text-xs text-muted-foreground mt-2">This name will be displayed to students</p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-bold text-foreground mb-2">
-                        Short Description
-                      </label>
-                      <Textarea
-                        value={currentActivity.shortDescription || ''}
-                        className="bg-background min-h-[120px] text-base border-2"
-                        placeholder="Provide a brief description of this activity"
-                      />
-                      <p className="text-xs text-muted-foreground mt-2">
-                        Help students understand what this activity covers
-                      </p>
-                    </div>
-
-                    {/* Collapsible Slugs */}
-                    <details className="group">
-                      <summary className="flex items-center gap-2 text-base font-semibold text-foreground cursor-pointer hover:text-cyan-600 dark:hover:text-cyan-400 py-3">
-                        <ChevronRight className="w-5 h-5 transition-transform group-open:rotate-90 text-cyan-500" />
-                        Advanced Settings (Mobile & Date Slugs)
-                      </summary>
-                      <div className="pl-7 pt-3 space-y-4">
-                        <div>
-                          <label className="block text-sm font-semibold text-foreground mb-2">Mobile Slug</label>
-                          <Input className="bg-background h-12 border-2" placeholder="mobile-slug" />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-semibold text-foreground mb-2">Date Slug</label>
-                          <Input className="bg-background h-12 border-2" placeholder="date-slug" />
-                        </div>
-                      </div>
-                    </details>
-                  </div>
-                </div>
-
-                {/* Enhanced Content Type Tabs */}
-                <div className="bg-card border-2 border-border rounded-2xl p-6 mb-6 shadow-sm">
-                  <h3 className="text-lg font-bold text-foreground mb-5">Activity Type</h3>
-                  <div className="grid grid-cols-3 gap-4 mb-6">
-                    {([
-                      { type: 'content', icon: FileText, label: 'Content', color: 'cyan' },
-                      { type: 'assessment', icon: ClipboardCheck, label: 'Assessment', color: 'purple' },
-                      { type: 'form', icon: ListChecks, label: 'Form', color: 'orange' }
-                    ] as const).map(tab => (
-                      <button
-                        key={tab.type}
-                        onClick={() => setContentTab(tab.type)}
-                        className={cn(
-                          "p-5 rounded-xl text-base font-bold transition-all border-2 flex items-center justify-center gap-3",
-                          contentTab === tab.type
-                            ? `bg-${tab.color}-500 text-white shadow-lg shadow-${tab.color}-500/30 border-${tab.color}-600 scale-105`
-                            : "bg-muted text-foreground hover:bg-muted/80 border-transparent hover:border-muted-foreground/20"
-                        )}
-                      >
-                        <tab.icon className="w-6 h-6" />
-                        {tab.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Enhanced Media Section */}
-                <div className="bg-card border-2 border-border rounded-2xl p-6 mb-6 shadow-sm">
-                  <h3 className="text-lg font-bold text-foreground mb-5 flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900 flex items-center justify-center">
-                      <Upload className="w-4 h-4 text-green-600 dark:text-green-400" />
-                    </div>
-                    Media Content
-                  </h3>
-                  <button className="w-full flex items-start gap-4 text-left hover:bg-muted/50 p-6 rounded-xl transition-all border-2 border-dashed border-muted-foreground/30 hover:border-cyan-500 hover:bg-cyan-50 dark:hover:bg-cyan-950">
-                    <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center flex-shrink-0 shadow-lg">
-                      <Plus className="w-7 h-7 text-white" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-bold text-lg text-foreground mb-2">Add Content</div>
-                      <div className="text-base text-muted-foreground leading-relaxed">
-                        Upload images, videos, audio files, or PDFs
-                      </div>
-                      <div className="text-sm text-muted-foreground mt-2 font-medium">
-                        📄 PDF: Max 20MB • 🎥 Video: Max 2GB
-                      </div>
-                    </div>
-                  </button>
-                </div>
-
-                {/* Enhanced Downloadable Resources */}
-                <div className="bg-card border-2 border-border rounded-2xl p-6 mb-6 shadow-sm">
-                  <h3 className="text-lg font-bold text-foreground mb-5 flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
-                      <Download className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                    </div>
-                    Downloadable Resources
-                  </h3>
-                  <button className="w-full flex items-start gap-4 text-left hover:bg-muted/50 p-6 rounded-xl transition-all border-2 border-dashed border-muted-foreground/30 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950">
-                    <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center flex-shrink-0 shadow-lg">
-                      <Plus className="w-7 h-7 text-white" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-bold text-lg text-foreground mb-2">Add Downloadable Resources</div>
-                      <div className="text-base text-muted-foreground leading-relaxed">
-                        Students can download these materials for offline access
-                      </div>
-                      <div className="text-sm text-muted-foreground mt-2 font-medium">
-                        🎥 Max file size: 2GB for Videos
-                      </div>
-                    </div>
-                  </button>
-                </div>
-
-                {/* Enhanced Settings */}
-                <div className="bg-card border-2 border-border rounded-2xl p-6 mb-6 shadow-sm">
-                  <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900 flex items-center justify-center">
-                      <ListChecks className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                    </div>
-                    Activity Settings
-                  </h3>
-                  <div className="space-y-2">
-                    <label className="flex items-center gap-3 cursor-pointer p-3 rounded-lg hover:bg-muted/30 transition-colors">
-                      <Checkbox 
-                        checked={currentActivity.settings.trackActivity}
-                        className="w-4 h-4 flex-shrink-0"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium text-sm text-foreground">Track Activity Completion</div>
-                        <div className="text-xs text-muted-foreground mt-0.5">
-                          Students will be able to mark this lesson as complete.
-                        </div>
-                      </div>
-                    </label>
-
-                    <label className="flex items-center gap-3 cursor-pointer p-3 rounded-lg hover:bg-muted/30 transition-colors">
-                      <Checkbox 
-                        checked={currentActivity.settings.hideOnTOC}
-                        className="w-4 h-4 flex-shrink-0"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium text-sm text-foreground">Hide from Table of Contents</div>
-                        <div className="text-xs text-muted-foreground mt-0.5">
-                          This activity will not appear in the course table of contents.
-                        </div>
-                      </div>
-                    </label>
-
-                    <label className="flex items-center gap-3 cursor-pointer p-3 rounded-lg hover:bg-muted/30 transition-colors">
-                      <Checkbox 
-                        checked={currentActivity.settings.repeatActivity}
-                        className="w-4 h-4 flex-shrink-0"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium text-sm text-foreground">Allow Multiple Attempts</div>
-                        <div className="text-xs text-muted-foreground mt-0.5">
-                          Students can complete this assessment, activity, or form multiple times.
-                        </div>
-                      </div>
-                    </label>
-
-                    <label className="flex items-center gap-3 cursor-pointer p-3 rounded-lg hover:bg-muted/30 transition-colors">
-                      <Checkbox 
-                        checked={currentActivity.settings.allowHomeworkUploads}
-                        className="w-4 h-4 flex-shrink-0"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium text-sm text-foreground">Enable Homework Uploads</div>
-                        <div className="text-xs text-muted-foreground mt-0.5">
-                          Students will be prompted to upload a file or video to complete this activity.
-                        </div>
-                      </div>
-                    </label>
-
-                    <label className="flex items-center gap-3 cursor-pointer p-3 rounded-lg hover:bg-muted/30 transition-colors">
-                      <Checkbox 
-                        checked={currentActivity.settings.allowDemoActivity}
-                        className="w-4 h-4 flex-shrink-0"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium text-sm text-foreground">Show in Demo Access</div>
-                        <div className="text-xs text-muted-foreground mt-0.5">
-                          Students with demo access will be able to see and access this activity.
-                        </div>
-                      </div>
-                    </label>
-                  </div>
-                </div>
-
-                {/* Enhanced Submit Button */}
-                <div className="flex gap-4 justify-end pt-4">
-                  <Button 
-                    variant="outline" 
-                    size="lg"
-                    className="px-8 text-base font-semibold h-14"
-                  >
-                    Cancel
-                  </Button>
-                  <Button 
-                    size="lg"
-                    className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white px-12 text-base font-bold h-14 shadow-lg shadow-cyan-500/30"
-                  >
-                    Save Changes
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center h-full p-8">
-                <div className="w-32 h-32 rounded-full bg-muted flex items-center justify-center mb-6">
-                  <FileText className="w-16 h-16 text-muted-foreground" />
-                </div>
-                <h3 className="text-xl font-bold text-foreground mb-2">No Activity Selected</h3>
-                <p className="text-base text-muted-foreground text-center max-w-md">
-                  Select an activity from the left sidebar to view and edit its details
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Placeholder for other tabs */}
-      {activeTab !== 'contents' && (
-        <div className="flex items-center justify-center h-64">
-          <p className="text-muted-foreground capitalize">{activeTab} content coming soon...</p>
         </div>
       )}
     </div>
   );
-}
+};
+
+export default AddEditCoursePage;
+

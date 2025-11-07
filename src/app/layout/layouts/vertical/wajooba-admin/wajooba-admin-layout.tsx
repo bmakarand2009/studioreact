@@ -8,7 +8,7 @@ import VerticalNavigation from '@/components/navigation/vertical-navigation';
 import Header from '@/components/layout/header';
 
 import { Button } from '@/components/ui';
-import { MenuIcon, XIcon, PinIcon, Pin } from 'lucide-react';
+import { MenuIcon, XIcon } from 'lucide-react';
 
 interface WajoobaAdminLayoutProps {
   children: ReactNode;
@@ -85,21 +85,6 @@ export default function WajoobaAdminLayout({ children }: WajoobaAdminLayoutProps
             : 'w-20 lg:relative'
         }`}
       >
-        {/* Pin Button - Desktop Only */}
-        {!isScreenSmall && (
-          <button
-            onClick={togglePin}
-            className={`absolute top-4 right-4 z-10 p-2 rounded-lg transition-all ${
-              sidebarPinned
-                ? 'bg-cyan-500 text-white hover:bg-cyan-600'
-                : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
-            }`}
-            title={sidebarPinned ? 'Unpin sidebar' : 'Pin sidebar'}
-          >
-            <Pin className={`w-4 h-4 transition-transform ${sidebarPinned ? 'rotate-0' : 'rotate-45'}`} />
-          </button>
-        )}
-
         <VerticalNavigation
           navigation={currentNavigation}
           user={displayUser}
@@ -122,6 +107,8 @@ export default function WajoobaAdminLayout({ children }: WajoobaAdminLayoutProps
         {/* Header */}
         <Header
           onMenuClick={toggleSidebar}
+          onTogglePin={togglePin}
+          sidebarPinned={sidebarPinned}
           user={displayUser}
           navigation={memoizedNavigation}
         />
