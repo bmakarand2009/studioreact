@@ -15,7 +15,7 @@
 export const environment = {
   // API Configuration
   api: {
-    baseUrl: import.meta.env.VITE_API_URL || 'https://api.wajooba.me',
+    baseUrl: import.meta.env.VITE_API_URL,
     timeout: 30000,
     retryAttempts: 3,
   },

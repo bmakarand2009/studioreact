@@ -3,7 +3,7 @@ export const APP_CONFIG = {
   name: 'Wisely-React',
   version: '1.0.0',
   description: 'Enterprise-Grade Learning Management System',
-  apiBaseUrl: import.meta.env.VITE_API_URL || 'https://api.wajooba.me',
+  apiBaseUrl: import.meta.env.VITE_API_URL,
   environment: import.meta.env.MODE || (import.meta.env.DEV ? 'development' : 'production'),
 } as const;
 
