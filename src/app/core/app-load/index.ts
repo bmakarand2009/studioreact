@@ -196,6 +196,7 @@ export class AppLoadService {
     this._hostName = typeof window !== 'undefined' ? window.location.hostname : '';
     // For development, use a default host ID if we can't extract one
     this._hostId = this._hostName.split('.')[0] || 'dev';
+    console.log('AppLoadService: Constructor: hostName: ', this._hostName, 'hostId: ', this._hostId);
   }
 
   /**
@@ -231,21 +232,6 @@ export class AppLoadService {
    */
   private async _performInitialization(): Promise<TenantDetails | null> {
     try {
-      const disableDomainCheck = import.meta.env.VITE_DISABLE_DOMAIN_CHECK === 'true';
-
-      const isDevelopmentHostname =
-        this._hostName === 'localhost' ||
-        this._hostName === '127.0.0.1' ||
-        this._hostName.startsWith('localhost:');
-
-      const isDevelopmentMode = import.meta.env.MODE === 'development';
-      
-      // Check if we're on Lovable preview
-      const isLovablePreview = this._hostName.includes('lovableproject.com') || 
-                               this._hostName.includes('lovable.app') || 
-                               this._hostName.includes('lovable.dev');
-      
-      const isDevelopment = isDevelopmentHostname || isDevelopmentMode || isLovablePreview;
       // TBD it has been taken out to nesure application works in lovable.dev
       // const isAllowedDomain = this._allowedDomains.some((domain) => this._hostName.endsWith(domain));
       // console.log(`AppLoadService: Domain check - isDevelopment: ${isDevelopment}, isAllowedDomain: ${isAllowedDomain}, isLovablePreview: ${isLovablePreview}`);
@@ -257,14 +243,25 @@ export class AppLoadService {
       // }
 
       // Check if dev mode is enabled via environment variable
-      const isDevMode = import.meta.env.VITE_IS_DEV_MODE === 'true';
-      const devTenantName = import.meta.env.VITE_DEV_TENANT_NAME || 'marksampletest';
+      // 0 = dev mode enabled, 1 = dev mode disabled
+      // Convert to number since env vars are strings in Vite
+      const devModeValue = Number(import.meta.env.VITE_IS_DEV_MODE);
+      const isDevMode = devModeValue === 0;
       
-      // Use dev tenant name if in dev mode, otherwise use hostname-based tenant ID
-      const tenantName = isDevMode ? devTenantName : this._hostId;
+      // Determine tenant name: use dev tenant from .env if dev mode is on, otherwise use hostId
+      let tenantName: string;
+      if (isDevMode) {
+        // Dev mode: use tenant name from .env file
+        tenantName = import.meta.env.VITE_DEV_TENANT_NAME || 'marksampletest';
+        console.log(`AppLoadService: Dev mode enabled - using tenant from .env: ${tenantName}`);
+      } else {
+        // Normal mode: use hostId extracted from hostname
+        tenantName = this._hostId;
+        console.log(`AppLoadService: Normal mode - using hostId: ${tenantName}`);
+      }
       
       const url = `${environment.api.baseUrl}/snode/tenant/ping?name=${tenantName}`;
-      console.log(`AppLoadService: Making ping request to: ${url} (DevMode: ${isDevMode})`);
+      console.log(`AppLoadService: Making ping request to: ${url}`);
       
       const response = await fetch(url);
       

@@ -17,16 +17,16 @@ export default defineConfig({
   },
   server: {
     host: '0.0.0.0',
-    port: 5000,
+    port: 5173,
     open: false,
-    strictPort: true,
+    strictPort: false,
     allowedHosts: true,
     hmr: false,
   },
   preview: {
     host: '0.0.0.0',
-    port: 5000,
-    strictPort: true,
+    port: 5173,
+    strictPort: false,
     allowedHosts: true,
   },
 });
