@@ -15,7 +15,7 @@
 export const environment = {
   // API Configuration
   api: {
-    baseUrl: import.meta.env.VITE_API_URL || 'https://api.wajooba.me',
+    baseUrl: import.meta.env.VITE_API_URL,
     timeout: 30000,
     retryAttempts: 3,
   },
@@ -23,8 +23,8 @@ export const environment = {
   // Application Configuration
   app: {
     name: 'Wajooba LMS',
-    version: import.meta.env.VITE_APP_VERSION || '1.0.0',
-    environment: import.meta.env.MODE || (import.meta.env.DEV ? 'development' : 'production'),
+    // version: import.meta.env.VITE_APP_VERSION,
+    // environment: import.meta.env.MODE || (import.meta.env.DEV ? 'development' : 'production'),
   },
 
   // Feature Flags
