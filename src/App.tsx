@@ -11,6 +11,7 @@ import AdminDashboardPage from '@/app/admin/dashboard/page';
 import AdminCoursesPage from '@/app/admin/courses/page';
 import AddEditCoursePage from '@/app/admin/courses/[id]/page';
 import AdminEventsPage from '@/app/admin/events/page';
+import AddEditEventPage from '@/app/admin/events/[id]/page';
 import DashboardPage from '@/app/dashboard/page';
 import StudentDashboardPage from '@/app/student/dashboard/page';
 import StudentAssessmentsPage from '@/app/student/assessments/page';
@@ -50,6 +51,8 @@ const router = createBrowserRouter(
         { path: '/admin/courses/add', element: <AddEditCoursePage /> },
         { path: '/admin/courses/edit/:id', element: <AddEditCoursePage /> },
         { path: '/admin/events', element: <AdminEventsPage /> },
+        { path: '/admin/events/add', element: <AddEditEventPage /> },
+        { path: '/admin/events/edit/:id', element: <AddEditEventPage /> },
 
         // Student
         { path: '/student/dashboard', element: <StudentDashboardPage /> },

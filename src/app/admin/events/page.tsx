@@ -134,14 +134,14 @@ export default function EventsListPage() {
    * Navigate to add event page
    */
   const handleAddEvent = () => {
-    navigate('/admin/events/event');
+    navigate('/admin/events/add');
   };
 
   /**
    * Navigate to event details
    */
   const handleEventClick = (eventId: string) => {
-    navigate(`/admin/events/${eventId}/detail`);
+    navigate(`/admin/events/edit/${eventId}`);
   };
 
   /**
