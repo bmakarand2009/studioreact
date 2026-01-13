@@ -1,14 +1,15 @@
 
 
-import { ReactNode, useState, useEffect, useMemo } from 'react';
+import { ReactNode, useState, useEffect, useMemo, useRef } from 'react';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useNavigation } from '@/hooks/useNavigation';
 import { useAuth } from '@/hooks/useAuth';
 import VerticalNavigation from '@/components/navigation/vertical-navigation';
 import Header from '@/components/layout/header';
 
-import { Button } from '@/components/ui';
-import { MenuIcon, XIcon } from 'lucide-react';
+import { MediaSliderPanel } from '@/components/media-slider';
+import { SidebarPayload } from '@/services/sidebarControllerService';
+import { cn } from '@/utils/cn';
 
 interface WajoobaAdminLayoutProps {
   children: ReactNode;
@@ -19,12 +20,29 @@ export default function WajoobaAdminLayout({ children }: WajoobaAdminLayoutProps
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [sidebarPinned, setSidebarPinned] = useState(true);
   const [isHovering, setIsHovering] = useState(false);
+  const [mediaSliderOpen, setMediaSliderOpen] = useState(false);
   const isScreenSmall = useMediaQuery('(max-width: 768px)');
   const { navigation } = useNavigation();
-  const { user, logout, isLoading } = useAuth();
+  const { user, logout } = useAuth();
 
   // Memoize navigation to prevent unnecessary re-renders
   const memoizedNavigation = useMemo(() => navigation, [navigation]);
+
+  const previousSidebarStateRef = useRef({
+    pinned: sidebarPinned,
+    collapsed: sidebarCollapsed,
+  });
+  const forcedFoldRef = useRef(false);
+  const sidebarPinnedRef = useRef(sidebarPinned);
+  const sidebarCollapsedRef = useRef(sidebarCollapsed);
+
+  useEffect(() => {
+    sidebarPinnedRef.current = sidebarPinned;
+  }, [sidebarPinned]);
+
+  useEffect(() => {
+    sidebarCollapsedRef.current = sidebarCollapsed;
+  }, [sidebarCollapsed]);
 
   // Close sidebar on screen size change
   useEffect(() => {
@@ -57,6 +75,36 @@ export default function WajoobaAdminLayout({ children }: WajoobaAdminLayoutProps
     }
   }, [sidebarPinned, isHovering, isScreenSmall]);
 
+  useEffect(() => {
+    const handleSidebarLayout = (event: Event) => {
+      const detail = (event as CustomEvent<SidebarPayload>).detail;
+      if (!detail || detail.name !== 'mediaSlider') {
+        return;
+      }
+      setMediaSliderOpen(detail.open);
+      if (detail.open) {
+        previousSidebarStateRef.current = {
+          pinned: sidebarPinnedRef.current,
+          collapsed: sidebarCollapsedRef.current,
+        };
+        forcedFoldRef.current = true;
+        if (sidebarPinnedRef.current) {
+          setSidebarPinned(false);
+        }
+        setSidebarCollapsed(true);
+      } else if (forcedFoldRef.current) {
+        setSidebarPinned(previousSidebarStateRef.current.pinned);
+        setSidebarCollapsed(previousSidebarStateRef.current.collapsed);
+        forcedFoldRef.current = false;
+      }
+    };
+
+    window.addEventListener('sidebar:layout-change', handleSidebarLayout as EventListener);
+    return () => {
+      window.removeEventListener('sidebar:layout-change', handleSidebarLayout as EventListener);
+    };
+  }, []);
+
   // Don't show loading state here - let the role guard handle it
   // The role guard will show appropriate loading messages
   if (!user) {
@@ -72,7 +120,13 @@ export default function WajoobaAdminLayout({ children }: WajoobaAdminLayoutProps
   const showExpanded = isScreenSmall ? sidebarOpen : (!sidebarCollapsed || isHovering);
 
   return (
-    <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
+    <div
+      className={cn(
+        'flex h-screen bg-gray-100 dark:bg-gray-900 transition-[padding] duration-300',
+        mediaSliderOpen ? 'lg:pr-[420px]' : '',
+      )}
+      data-sidebar-mode={mediaSliderOpen ? 'folded' : sidebarPinned ? 'pinned' : 'hover'}
+    >
       {/* Sidebar */}
       <div
         onMouseEnter={() => !isScreenSmall && setIsHovering(true)}
@@ -114,7 +168,12 @@ export default function WajoobaAdminLayout({ children }: WajoobaAdminLayoutProps
         />
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900">
+        <main
+          className={cn(
+            'flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900 transition-[padding] duration-300',
+            mediaSliderOpen ? 'lg:pr-6' : '',
+          )}
+        >
           {children}
         </main>
 
@@ -125,6 +184,7 @@ export default function WajoobaAdminLayout({ children }: WajoobaAdminLayoutProps
           </div>
         </footer>
       </div>
+      <MediaSliderPanel />
     </div>
   );
 }
