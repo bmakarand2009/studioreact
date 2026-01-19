@@ -26,6 +26,7 @@ import eventDetailService, {
   MeetingProvider,
 } from '@/services/eventDetailService';
 import { eventAiService, EventAiContext, EventAiTarget } from '@/services/eventAiService';
+import { MediaSliderLauncher } from '@/components/media-slider';
 
 import type { EventDetailResponse } from '@/services/eventDetailService';
 
@@ -546,6 +547,14 @@ const AddEditEventPage = () => {
       setFormState((prev) => ({ ...prev, ...patch }));
     },
     [],
+  );
+
+  const handleImageSelect = useCallback(
+    (publicId: string) => {
+      // Directly use the public ID received from media slider (matches Angular pattern)
+      updateFormState({ image1: publicId });
+    },
+    [updateFormState],
   );
 
   const handleMeetingMode = useCallback(
@@ -1604,8 +1613,8 @@ const AddEditEventPage = () => {
               </div>
 
               <aside className="space-y-8">
-                <div className="rounded-3xl border border-slate-200 bg-slate-100 p-4 dark:border-slate-800 dark:bg-slate-900">
-                  <div className="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
+                <div className="rounded-3xl border border-slate-200 bg-slate-100 p-4 dark:border-slate-700 dark:bg-slate-800">
+                  <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
                     <img
                       src={eventImageUrl}
                       alt="Event banner"
@@ -1614,26 +1623,22 @@ const AddEditEventPage = () => {
                         (event.target as HTMLImageElement).src = PLACEHOLDER_IMAGE;
                       }}
                     />
-                    <div className="p-4">
-                      <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">Event banner</p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">Recommended ratio 3:2</p>
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
-                        onClick={() => {
-                          const newPublicId = window.prompt(
-                            'Enter Cloudinary public ID or image URL',
-                            formState.image1,
-                          );
-                          if (newPublicId !== null) {
-                            updateFormState({ image1: newPublicId.trim() });
-                          }
-                        }}
-                      >
-                        <UploadCloud className="h-4 w-4" /> Change image
-                      </Button>
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900/70 to-transparent p-4">
+                      <p className="text-sm font-semibold text-white">Event Banner</p>
+                      <p className="text-xs text-slate-200">Recommended ratio 3:2</p>
                     </div>
+                  </div>
+                  <div className="mt-3 flex items-center gap-2">
+                    <MediaSliderLauncher
+                      variant="secondary"
+                      className="flex-1 justify-center rounded-xl bg-white text-slate-600 shadow-sm hover:bg-slate-100 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+                      onSelect={handleImageSelect}
+                      title="Select Event Banner"
+                      description="Choose an image from your media library or upload a new one"
+                    >
+                      <UploadCloud className="mr-2 h-4 w-4" />
+                      Change Image
+                    </MediaSliderLauncher>
                   </div>
                 </div>
 

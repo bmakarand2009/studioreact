@@ -2,8 +2,7 @@ import { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from '
 import { XIcon, UploadCloudIcon, Trash2Icon, Loader2Icon, ImageIcon } from 'lucide-react';
 import { sidebarController, SidebarPayload } from '@/services/sidebarControllerService';
 import { useMediaSliderContext } from './MediaSliderProvider';
-import { GroupedMediaRow, MediaAsset } from './types';
-import { groupImagesIntoRows } from './utils';
+import { MediaAsset } from './types';
 import { MediaSliderOpenOptions } from '@/hooks/useMediaSlider';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/utils/cn';
@@ -25,26 +24,32 @@ export const MediaSliderPanel = () => {
   const [options, setOptions] = useState<MediaSliderOptions | null>(null);
   const [assets, setAssets] = useState<MediaAsset[]>([]);
   const [isLoadingAssets, setIsLoadingAssets] = useState(false);
+  const [imageDimensions, setImageDimensions] = useState<Record<string, { width: number; height: number }>>({});
+  const [masonryColumns, setMasonryColumns] = useState<MediaAsset[][]>([[], []]);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const latestOptionsRef = useRef<MediaSliderOptions | null>(null);
+  const masonryContainerRef = useRef<HTMLDivElement | null>(null);
+  const sidebarRef = useRef<HTMLDivElement | null>(null);
 
   const loadAssets = useCallback(async () => {
     setIsLoadingAssets(true);
     try {
       const result = await fetchAssets();
       setAssets(result);
+      // Clear dimensions when assets change
+      setImageDimensions({});
     } finally {
       setIsLoadingAssets(false);
     }
   }, [fetchAssets]);
 
   const handleSidebarChange = useCallback(
-    (payload: SidebarPayload<MediaSliderOptions>) => {
+    (payload: SidebarPayload) => {
       if (payload.name !== PANEL_NAME) {
         return;
       }
       setOpen(payload.open);
-      const data = payload.data ?? null;
+      const data = (payload.data as MediaSliderOptions | undefined) ?? null;
       latestOptionsRef.current = data;
       setOptions(data);
       if (payload.open) {
@@ -63,6 +68,13 @@ export const MediaSliderPanel = () => {
 
   useEffect(() => {
     if (!open) {
+      // When sidebar closes, blur any focused element inside it to prevent aria-hidden warning
+      // Use setTimeout to ensure this happens after the state update
+      setTimeout(() => {
+        if (document.activeElement && sidebarRef.current?.contains(document.activeElement)) {
+          (document.activeElement as HTMLElement).blur();
+        }
+      }, 0);
       return;
     }
 
@@ -95,21 +107,102 @@ export const MediaSliderPanel = () => {
     };
   }, [open]);
 
-  const groupedRows = useMemo<GroupedMediaRow[]>(() => {
-    return groupImagesIntoRows(assets);
-  }, [assets]);
+  const handleImageLoad = useCallback((assetId: string, event: React.SyntheticEvent<HTMLImageElement>) => {
+    const img = event.currentTarget;
+    if (img.naturalWidth && img.naturalHeight) {
+      setImageDimensions((prev) => {
+        const updated = {
+          ...prev,
+          [assetId]: {
+            width: img.naturalWidth,
+            height: img.naturalHeight,
+          },
+        };
+        return updated;
+      });
+    }
+  }, []);
+
+  // Calculate masonry layout: distribute images into columns based on their heights
+  useEffect(() => {
+    if (assets.length === 0) {
+      setMasonryColumns([[], []]);
+      return;
+    }
+
+    const NUM_COLUMNS = 2;
+    const columns: MediaAsset[][] = Array.from({ length: NUM_COLUMNS }, () => []);
+    const columnHeights: number[] = Array(NUM_COLUMNS).fill(0);
+    const BASE_WIDTH = 180; // Approximate column width in pixels (accounting for gap)
+
+    assets.forEach((asset) => {
+      const dimensions = imageDimensions[asset.id];
+      let estimatedHeight = 200; // Default height
+
+      if (dimensions) {
+        // Calculate height based on aspect ratio and column width
+        const aspectRatio = dimensions.width / dimensions.height;
+        estimatedHeight = BASE_WIDTH / aspectRatio;
+      }
+
+      // Find the shortest column
+      const shortestColumnIndex = columnHeights.indexOf(Math.min(...columnHeights));
+      columns[shortestColumnIndex].push(asset);
+      columnHeights[shortestColumnIndex] += estimatedHeight;
+    });
+
+    setMasonryColumns(columns);
+  }, [assets, imageDimensions]);
+
+  // Extract Cloudinary public ID from URL if needed
+  const extractPublicIdFromUrl = useCallback((url: string): string => {
+    if (!url) return '';
+    // If it's already a public ID (doesn't start with http), return as-is
+    if (!url.startsWith('http')) {
+      return url;
+    }
+    // Extract public ID from Cloudinary URL
+    // Format: https://res.cloudinary.com/{cloudName}/image/upload/{publicId}
+    const match = url.match(/\/image\/upload\/(.+)$/);
+    return match ? match[1] : url;
+  }, []);
 
   const handleSelect = useCallback(
     (asset: MediaAsset) => {
-      latestOptionsRef.current?.onSelect?.(asset);
+      // Extract the public ID - prefer publicId field, fallback to extracting from originalUrl or using id
+      let publicId = asset.publicId || '';
+      
+      // If publicId is empty or looks like a URL, extract from originalUrl
+      if (!publicId || publicId.startsWith('http')) {
+        publicId = extractPublicIdFromUrl(asset.originalUrl) || asset.id;
+      }
+      
+      // Ensure we have a valid public ID
+      if (!publicId) {
+        console.warn('MediaSlider: No valid public ID found for asset', asset);
+        return;
+      }
+      
+      // Blur any focused element inside the sidebar before closing (prevents aria-hidden warning)
+      if (document.activeElement && sidebarRef.current?.contains(document.activeElement)) {
+        (document.activeElement as HTMLElement).blur();
+      }
+      
+      // Call the callback with the public ID string (matches Angular's uploadSelectedImage pattern)
+      if (latestOptionsRef.current?.onSelect) {
+        latestOptionsRef.current.onSelect(publicId);
+      }
+      
+      // Also dispatch custom event for any other listeners (backward compatibility)
       window.dispatchEvent(
         new CustomEvent('media-slider:select', {
-          detail: asset,
+          detail: { asset, publicId },
         }),
       );
+      
       sidebarController.close(PANEL_NAME);
     },
-    [],
+    [extractPublicIdFromUrl],
   );
 
   const handleDelete = useCallback(
@@ -138,7 +231,17 @@ export const MediaSliderPanel = () => {
         return;
       }
       try {
-        await uploadImage(file);
+        const response = await uploadImage(file);
+        // Extract public ID from upload response (matches Angular pattern)
+        // Response structure: { data: { imgUrl: "public-id" } } or { imgUrl: "public-id" }
+        const publicId = response?.data?.imgUrl || response?.imgUrl || null;
+        
+        if (publicId && latestOptionsRef.current?.onSelect) {
+          // Call the callback with the public ID (matches Angular's uploadNewImage pattern)
+          latestOptionsRef.current.onSelect(publicId);
+          sidebarController.close(PANEL_NAME);
+        }
+        
         await loadAssets();
       } catch (error) {
         console.error(error);
@@ -162,19 +265,21 @@ export const MediaSliderPanel = () => {
 
   return (
     <>
-      <div className={classes} aria-hidden={!open}>
+      <div 
+        ref={sidebarRef}
+        className={classes} 
+        aria-hidden={!open}
+        data-media-slider-panel
+      >
         <header className="relative flex items-start justify-between px-6 pb-4 pt-6">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-              {tenantDetails?.name ?? 'Wajooba'}
-            </p>
             <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-50">{title}</h2>
             <p className="mt-1 max-w-xs text-sm text-slate-500 dark:text-slate-400">{description}</p>
           </div>
           <button
             type="button"
             onClick={() => sidebarController.close(PANEL_NAME)}
-            className="ml-4 inline-flex h-10 w-10 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
+            className="ml-4 inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
           >
             <XIcon className="h-5 w-5" />
             <span className="sr-only">Close media slider</span>
@@ -248,42 +353,65 @@ export const MediaSliderPanel = () => {
                 </p>
               </div>
             ) : (
-              <div className="mt-4 space-y-4">
-                {groupedRows.map((row) => (
-                  <div
-                    key={`${row.columns}-${row.items[0]?.id}`}
-                    className="grid gap-3"
-                    style={{ gridTemplateColumns: `repeat(${row.columns}, minmax(0, 1fr))` }}
-                  >
-                    {row.items.map((asset) => (
-                      <figure
-                        key={asset.id}
-                        className="group relative overflow-hidden rounded-2xl border border-transparent bg-white shadow-sm transition hover:-translate-y-1 hover:border-primary-200 hover:shadow-lg dark:bg-slate-900/60"
-                      >
-                        <button
-                          type="button"
-                          onClick={() => handleSelect(asset)}
-                          className="block h-full w-full focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+              <div ref={masonryContainerRef} className="mt-4 flex gap-3">
+                {masonryColumns.map((column, columnIndex) => (
+                  <div key={columnIndex} className="flex-1 space-y-3">
+                    {column.map((asset) => {
+                      const dimensions = imageDimensions[asset.id];
+
+                      return (
+                        <figure
+                          key={asset.id}
+                          className="group relative cursor-pointer overflow-hidden rounded-lg border border-transparent bg-white shadow-sm transition hover:shadow-lg dark:bg-slate-900/60"
+                          onClick={(e) => {
+                            // If the click is on the delete button, let it handle it
+                            if ((e.target as HTMLElement).closest('button[data-action="delete"]')) {
+                              return;
+                            }
+                            handleSelect(asset);
+                          }}
                         >
-                          <img
-                            src={asset.displayUrl ?? placeholderUrl}
-                            alt="Media asset"
-                            className="h-32 w-full object-cover"
-                            loading="lazy"
-                          />
-                        </button>
-                        <div className="absolute inset-0 flex items-start justify-end bg-gradient-to-t from-black/40 via-black/5 to-transparent opacity-0 transition group-hover:opacity-100">
                           <button
                             type="button"
-                            onClick={() => handleDelete(asset)}
-                            className="m-2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSelect(asset);
+                            }}
+                            className="block w-full cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
                           >
-                            <Trash2Icon className="h-4 w-4" />
-                            <span className="sr-only">Delete asset</span>
+                            <img
+                              src={asset.displayUrl ?? placeholderUrl}
+                              alt="Media asset"
+                              className="w-full object-cover"
+                              style={
+                                dimensions
+                                  ? {
+                                      aspectRatio: `${dimensions.width} / ${dimensions.height}`,
+                                      height: 'auto',
+                                    }
+                                  : { minHeight: '200px', objectFit: 'cover' }
+                              }
+                              loading="lazy"
+                              onLoad={(e) => handleImageLoad(asset.id, e)}
+                            />
                           </button>
-                        </div>
-                      </figure>
-                    ))}
+                          <div className="pointer-events-none absolute inset-0 flex items-start justify-end bg-gradient-to-t from-black/40 via-black/5 to-transparent opacity-0 transition group-hover:opacity-100">
+                            <button
+                              type="button"
+                              data-action="delete"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDelete(asset);
+                              }}
+                              className="pointer-events-auto m-2 inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-sm transition hover:bg-black/80"
+                            >
+                              <Trash2Icon className="h-4 w-4" />
+                              <span className="sr-only">Delete asset</span>
+                            </button>
+                          </div>
+                        </figure>
+                      );
+                    })}
                   </div>
                 ))}
               </div>

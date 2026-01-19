@@ -23,6 +23,7 @@ import {
 } from '@/services/courseDetailService';
 import { courseAiService } from '@/services/courseAiService';
 import { useToast } from '@/components/ui/ToastProvider';
+import { MediaSliderLauncher } from '@/components/media-slider';
 
 type Step = 0 | 1;
 
@@ -170,6 +171,14 @@ const AddEditCoursePage = () => {
     const match = DURATION_OPTIONS.find((option) => option.value === value);
     return match ? match.label : `${value} minutes`;
   }, []);
+
+  const handleImageSelect = useCallback(
+    (publicId: string) => {
+      // Directly use the public ID received from media slider (matches Angular pattern)
+      setFormValues({ image1: publicId });
+    },
+    [setFormValues],
+  );
 
   const bannerImageUrl = useMemo(() => {
     if (!formState.image1) {
@@ -872,22 +881,16 @@ const AddEditCoursePage = () => {
                       </div>
                     </div>
                     <div className="mt-3 flex items-center gap-2">
-                      <Button
+                      <MediaSliderLauncher
                         variant="secondary"
                         className="flex-1 justify-center rounded-xl bg-white text-slate-600 shadow-sm hover:bg-slate-100 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
-                        onClick={() => {
-                          const newPublicId = prompt(
-                            'Enter Cloudinary public ID or image URL',
-                            formState.image1,
-                          );
-                          if (newPublicId !== null) {
-                            setFormValues({ image1: newPublicId.trim() });
-                          }
-                        }}
+                        onSelect={handleImageSelect}
+                        title="Select Course Banner"
+                        description="Choose an image from your media library or upload a new one"
                       >
                         <UploadCloud className="mr-2 h-4 w-4" />
                         Change Image
-                      </Button>
+                      </MediaSliderLauncher>
                     </div>
                   </div>
 

@@ -1,9 +1,12 @@
 import { useCallback } from 'react';
 import { sidebarController } from '@/services/sidebarControllerService';
-import { MediaAsset } from '@/components/media-slider/types';
 
 export interface MediaSliderOpenOptions {
-  onSelect?: (asset: MediaAsset) => void;
+  /**
+   * Callback invoked when an image is selected or uploaded.
+   * Receives the Cloudinary public ID (string) that can be stored directly in form fields.
+   */
+  onSelect?: (publicId: string) => void;
   title?: string;
   description?: string;
 }

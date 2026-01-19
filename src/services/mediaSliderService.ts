@@ -76,12 +76,14 @@ export const useMediaSliderService = (): UseMediaSliderServiceResult => {
         ? crypto.randomUUID()
         : `media-${Math.random().toString(36).slice(2)}`;
       const id = value._id ?? value.id ?? value.imgUrl ?? fallbackId;
+      // Extract the Cloudinary public ID (matches Angular pattern where originalUrl = imgUrl)
       const publicId = value.imgUrl ?? value.originalUrl ?? value.id ?? '';
       return {
         id,
         displayUrl: buildCloudinaryImageUrl(tenantDetails?.cloudName ?? null, publicId, 420, 280),
         originalUrl: buildCloudinaryImageUrl(tenantDetails?.cloudName ?? null, publicId),
         thumbnailUrl: buildCloudinaryImageUrl(tenantDetails?.cloudName ?? null, publicId, 200, 200),
+        publicId, // Store the public ID separately for easy access (matches Angular pattern)
       };
     },
     [tenantDetails?.cloudName],

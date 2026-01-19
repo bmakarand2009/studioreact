@@ -171,7 +171,6 @@ export default function WajoobaAdminLayout({ children }: WajoobaAdminLayoutProps
         <main
           className={cn(
             'flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900 transition-[padding] duration-300',
-            mediaSliderOpen ? 'lg:pr-6' : '',
           )}
         >
           {children}
