@@ -1,38 +1,32 @@
-import { defineConfig, loadEnv } from 'vite';
+import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'node:path';
 
-export default defineConfig(({ mode }) => {
-  // Load env file based on `mode` in the current working directory.
-  // Set the third parameter to '' to load all env regardless of the `VITE_` prefix.
-  const env = loadEnv(mode, process.cwd(), '');
-  
-  return {
-    plugins: [react()],
-    resolve: {
-      alias: {
-        '@': path.resolve(__dirname, 'src'),
-        'next/link': path.resolve(__dirname, 'src/shims/next-link.tsx'),
-        'next/navigation': path.resolve(__dirname, 'src/shims/next-navigation.ts'),
-        'next/font/google': path.resolve(__dirname, 'src/shims/next-font-google.ts'),
-      },
+export default defineConfig({
+  plugins: [react()],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, 'src'),
+      'next/link': path.resolve(__dirname, 'src/shims/next-link.tsx'),
+      'next/navigation': path.resolve(__dirname, 'src/shims/next-navigation.ts'),
+      'next/font/google': path.resolve(__dirname, 'src/shims/next-font-google.ts'),
     },
-    define: {
-      'process.env': {},
-    },
-    server: {
-      host: '0.0.0.0',
-      port: 5173,
-      open: false,
-      strictPort: false,
-      allowedHosts: true,
-      hmr: false,
-    },
-    preview: {
-      host: '0.0.0.0',
-      port: Number(env.PORT) || 5173,
-      strictPort: false,
-      allowedHosts: true,
-    },
-  };
+  },
+  define: {
+    'process.env': {},
+  },
+  server: {
+    host: '0.0.0.0',
+    port: 5173,
+    open: false,
+    strictPort: false,
+    allowedHosts: true,
+    hmr: false,
+  },
+  preview: {
+    host: '0.0.0.0',
+    port: 5173,
+    strictPort: false,
+    allowedHosts: true,
+  },
 });
