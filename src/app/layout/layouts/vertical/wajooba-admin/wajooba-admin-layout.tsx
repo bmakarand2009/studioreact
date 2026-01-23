@@ -145,6 +145,8 @@ export default function WajoobaAdminLayout({ children }: WajoobaAdminLayoutProps
           onLogout={logout}
           onClose={() => setSidebarOpen(false)}
           collapsed={!showExpanded}
+          onTogglePin={togglePin}
+          sidebarPinned={sidebarPinned}
         />
       </div>
 

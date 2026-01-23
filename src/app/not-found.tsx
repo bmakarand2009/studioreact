@@ -10,9 +10,6 @@ export default function NotFound() {
       <div className="max-w-md mx-auto text-center">
         {/* 404 Icon */}
         <div className="mb-8">
-          <div className="inline-flex items-center justify-center w-24 h-24 bg-red-100 dark:bg-red-900 rounded-full mb-4">
-            <AlertTriangle className="h-12 w-12 text-red-600 dark:text-red-400" />
-          </div>
           <h1 className="text-9xl font-bold text-gray-300 dark:text-gray-700">404</h1>
         </div>
 

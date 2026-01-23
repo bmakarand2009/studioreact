@@ -20,6 +20,33 @@ export interface UseAuthReturn {
 // Global flag to prevent multiple auth checks from running simultaneously
 let globalAuthCheckRunning = false;
 
+/**
+ * Check if a route requires authentication
+ * - /admin/* routes require admin role
+ * - /student/* routes require student/admin role
+ * - Everything else is public
+ */
+const isProtectedRoute = (pathname: string): boolean => {
+  // Auth routes are always public
+  const authRoutes = ['/login', '/forgot-password', '/sign-up', '/sign-in'];
+  if (authRoutes.includes(pathname)) {
+    return false;
+  }
+  
+  // Admin and student routes require authentication
+  if (pathname.startsWith('/admin') || pathname.startsWith('/student') || pathname.startsWith('/staff')) {
+    return true;
+  }
+  
+  // Dashboard route requires authentication
+  if (pathname === '/dashboard') {
+    return true;
+  }
+  
+  // Everything else is public
+  return false;
+};
+
 export function useAuth(): UseAuthReturn {
   const { state, setUser, setLoading, setAuthenticated, logout: contextLogout } = useUserContext();
   const navigate = useNavigate();
@@ -91,8 +118,8 @@ export function useAuth(): UseAuthReturn {
       if (!hasToken) {
           // No token → not authenticated
           setUser(null);
-          const publicRoutes = ['/login', '/forgot-password', '/sign-up', '/'];
-          if (!publicRoutes.includes(pathname)) {
+          // Only redirect if this is a protected route
+          if (isProtectedRoute(pathname)) {
               const redirectUrl = `/login?redirect=${encodeURIComponent(pathname)}`;
               navigate(redirectUrl);
           }
@@ -113,15 +140,14 @@ export function useAuth(): UseAuthReturn {
         console.log('useAuth: Not authenticated');
         setUser(null);
         
-        // Only redirect if we're not already on a public route
-        const publicRoutes = ['/login', '/forgot-password', '/sign-up', '/'];
-        if (!publicRoutes.includes(pathname)) {
-          console.log('useAuth: Redirecting to login from:', pathname);
+        // Only redirect if this is a protected route
+        if (isProtectedRoute(pathname)) {
+          console.log('useAuth: Redirecting to login from protected route:', pathname);
           // Redirect to login with current page as redirect parameter
           const redirectUrl = `/login?redirect=${encodeURIComponent(pathname)}`;
           navigate(redirectUrl);
         } else {
-          console.log('useAuth: Already on public route:', pathname);
+          console.log('useAuth: Public route, no redirect needed:', pathname);
         }
       }
       
@@ -130,15 +156,14 @@ export function useAuth(): UseAuthReturn {
       console.error('useAuth: Auth check error:', error);
       setUser(null);
       
-      // Only redirect if we're not already on a public route
-      const publicRoutes = ['/login', '/forgot-password', '/sign-up', '/'];
-      if (!publicRoutes.includes(pathname)) {
-        console.log('useAuth: Error redirecting to login from:', pathname);
+      // Only redirect if this is a protected route
+      if (isProtectedRoute(pathname)) {
+        console.log('useAuth: Error redirecting to login from protected route:', pathname);
         // Redirect to login with current page as redirect parameter
         const redirectUrl = `/login?redirect=${encodeURIComponent(pathname)}`;
         navigate(redirectUrl);
       } else {
-        console.log('useAuth: Error but already on public route:', pathname);
+        console.log('useAuth: Error but on public route, no redirect:', pathname);
       }
     } finally {
       console.log('useAuth: Setting loading to false, current state:', state.isLoading);

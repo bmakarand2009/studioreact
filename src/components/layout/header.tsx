@@ -16,6 +16,8 @@ import { usePreview } from '@/contexts/PreviewContext';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '@/services/authService';
 import { useUIStore } from '@/stores/uiStore';
+import { appLoadService } from '@/app/core/app-load';
+import { ImageUtils } from '@/utils/imageUtils';
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -29,6 +31,7 @@ export default function Header({ onMenuClick, onTogglePin, sidebarPinned, user, 
   const { isInPreviewMode, exitPreviewMode } = usePreview();
   const navigate = useNavigate();
   const { theme, toggleTheme } = useUIStore();
+  const tenantDetails = appLoadService.tenantDetails;
 
   const handleBackToAdmin = () => {
     const adminToken = exitPreviewMode();
@@ -70,20 +73,42 @@ export default function Header({ onMenuClick, onTogglePin, sidebarPinned, user, 
             <nav className="flex" aria-label="Breadcrumb">
               <ol className="flex items-center space-x-2">
                 <li className="flex items-center gap-2">
-                  <button
-                    onClick={onTogglePin}
-                    className={`hidden md:inline-flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
-                      sidebarPinned
-                        ? 'bg-cyan-500 text-white hover:bg-cyan-600'
-                        : 'bg-gray-200 text-gray-600 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
-                    }`}
-                    aria-label={sidebarPinned ? 'Unpin sidebar' : 'Pin sidebar'}
-                    title={sidebarPinned ? 'Unpin sidebar' : 'Pin sidebar'}
-                  >
-                    <Pin className={`h-4 w-4 transition-transform ${sidebarPinned ? 'rotate-0' : 'rotate-45'}`} />
-                  </button>
-                  <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                    Dashboard
+                  {tenantDetails?.org?.logo ? (
+                    <img 
+                      src={ImageUtils.buildCloudinaryUrl(
+                        tenantDetails.cloudName,
+                        tenantDetails.org.logo,
+                        tenantDetails.org.logoWidth || 200,
+                        tenantDetails.org.logoHeight || 60,
+                        'fit'
+                      )} 
+                      alt={tenantDetails.name || tenantDetails.org.title || 'Logo'} 
+                      className="h-8 w-auto"
+                      style={{
+                        maxHeight: tenantDetails.org.logoHeight ? `${tenantDetails.org.logoHeight}px` : '32px',
+                        maxWidth: tenantDetails.org.logoWidth ? `${tenantDetails.org.logoWidth}px` : 'auto'
+                      }}
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const parent = target.parentElement;
+                        if (parent && !parent.querySelector('.logo-fallback')) {
+                          const fallback = document.createElement('div');
+                          fallback.className = 'logo-fallback h-8 w-8 rounded-lg bg-primary flex items-center justify-center';
+                          fallback.innerHTML = `<span class="text-white text-sm font-bold">${(tenantDetails?.name?.charAt(0) || tenantDetails?.org?.title?.charAt(0) || 'W').toUpperCase()}</span>`;
+                          parent.insertBefore(fallback, target);
+                        }
+                      }}
+                    />
+                  ) : (
+                    <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
+                      <span className="text-white text-sm font-bold">
+                        {tenantDetails?.name?.charAt(0).toUpperCase() || tenantDetails?.org?.title?.charAt(0).toUpperCase() || 'W'}
+                      </span>
+                    </div>
+                  )}
+                  <span className="text-sm font-bold text-black dark:text-white">
+                    {tenantDetails?.name || tenantDetails?.org?.title || 'Wajooba'}
                   </span>
                 </li>
               </ol>

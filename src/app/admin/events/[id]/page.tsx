@@ -27,6 +27,8 @@ import eventDetailService, {
 } from '@/services/eventDetailService';
 import { eventAiService, EventAiContext, EventAiTarget } from '@/services/eventAiService';
 import { MediaSliderLauncher } from '@/components/media-slider';
+import { eventService } from '@/services/eventService';
+import type { EventCategory } from '@/types/event';
 
 import type { EventDetailResponse } from '@/services/eventDetailService';
 
@@ -92,6 +94,8 @@ interface EventFormState {
   isMultiDayEvent: boolean;
   maxAttendees: string;
   eventTags: string[];
+  categoryGuId: string;
+  isFeaturedClass: boolean;
 }
 
 interface TemplateState {
@@ -179,6 +183,8 @@ const initialFormState: EventFormState = {
   isMultiDayEvent: false,
   maxAttendees: '75',
   eventTags: [],
+  categoryGuId: '',
+  isFeaturedClass: true, // Default to true for events (matches Angular behavior)
 };
 
 const sparkleStyles = `
@@ -222,6 +228,8 @@ const AddEditEventPage = () => {
   const [meetingProviders, setMeetingProviders] = useState<MeetingProvider[]>([]);
   const [preferences, setPreferences] = useState<EventPreference | null>(null);
   const [eventData, setEventData] = useState<EventDetailResponse | null>(null);
+  const [categories, setCategories] = useState<EventCategory[]>([]);
+  const [showRegenerateDialog, setShowRegenerateDialog] = useState<boolean>(false);
   const [templateState, setTemplateState] = useState<TemplateState>({
     html: DEFAULT_TEMPLATE_HTML,
     json: {},
@@ -384,6 +392,8 @@ const AddEditEventPage = () => {
         isMultiDayEvent: event?.isMultiDayEvent ?? false,
         maxAttendees: event?.maxAttendees ? String(event.maxAttendees) : prev.maxAttendees,
         eventTags: currentTags,
+        categoryGuId: event?.category?.guId || prev.categoryGuId || '',
+        isFeaturedClass: event?.isFeaturedClass ?? true,
       }));
 
       if (Array.isArray(event?.scheduleList) && event.scheduleList.length > 0) {
@@ -424,16 +434,26 @@ const AddEditEventPage = () => {
       const tenant = await appLoadService.initAppConfig();
       setTenantDetails(tenant);
 
-      const [pref, teacherList, locationList, providers] = await Promise.all([
+      const [pref, teacherList, locationList, providers, categoryList] = await Promise.all([
         eventDetailService.getPreferences().catch(() => null),
         eventDetailService.getTeachers().catch(() => []),
         eventDetailService.getLocations().catch(() => []),
         eventDetailService.getMeetingProviders().catch(() => []),
+        eventService.getEventCategories().catch(() => []),
       ]);
 
       setPreferences(pref);
       setTeachers(teacherList);
       setMeetingProviders(providers);
+      setCategories(categoryList);
+
+      // Set default category from preferences if available
+      if (pref?.defaultEventCategory && !formState.categoryGuId) {
+        setFormState((prev) => ({ ...prev, categoryGuId: pref.defaultEventCategory || '' }));
+      } else if (categoryList.length > 0 && !formState.categoryGuId) {
+        // Fallback to first category if no default
+        setFormState((prev) => ({ ...prev, categoryGuId: categoryList[0].guId }));
+      }
 
       if (pref?.size) {
         setFormState((prev) => ({ ...prev, maxAttendees: String(pref.size) }));
@@ -728,6 +748,7 @@ const AddEditEventPage = () => {
       isInPersonMeeting: formState.isInPersonMeeting,
       isOnlineMeeting: formState.isOnlineMeeting,
       isMultiDayEvent: formState.isMultiDayEvent,
+      isFeaturedClass: formState.isFeaturedClass,
       host: formState.authorType === 'host' ? formState.host : undefined,
       isTeacher: formState.authorType === 'organizer',
       teacherId: formState.authorType === 'organizer' ? formState.teacherId : undefined,
@@ -741,6 +762,15 @@ const AddEditEventPage = () => {
       zipCode: formState.isInPersonMeeting ? formState.zipCode : undefined,
       scheduleList,
       tagList: formState.eventTags,
+      category: formState.categoryGuId
+        ? {
+            guId: formState.categoryGuId,
+          }
+        : preferences?.defaultEventCategory
+        ? {
+            guId: preferences.defaultEventCategory,
+          }
+        : undefined,
       meetingProvider: formState.isOnlineMeeting && formState.isAutoGenerateMeetingLink ? formState.meetingProvider : undefined,
       onlineMeetJoinUrl:
         formState.isOnlineMeeting && !formState.isAutoGenerateMeetingLink
@@ -802,7 +832,7 @@ const AddEditEventPage = () => {
     } finally {
       setIsSaving(false);
     }
-  }, [buildEventPayload, eventAiContext, hydrateEvent, meetingProviders, navigate, primaryEventId, toast, updateFormState, validateStepOne]);
+  }, [buildEventPayload, eventAiContext, hydrateEvent, meetingProviders, navigate, primaryEventId, preferences, toast, updateFormState, validateStepOne]);
 
   const handleTemplateSave = useCallback(
     async (redirectAfterSave: boolean) => {
@@ -929,6 +959,44 @@ const AddEditEventPage = () => {
       toast.error(error?.message || 'Failed to delete location.');
     }
   }, [formState.locationId, toast, updateFormState]);
+
+  const handleRegenerateMeetingUrl = useCallback(async () => {
+    if (!primaryEventId) {
+      toast.error('Event must be saved before regenerating meeting URL.');
+      return;
+    }
+
+    if (!formState.isOnlineMeeting) {
+      toast.error('Event must have online meeting enabled.');
+      return;
+    }
+
+    if (!formState.isAutoGenerateMeetingLink || !formState.meetingProvider) {
+      toast.error('Auto-generate meeting link must be enabled with a provider selected.');
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+      const payload: Record<string, any> = {
+        isOnlineMeeting: true,
+        meetingProvider: formState.meetingProvider,
+      };
+
+      const result = await eventDetailService.regenerateMeetingUrl(primaryEventId, payload);
+      const updated = result?.data || result;
+
+      if (updated) {
+        await hydrateEvent(updated, meetingProviders);
+        toast.success('Meeting URL regenerated successfully.');
+      }
+    } catch (error: any) {
+      console.error('[EventAddEdit] Failed to regenerate meeting URL', error);
+      toast.error(error?.message || 'Failed to regenerate meeting URL.');
+    } finally {
+      setIsSaving(false);
+    }
+  }, [primaryEventId, formState.isOnlineMeeting, formState.isAutoGenerateMeetingLink, formState.meetingProvider, hydrateEvent, meetingProviders, toast]);
 
   const renderScheduleRow = (row: ScheduleFormRow, index: number) => {
     const dateError = errors[`schedule-${index}-date`];
@@ -1236,7 +1304,7 @@ const AddEditEventPage = () => {
                         className="h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
                       />
                       <label htmlFor="multi-day-toggle" className="text-xs font-medium text-slate-600 dark:text-slate-300">
-                        Treat as multi-slot event
+                        Multi Slot Event
                       </label>
                     </div>
                   </div>
@@ -1393,6 +1461,38 @@ const AddEditEventPage = () => {
                           />
                           {errors.zipCode && <p className="mt-1 text-xs font-medium text-red-500">{errors.zipCode}</p>}
                         </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {formState.isOnlineMeeting && isExistingEvent && formState.isAutoGenerateMeetingLink && eventData?.onlineMeetJoinUrl && (
+                    <div className="mt-6 rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          {eventData?.onlineMeetProviderName === 'zoom' && (
+                            <img src="/assets/images/logos/zoom-icon.svg" alt="Zoom" className="h-5 w-auto" />
+                          )}
+                          {eventData?.onlineMeetProviderName === 'googlemeet' && (
+                            <img src="/assets/images/logos/google-meet-icon.svg" alt="Google Meet" className="h-5 w-auto" />
+                          )}
+                          <a
+                            href={eventData.onlineMeetJoinUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm text-primary-600 underline dark:text-primary-400"
+                          >
+                            {eventData.onlineMeetJoinUrl}
+                          </a>
+                        </div>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          className="rounded-lg border border-primary-200 bg-primary-50 px-3 py-1.5 text-xs font-semibold text-primary-600 hover:bg-primary-100 dark:border-primary-800 dark:bg-primary-900/20 dark:text-primary-300"
+                          onClick={handleRegenerateMeetingUrl}
+                          disabled={isSaving}
+                        >
+                          {isSaving ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Regenerate'}
+                        </Button>
                       </div>
                     </div>
                   )}
@@ -1572,6 +1672,41 @@ const AddEditEventPage = () => {
                         className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                       />
                     </div>
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-5 dark:border-slate-700 dark:bg-slate-800">
+                  <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">Event category</span>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Select a category for this event.</p>
+                  <select
+                    value={formState.categoryGuId}
+                    onChange={(event) => updateFormState({ categoryGuId: event.target.value })}
+                    className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-900 shadow-sm transition focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                  >
+                    <option value="">Select a category</option>
+                    {categories.map((category) => (
+                      <option key={category.guId} value={category.guId}>
+                        {category.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-5 dark:border-slate-700 dark:bg-slate-800">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">Featured event</span>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">Feature this event prominently on your site.</p>
+                    </div>
+                    <label className="relative inline-flex cursor-pointer items-center">
+                      <input
+                        type="checkbox"
+                        checked={formState.isFeaturedClass}
+                        onChange={(event) => updateFormState({ isFeaturedClass: event.target.checked })}
+                        className="peer sr-only"
+                      />
+                      <div className="peer h-6 w-11 rounded-full bg-slate-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-slate-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:bg-slate-700 dark:peer-focus:ring-primary-800"></div>
+                    </label>
                   </div>
                 </div>
 

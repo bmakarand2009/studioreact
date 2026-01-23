@@ -24,13 +24,19 @@ export function AppInitializer() {
     try {
       console.log('AppInitializer: Starting app initialization...');
       
-      // Initialize app configuration (tenant details) - don't block on failure
-      const tenantDetails = await appLoadService.initAppConfig().catch((error) => {
-        console.warn('AppInitializer: Tenant details fetch failed, continuing anyway:', error);
-        return null;
-      });
+      // Initialize app configuration (tenant details) - block on failure
+      const tenantDetails = await appLoadService.initAppConfig();
       
       if (!tenantDetails) {
+        // Check if there was an error
+        if (appLoadService.hasError) {
+          console.error('AppInitializer: Tenant ping failed, stopping app initialization');
+          // Redirect to error page
+          if (window.location.pathname !== '/error-connection') {
+            window.location.href = '/error-connection';
+          }
+          return;
+        }
         console.warn('AppInitializer: No tenant details, but continuing app load');
         return;
       }

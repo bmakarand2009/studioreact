@@ -3,7 +3,7 @@
 ### Context & Goal
 - Mirror the Angular `MediaSliderComponent` behaviour inside the React + Tailwind admin app (`studioreact`).
 - Provide a reusable sidebar experience that communicates with the shell layout so the main content shrinks and the navigation menu folds while the slider is open.
-- Reuse the existing `/edmedia` media endpoints, Cloudinary helpers, and business rules surfaced by `BunnyUploadService`.
+- Reuse the existing `/edmedia` media endpoints, Cloudinary helpers, and business rules surfaced by `UploadService`.
 
 ### Core Requirements
 - **APIs & Services**
@@ -100,7 +100,7 @@ export const useMediaSliderService = () => {
   const uploadImage = async (file: File) => {
     setIsUploading(true);
     try {
-      const response = await bunnyUploadService.uploadImage(file, 'tasset');
+      const response = await uploadService.uploadImage(file, 'tasset');
       toast.success('Image uploaded');
       return response;
     } finally {

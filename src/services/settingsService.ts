@@ -16,7 +16,10 @@ export interface AccountSettings {
   dateFormat: string;
   currency: string;
   orgId: string;
+  tenantId?: string;
   isMasterFranchise: boolean;
+  cloudinaryCloudName?: string;
+  cloudinaryPreset?: string;
 }
 
 export interface WebsiteSettings {

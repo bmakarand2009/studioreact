@@ -1,11 +1,13 @@
-import { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { XIcon, UploadCloudIcon, Trash2Icon, Loader2Icon, ImageIcon } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { XIcon, Trash2Icon, ImageIcon } from 'lucide-react';
 import { sidebarController, SidebarPayload } from '@/services/sidebarControllerService';
 import { useMediaSliderContext } from './MediaSliderProvider';
 import { MediaAsset } from './types';
 import { MediaSliderOpenOptions } from '@/hooks/useMediaSlider';
-import { Button } from '@/components/ui/Button';
 import { cn } from '@/utils/cn';
+import { UploadMediaFile } from '@/components/upload-media-file';
+import { Button } from '@/components/ui/Button';
+import { uploadService, FileUploadStatus } from '@/services/uploadService';
 
 type MediaSliderOptions = MediaSliderOpenOptions;
 
@@ -14,9 +16,7 @@ export const MediaSliderPanel = () => {
   const {
     fetchAssets,
     deleteAsset,
-    uploadImage,
     placeholderUrl,
-    isUploading,
     tenantDetails,
   } = useMediaSliderContext();
 
@@ -26,7 +26,6 @@ export const MediaSliderPanel = () => {
   const [isLoadingAssets, setIsLoadingAssets] = useState(false);
   const [imageDimensions, setImageDimensions] = useState<Record<string, { width: number; height: number }>>({});
   const [masonryColumns, setMasonryColumns] = useState<MediaAsset[][]>([[], []]);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const latestOptionsRef = useRef<MediaSliderOptions | null>(null);
   const masonryContainerRef = useRef<HTMLDivElement | null>(null);
   const sidebarRef = useRef<HTMLDivElement | null>(null);
@@ -224,35 +223,92 @@ export const MediaSliderPanel = () => {
     [deleteAsset, loadAssets],
   );
 
-  const handleUpload = useCallback(
-    async (event: ChangeEvent<HTMLInputElement>) => {
-      const file = event.target.files?.[0];
-      if (!file) {
-        return;
+  const handleTestProgress = useCallback(() => {
+    const timestamp = Date.now();
+    // Create test upload statuses
+    const testFile1: FileUploadStatus = {
+      filename: 'test-image-1.jpg',
+      progress: 0,
+      hash: '',
+      uuid: `test_${timestamp}_1`,
+      upload: null,
+      status: 'uploading',
+    };
+    
+    const testFile2: FileUploadStatus = {
+      filename: 'test-video-1.mp4',
+      progress: 25,
+      hash: '',
+      uuid: `test_${timestamp}_2`,
+      upload: null,
+      status: 'uploading',
+    };
+    
+    const testFile3: FileUploadStatus = {
+      filename: 'test-audio-1.mp3',
+      progress: 100,
+      hash: '',
+      uuid: `test_${timestamp}_3`,
+      upload: null,
+      status: 'completed',
+    };
+
+    // Add test files to upload service
+    uploadService.updateFileStatus(testFile1);
+    uploadService.updateFileStatus(testFile2);
+    uploadService.updateFileStatus(testFile3);
+
+    // Simulate slow progress updates to keep snackbar visible for at least 1 minute
+    let progress1 = 0;
+    let progress2 = 25;
+    
+    // Update file 1: very slow progress (will take ~60 seconds to reach 99%, then stays at 99% until cleared)
+    // Increment by ~1.65% every second to reach 99% in ~60 seconds, then stop
+    const interval1 = setInterval(() => {
+      progress1 += 1.65;
+      if (progress1 >= 99) {
+        // Keep it at 99% to prevent auto-hide, will be cleared after 1 minute
+        uploadService.updateFileStatus({
+          ...testFile1,
+          progress: 99,
+          status: 'uploading',
+        });
+      } else {
+        uploadService.updateFileStatus({
+          ...testFile1,
+          progress: Math.round(progress1),
+          status: 'uploading',
+        });
       }
-      try {
-        const response = await uploadImage(file);
-        // Extract public ID from upload response (matches Angular pattern)
-        // Response structure: { data: { imgUrl: "public-id" } } or { imgUrl: "public-id" }
-        const publicId = response?.data?.imgUrl || response?.imgUrl || null;
-        
-        if (publicId && latestOptionsRef.current?.onSelect) {
-          // Call the callback with the public ID (matches Angular's uploadNewImage pattern)
-          latestOptionsRef.current.onSelect(publicId);
-          sidebarController.close(PANEL_NAME);
-        }
-        
-        await loadAssets();
-      } catch (error) {
-        console.error(error);
-      } finally {
-        if (fileInputRef.current) {
-          fileInputRef.current.value = '';
-        }
+    }, 1000); // Update every 1 second
+
+    // Update file 2: slower progress (will complete in ~25 seconds)
+    const interval2 = setInterval(() => {
+      progress2 += 3;
+      if (progress2 >= 100) {
+        uploadService.updateFileStatus({
+          ...testFile2,
+          progress: 100,
+          status: 'completed',
+        });
+        clearInterval(interval2);
+      } else {
+        uploadService.updateFileStatus({
+          ...testFile2,
+          progress: progress2,
+          status: 'uploading',
+        });
       }
-    },
-    [loadAssets, uploadImage],
-  );
+    }, 1000); // Update every 1 second
+
+    // Clear test uploads after 1 minute (60000ms)
+    // This ensures the snackbar stays visible for the full minute
+    setTimeout(() => {
+      clearInterval(interval1);
+      clearInterval(interval2);
+      uploadService.clear();
+    }, 60000);
+  }, []);
 
   const title = options?.title ?? 'Media Library';
   const description =
@@ -276,52 +332,43 @@ export const MediaSliderPanel = () => {
             <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-50">{title}</h2>
             <p className="mt-1 max-w-xs text-sm text-slate-500 dark:text-slate-400">{description}</p>
           </div>
-          <button
-            type="button"
-            onClick={() => sidebarController.close(PANEL_NAME)}
-            className="ml-4 inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
-          >
-            <XIcon className="h-5 w-5" />
-            <span className="sr-only">Close media slider</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleTestProgress}
+              className="text-xs"
+            >
+              Test Progress
+            </Button>
+            <button
+              type="button"
+              onClick={() => sidebarController.close(PANEL_NAME)}
+              className="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
+            >
+              <XIcon className="h-5 w-5" />
+              <span className="sr-only">Close media slider</span>
+            </button>
+          </div>
         </header>
 
         <div className="space-y-6 overflow-y-auto px-6 pb-6">
-          <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50/70 p-6 text-center dark:border-slate-700 dark:bg-slate-800/50">
-            <UploadCloudIcon className="mx-auto h-10 w-10 text-slate-400" />
-            <h3 className="mt-3 text-base font-medium text-slate-900 dark:text-slate-100">
-              Upload new media
-            </h3>
-            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-              JPG, PNG up to 10MB. Optimized automatically for your tenant.
-            </p>
-            <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
-              <Button
-                size="sm"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isUploading}
-              >
-                {isUploading ? (
-                  <>
-                    <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
-                    Uploading…
-                  </>
-                ) : (
-                  <>
-                    <UploadCloudIcon className="mr-2 h-4 w-4" />
-                    Choose file
-                  </>
-                )}
-              </Button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleUpload}
-                className="hidden"
-              />
-            </div>
-          </div>
+          <UploadMediaFile
+            title="Upload new media"
+            isSingleUploadBlock={true}
+            moduleName="tasset"
+            allowMultipleUploads={false}
+            helpText="JPG, PNG up to 10MB. Optimized automatically for your tenant."
+            onOutput={(data) => {
+              if (data === 'refresh') {
+                loadAssets();
+              } else if (data?.type === 'image' && data?.value && latestOptionsRef.current?.onSelect) {
+                // If image was uploaded, call the onSelect callback
+                latestOptionsRef.current.onSelect(data.value);
+                sidebarController.close(PANEL_NAME);
+              }
+            }}
+          />
 
           <section aria-live="polite">
             <div className="flex items-center justify-between">

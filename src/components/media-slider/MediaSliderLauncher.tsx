@@ -1,14 +1,14 @@
 import { ReactNode, useMemo } from 'react';
 import { Button, ButtonProps } from '@/components/ui/Button';
-import { useMediaSlider } from '@/hooks/useMediaSlider';
+import { useMediaSlider, MediaSliderOpenOptions } from '@/hooks/useMediaSlider';
 import { useMediaSliderContext } from './MediaSliderProvider';
 
-interface MediaSliderLauncherProps extends Partial<ButtonProps> {
+interface MediaSliderLauncherProps extends Omit<Partial<ButtonProps>, 'onSelect'> {
   children?: ReactNode;
   label?: string;
   title?: string;
   description?: string;
-  onSelect?: Parameters<ReturnType<typeof useMediaSlider>>[0]['onSelect'];
+  onSelect?: MediaSliderOpenOptions['onSelect'];
 }
 
 export const MediaSliderLauncher = ({

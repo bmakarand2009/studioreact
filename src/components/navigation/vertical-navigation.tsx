@@ -4,6 +4,8 @@ import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui';
+import { appLoadService } from '@/app/core/app-load';
+import { ImageUtils } from '@/utils/imageUtils';
 import { 
   Home, 
   Users, 
@@ -16,7 +18,8 @@ import {
   LogOut,
   Calendar,
   ShoppingCart,
-  ClipboardCheck
+  ClipboardCheck,
+  Pin
 } from 'lucide-react';
 
 interface NavigationItem {
@@ -33,6 +36,8 @@ interface VerticalNavigationProps {
   onLogout: () => void;
   onClose?: () => void;
   collapsed?: boolean;
+  onTogglePin?: () => void;
+  sidebarPinned?: boolean;
 }
 
 const iconMap: Record<string, React.ComponentType<any>> = {
@@ -45,10 +50,11 @@ const iconMap: Record<string, React.ComponentType<any>> = {
   'clipboard-check': ClipboardCheck,
 };
 
-export default function VerticalNavigation({ navigation, user, onLogout, onClose, collapsed = false }: VerticalNavigationProps) {
+export default function VerticalNavigation({ navigation, user, onLogout, onClose, collapsed = false, onTogglePin, sidebarPinned = false }: VerticalNavigationProps) {
   const location = useLocation();
   const pathname = location.pathname;
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
+  const tenantDetails = appLoadService.tenantDetails;
 
   const toggleExpanded = (itemId: string) => {
     const newExpanded = new Set(expandedItems);
@@ -104,18 +110,63 @@ export default function VerticalNavigation({ navigation, user, onLogout, onClose
   return (
     <div className="flex flex-col h-full bg-white dark:bg-gray-800 shadow-lg">
       {/* Header */}
-      <div className={`flex items-center h-16 px-4 transition-all ${collapsed ? 'justify-center' : 'justify-center'}`}>
-        {!collapsed ? (
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-deep-600 rounded-lg flex items-center justify-center">
-              <span className="text-white text-sm font-bold">W</span>
-            </div>
-            <span className="text-xl font-bold text-gray-900 dark:text-white">Wajooba</span>
-          </div>
-        ) : (
-          <div className="w-10 h-10 bg-deep-600 rounded-lg flex items-center justify-center">
-            <span className="text-white text-lg font-bold">W</span>
-          </div>
+      <div className={`flex items-center h-16 px-4 transition-all ${collapsed ? 'justify-center' : 'justify-between'}`}>
+        {/* When collapsed: Show Pin Button */}
+        {collapsed && onTogglePin && (
+          <button
+            onClick={onTogglePin}
+            className={`inline-flex h-8 w-8 items-center justify-center rounded-lg transition-colors flex-shrink-0 ${
+              sidebarPinned
+                ? 'bg-cyan-500 text-white hover:bg-cyan-600'
+                : 'bg-gray-200 text-gray-600 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+            }`}
+            aria-label={sidebarPinned ? 'Unpin sidebar' : 'Pin sidebar'}
+            title={sidebarPinned ? 'Unpin sidebar' : 'Pin sidebar'}
+          >
+            <Pin className={`h-4 w-4 transition-transform ${sidebarPinned ? 'rotate-0' : 'rotate-45'}`} />
+          </button>
+        )}
+        
+        {/* When expanded: Show Logo and Pin Button */}
+        {!collapsed && (
+          <>
+            {/* Wajooba Logo - Left */}
+            <img 
+              src="https://marksampletest.wajooba.me/assets/images/logos/Wajooba_Logo_w.png"
+              alt="Wajooba Logo" 
+              className="h-8 w-auto flex-shrink-0"
+              style={{
+                maxHeight: '32px',
+                maxWidth: 'auto'
+              }}
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+                const parent = target.parentElement;
+                if (parent && !parent.querySelector('.logo-fallback')) {
+                  const fallback = document.createElement('div');
+                  fallback.className = 'logo-fallback h-8 w-8 rounded-lg bg-primary flex items-center justify-center';
+                  fallback.innerHTML = `<span class="text-white text-sm font-bold">${(tenantDetails?.name?.charAt(0) || tenantDetails?.org?.title?.charAt(0) || 'W').toUpperCase()}</span>`;
+                  parent.insertBefore(fallback, target);
+                }
+              }}
+            />
+            {/* Pin Button - Right */}
+            {onTogglePin && (
+              <button
+                onClick={onTogglePin}
+                className={`inline-flex h-8 w-8 items-center justify-center rounded-lg transition-colors flex-shrink-0 ${
+                  sidebarPinned
+                    ? 'bg-cyan-500 text-white hover:bg-cyan-600'
+                    : 'bg-gray-200 text-gray-600 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+                }`}
+                aria-label={sidebarPinned ? 'Unpin sidebar' : 'Pin sidebar'}
+                title={sidebarPinned ? 'Unpin sidebar' : 'Pin sidebar'}
+              >
+                <Pin className={`h-4 w-4 transition-transform ${sidebarPinned ? 'rotate-0' : 'rotate-45'}`} />
+              </button>
+            )}
+          </>
         )}
       </div>
 
@@ -213,19 +264,6 @@ export default function VerticalNavigation({ navigation, user, onLogout, onClose
           {!collapsed && <span className="ml-2">Logout</span>}
         </button>
       </div>
-
-      {/* Footer */}
-      {!collapsed && (
-        <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-          <div className="text-center">
-            <img
-              className="h-8 mx-auto opacity-50"
-              src="/logo-text-on-dark.svg"
-              alt="Wajooba"
-            />
-          </div>
-        </div>
-      )}
     </div>
   );
 }

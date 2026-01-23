@@ -167,6 +167,7 @@ export interface Web {
   header: null | string;
   subHeader: null | string;
   footer: null | string;
+  isLegal: boolean;
   sequence: number;
   isShowNavigation: boolean;
   isShowFooter: boolean;
@@ -190,6 +191,8 @@ export class AppLoadService {
   private _initializationPromise: Promise<TenantDetails | null> | null = null;
   private _hostName: string;
   private _hostId: string;
+  private _hasError = false;
+  private _error: Error | null = null;
 
   constructor() {
     // this._hostName = typeof window !== 'undefined' ? window.location.hostname : '';
@@ -279,6 +282,8 @@ export class AppLoadService {
     } catch (error) {
       console.error('AppLoadService: Initialization error:', error);
       this._isInitializing = false;
+      this._hasError = true;
+      this._error = error instanceof Error ? error : new Error('Failed to connect to Wajooba servers');
       return null;
     }
   }
@@ -288,6 +293,31 @@ export class AppLoadService {
    */
   public get tenantDetails(): TenantDetails | null {
     return this._tenantDetails;
+  }
+
+  /**
+   * Check if initialization has error
+   */
+  public get hasError(): boolean {
+    return this._hasError;
+  }
+
+  /**
+   * Get initialization error
+   */
+  public get error(): Error | null {
+    return this._error;
+  }
+
+  /**
+   * Clear error state (for retry)
+   */
+  public clearError(): void {
+    this._hasError = false;
+    this._error = null;
+    this._tenantDetails = null;
+    this._isInitializing = false;
+    this._initializationPromise = null;
   }
 
   /**
@@ -329,10 +359,8 @@ export class AppLoadService {
    * Force re-initialization (useful for testing or domain changes)
    */
   public async reinitialize(): Promise<TenantDetails | null> {
-    this._tenantDetails = null;
+    this.clearError();
     this._isFirstInitialization = true;
-    this._isInitializing = false;
-    this._initializationPromise = null;
     return this.initAppConfig();
   }
 }

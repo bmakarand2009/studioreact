@@ -10,6 +10,8 @@ interface NavigationItem {
   type: string;
   icon?: string;
   url: string;
+  isExternalLink?: boolean;
+  externalLink?: string | null;
 }
 
 interface HorizontalNavigationProps {
@@ -29,6 +31,11 @@ export default function HorizontalNavigation({
   const pathname = location.pathname;
 
   const isActive = (url: string) => {
+    // Skip active check for external links
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return false;
+    }
+    
     // Exact match first
     if (pathname === url) {
       return true;
@@ -66,42 +73,57 @@ export default function HorizontalNavigation({
     }
   };
 
+  const renderNavItem = (item: NavigationItem, isMobile: boolean) => {
+    const baseClasses = isMobile
+      ? 'block px-3 py-2 rounded-md text-base font-medium transition-colors'
+      : 'px-3 py-2 rounded-md text-sm font-medium transition-colors';
+    
+    const activeClasses = isActive(item.url)
+      ? 'bg-primary-600 text-white shadow-md'
+      : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white';
+
+    const className = `${baseClasses} ${activeClasses}`;
+
+    // Handle external links
+    if (item.isExternalLink && item.externalLink) {
+      return (
+        <a
+          key={item.id}
+          href={item.externalLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={handleItemClick}
+          className={className}
+        >
+          {item.title}
+        </a>
+      );
+    }
+
+    // Handle internal links
+    return (
+      <Link
+        key={item.id}
+        to={item.url}
+        onClick={handleItemClick}
+        className={className}
+      >
+        {item.title}
+      </Link>
+    );
+  };
+
   if (mobile) {
     return (
       <div className="space-y-1">
-        {useMemo(() => navigation.map((item) => (
-          <Link
-            key={item.id}
-            to={item.url}
-            onClick={handleItemClick}
-            className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
-              isActive(item.url)
-                ? 'bg-primary-600 text-white shadow-md'
-                : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
-            }`}
-          >
-            {item.title}
-          </Link>
-        )), [navigation, pathname, handleItemClick])}
+        {useMemo(() => navigation.map((item) => renderNavItem(item, true)), [navigation, pathname, handleItemClick])}
       </div>
     );
   }
 
   return (
-    <nav className="flex space-x-8">
-      {useMemo(() => navigation.map((item) => (
-        <Link
-          key={item.id}
-          to={item.url}
-          className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-            isActive(item.url)
-              ? 'bg-primary-600 text-white shadow-md'
-              : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
-          }`}
-        >
-          {item.title}
-        </Link>
-      )), [navigation, pathname])}
+    <nav className="flex items-center space-x-2">
+      {useMemo(() => navigation.map((item) => renderNavItem(item, false)), [navigation, pathname, handleItemClick])}
     </nav>
   );
 }

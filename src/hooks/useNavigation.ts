@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { navigationService } from '@/app/core';
 import type { NavigationItem as ServiceNavigationItem } from '@/app/core/navigation';
+import { useTenantMenu } from './useTenantMenu';
 
 interface NavigationItem {
   id: string;
@@ -19,6 +20,7 @@ interface NavigationState {
 }
 
 export function useNavigation() {
+  const { navigationItems: tenantMenuItems, isLoading: isLoadingTenantMenu } = useTenantMenu();
   const [navigation, setNavigation] = useState<NavigationState>({
     adminNavigation: [],
     studentNavigation: [],
@@ -29,12 +31,20 @@ export function useNavigation() {
     // Load navigation data
     const loadNavigation = async () => {
       try {
-        // For now, we'll use default navigation since we don't have a user context
-        // In a real app, you'd get the user from auth context
+        // Use tenant menu items for public navigation if available
+        const publicNav = tenantMenuItems.length > 0 
+          ? tenantMenuItems.map(item => ({
+              id: item.id,
+              title: item.title,
+              type: item.type,
+              url: item.url,
+            }))
+          : getDefaultPublicNavigation();
+
         setNavigation({
           adminNavigation: getDefaultAdminNavigation(),
           studentNavigation: getDefaultStudentNavigation(),
-          publicNavigation: getDefaultPublicNavigation(),
+          publicNavigation: publicNav,
         });
       } catch (error) {
         console.error('Failed to load navigation:', error);
@@ -47,8 +57,10 @@ export function useNavigation() {
       }
     };
 
-    loadNavigation();
-  }, []);
+    if (!isLoadingTenantMenu) {
+      loadNavigation();
+    }
+  }, [tenantMenuItems, isLoadingTenantMenu]);
 
   // Memoize the navigation object to prevent unnecessary re-renders
   const memoizedNavigation = useMemo(() => navigation, [navigation]);

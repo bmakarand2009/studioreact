@@ -1,8 +1,11 @@
 import { ReactNode, useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useNavigation } from '@/hooks/useNavigation';
 import { useAuth } from '@/hooks/useAuth';
+import { useTenantMenu } from '@/hooks/useTenantMenu';
+import { appLoadService } from '@/app/core/app-load';
+import { ImageUtils } from '@/utils/imageUtils';
 import HorizontalNavigation from '@/components/navigation/horizontal-navigation';
 
 import { Button } from '@/components/ui';
@@ -19,7 +22,9 @@ export default function WajoobaPublicLayout({ children }: WajoobaPublicLayoutPro
   const isScreenSmall = useMediaQuery('(max-width: 768px)');
   const { navigation } = useNavigation();
   const { user } = useAuth();
+  const { footerItems, legalItems } = useTenantMenu();
   const navigate = useNavigate();
+  const tenantDetails = appLoadService.tenantDetails;
 
   console.log('WajoobaPublicLayout: State loaded', { 
     hasUser: !!user, 
@@ -67,12 +72,41 @@ export default function WajoobaPublicLayout({ children }: WajoobaPublicLayoutPro
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <div className="flex items-center cursor-pointer" onClick={() => navigate('/')}>
-              <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-                <span className="text-white text-sm font-bold">W</span>
-              </div>
-              <span className="ml-2 text-xl font-semibold text-gray-900 dark:text-white">
-                Wajooba
-              </span>
+              {tenantDetails?.org?.logo ? (
+                <img 
+                  src={ImageUtils.buildCloudinaryUrl(
+                    tenantDetails.cloudName,
+                    tenantDetails.org.logo,
+                    tenantDetails.org.logoWidth || 200,
+                    tenantDetails.org.logoHeight || 60,
+                    'fit'
+                  )} 
+                  alt={tenantDetails.name || tenantDetails.org.title || 'Logo'} 
+                  className="h-[50px] w-auto"
+                  style={{
+                    maxHeight: tenantDetails.org.logoHeight ? `${tenantDetails.org.logoHeight}px` : '50px',
+                    maxWidth: tenantDetails.org.logoWidth ? `${tenantDetails.org.logoWidth}px` : 'auto'
+                  }}
+                  onError={(e) => {
+                    // Fallback to letter badge if logo fails to load
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                    const parent = target.parentElement;
+                    if (parent && !parent.querySelector('.logo-fallback')) {
+                      const fallback = document.createElement('div');
+                      fallback.className = 'logo-fallback h-[50px] w-[50px] rounded-lg bg-primary flex items-center justify-center';
+                      fallback.innerHTML = `<span class="text-white text-sm font-bold">${(tenantDetails?.name?.charAt(0) || tenantDetails?.org?.title?.charAt(0) || 'W').toUpperCase()}</span>`;
+                      parent.insertBefore(fallback, target);
+                    }
+                  }}
+                />
+              ) : (
+                <div className="h-[50px] w-[50px] rounded-lg bg-primary flex items-center justify-center">
+                  <span className="text-white text-sm font-bold">
+                    {tenantDetails?.name?.charAt(0).toUpperCase() || tenantDetails?.org?.title?.charAt(0).toUpperCase() || 'W'}
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Desktop Navigation */}
@@ -146,74 +180,159 @@ export default function WajoobaPublicLayout({ children }: WajoobaPublicLayoutPro
       </main>
 
       {/* Footer */}
-      <footer className="bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+      <footer className="bg-gray-900 dark:bg-gray-950 border-t border-gray-800 dark:border-gray-800">
         <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="col-span-1 md:col-span-2">
               <div className="flex items-center">
-                <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center">
-                  <span className="text-white text-lg font-bold">W</span>
-                </div>
-                <span className="ml-3 text-xl font-semibold text-gray-900 dark:text-white">
-                  Wajooba
+                {tenantDetails?.org?.logo ? (
+                  <img 
+                    src={ImageUtils.buildCloudinaryUrl(
+                      tenantDetails.cloudName,
+                      tenantDetails.org.logo,
+                      tenantDetails.org.logoWidth || 200,
+                      tenantDetails.org.logoHeight || 60,
+                      'fit'
+                    )} 
+                    alt={tenantDetails.name || tenantDetails.org.title || 'Logo'} 
+                    className="h-10 w-auto"
+                    style={{
+                      maxHeight: tenantDetails.org.logoHeight ? `${tenantDetails.org.logoHeight}px` : '40px',
+                      maxWidth: tenantDetails.org.logoWidth ? `${tenantDetails.org.logoWidth}px` : 'auto'
+                    }}
+                    onError={(e) => {
+                      // Fallback to letter badge if logo fails to load
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      const parent = target.parentElement;
+                      if (parent && !parent.querySelector('.logo-fallback')) {
+                        const fallback = document.createElement('div');
+                        fallback.className = 'logo-fallback h-10 w-10 rounded-lg bg-primary flex items-center justify-center';
+                        fallback.innerHTML = `<span class="text-white text-lg font-bold">${(tenantDetails?.name?.charAt(0) || tenantDetails?.org?.title?.charAt(0) || 'W').toUpperCase()}</span>`;
+                        parent.insertBefore(fallback, target);
+                      }
+                    }}
+                  />
+                ) : (
+                  <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center">
+                    <span className="text-white text-lg font-bold">
+                      {tenantDetails?.name?.charAt(0).toUpperCase() || tenantDetails?.org?.title?.charAt(0).toUpperCase() || 'W'}
+                    </span>
+                  </div>
+                )}
+                <span className="ml-3 text-xl font-semibold text-gray-100">
+                  {tenantDetails?.name || tenantDetails?.org?.title || 'Wajooba'}
                 </span>
               </div>
-              <p className="mt-4 text-gray-600 dark:text-gray-400 max-w-md">
-                Empowering education through innovative technology solutions. 
-                Join thousands of students and educators using Wajooba.
-              </p>
+              {tenantDetails?.org?.footerInfo && (
+                <p className="mt-4 text-gray-300 max-w-md">
+                  {tenantDetails.org.footerInfo}
+                </p>
+              )}
             </div>
 
-            <div>
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-white tracking-wider uppercase">
-                Solutions
-              </h3>
-              <ul className="mt-4 space-y-4">
-                <li>
-                  <a href="#" className="text-base text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
-                    For Students
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-base text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
-                    For Educators
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-base text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
-                    For Institutions
-                  </a>
-                </li>
-              </ul>
-            </div>
+            {/* Dynamic Footer Links */}
+            {footerItems.length > 0 && (() => {
+              const nonLegalItems = footerItems.filter(item => !item.isLegal);
+              const shouldSplit = nonLegalItems.length > 5;
+              const firstColumn = shouldSplit ? nonLegalItems.slice(0, 5) : nonLegalItems;
+              const secondColumn = shouldSplit ? nonLegalItems.slice(5) : [];
 
-            <div>
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-white tracking-wider uppercase">
-                Support
-              </h3>
-              <ul className="mt-4 space-y-4">
-                <li>
-                  <a href="#" className="text-base text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
-                    Help Center
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-base text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
-                    Contact Us
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-base text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
-                    Privacy Policy
-                  </a>
-                </li>
-              </ul>
-            </div>
+              return (
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-100 tracking-wider uppercase">
+                    Links
+                  </h3>
+                  <div className={shouldSplit ? 'mt-4 grid grid-cols-2 gap-x-8 gap-y-4' : 'mt-4'}>
+                    <ul className="space-y-4">
+                      {firstColumn.map((item) => (
+                        <li key={item.id}>
+                          {item.isExternalLink && item.externalLink ? (
+                            <a
+                              href={item.externalLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-base text-gray-300 hover:text-gray-100"
+                            >
+                              {item.title}
+                            </a>
+                          ) : (
+                            <Link
+                              to={item.url}
+                              className="text-base text-gray-300 hover:text-gray-100"
+                            >
+                              {item.title}
+                            </Link>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                    {shouldSplit && secondColumn.length > 0 && (
+                      <ul className="space-y-4">
+                        {secondColumn.map((item) => (
+                          <li key={item.id}>
+                            {item.isExternalLink && item.externalLink ? (
+                              <a
+                                href={item.externalLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-base text-gray-300 hover:text-gray-100"
+                              >
+                                {item.title}
+                              </a>
+                            ) : (
+                              <Link
+                                to={item.url}
+                                className="text-base text-gray-300 hover:text-gray-100"
+                              >
+                                {item.title}
+                              </Link>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Legal Links */}
+            {legalItems.length > 0 && (
+              <div>
+                <h3 className="text-sm font-semibold text-gray-100 tracking-wider uppercase">
+                  Legal
+                </h3>
+                <ul className="mt-4 space-y-4">
+                  {legalItems.map((item) => (
+                    <li key={item.id}>
+                      {item.isExternalLink && item.externalLink ? (
+                        <a
+                          href={item.externalLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-base text-gray-300 hover:text-gray-100"
+                        >
+                          {item.title}
+                        </a>
+                      ) : (
+                        <Link
+                          to={item.url}
+                          className="text-base text-gray-300 hover:text-gray-100"
+                        >
+                          {item.title}
+                        </Link>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
 
-          <div className="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
-            <p className="text-center text-base text-gray-400 dark:text-gray-500">
-              © {new Date().getFullYear()} Wajooba. All rights reserved.
+          <div className="mt-8 pt-8 border-t border-gray-800 dark:border-gray-800">
+            <p className="text-center text-base text-gray-400">
+              © {new Date().getFullYear()} {tenantDetails?.name || tenantDetails?.org?.title || 'Wajooba'}. All rights reserved.
             </p>
           </div>
         </div>

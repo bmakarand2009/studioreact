@@ -101,6 +101,43 @@ export const eventService = {
   },
 
   /**
+   * Get public events list (no auth required)
+   * Endpoint: GET /snode/pevent/{orgId}
+   * Returns: { data: Event[] } or Event[]
+   */
+  async getPublicEvents(orgId: string): Promise<Event[]> {
+    try {
+      const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://api.wajooba.me';
+      const response = await fetch(`${apiBaseUrl}/snode/pevent/${orgId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch events: ${response.status}`);
+      }
+
+      const result = await response.json();
+      
+      // Handle different response structures
+      // Angular component expects result.data, so check for that first
+      if (result && result.data && Array.isArray(result.data)) {
+        return result.data as Event[];
+      } else if (Array.isArray(result)) {
+        return result as Event[];
+      } else {
+        console.warn('Unexpected response structure from /snode/pevent:', result);
+        return [];
+      }
+    } catch (error) {
+      console.error('Error fetching public events:', error);
+      throw error;
+    }
+  },
+
+  /**
    * Build optimized Cloudinary URL for event image
    */
   buildEventImageUrl(imageUrl: string | undefined, cloudName: string): string {

@@ -1,13 +1,15 @@
 
 
-import { ReactNode } from 'react';
-import { useLocation } from 'react-router-dom';
+import { ReactNode, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { appLoadService } from '@/app/core/app-load';
 import EmptyLayout from './layouts/empty/empty-layout';
 import WajoobaPublicLayout from './layouts/horizontal/wajooba-public/wajooba-public-layout';
 import WajoobaStudentLayout from './layouts/vertical/wajooba-student/wajooba-student-layout';
 import WajoobaAdminLayout from './layouts/vertical/wajooba-admin/wajooba-admin-layout';
 import { useRef } from 'react';
+import { ProgressSnackbar } from '@/components/progress-snackbar';
 
 interface LayoutProps {
   children: ReactNode;
@@ -19,9 +21,17 @@ interface LayoutProps {
  */
 export function Layout({ children }: LayoutProps) {
   const location = useLocation();
+  const navigate = useNavigate();
   const pathname = location.pathname;
   const { isLoading, user } = useAuth();
   const layout = getRouteLayout(pathname);
+
+  // Check if ping failed and redirect to error page (except if already on error page)
+  useEffect(() => {
+    if (pathname !== '/error-connection' && appLoadService.hasError) {
+      navigate('/error-connection', { replace: true });
+    }
+  }, [pathname, navigate]);
 
   console.log('Layout: Rendering with', { pathname, isLoading, hasUser: !!user, layout });
 
@@ -69,19 +79,28 @@ export function Layout({ children }: LayoutProps) {
   console.log('Layout: Rendering layout', layout);
 
   // Render the appropriate layout based on the route
-  switch (layout) {
-    case 'empty':
-      return <EmptyLayout>{children}</EmptyLayout>;
-    case 'wajooba-public':
-      return <WajoobaPublicLayout>{children}</WajoobaPublicLayout>;
-    case 'wajooba-admin':
-      return <WajoobaAdminLayout>{children}</WajoobaAdminLayout>;
-    case 'wajooba-student':
-      return <WajoobaStudentLayout>{children}</WajoobaStudentLayout>;
-    default:
-      // Default to public layout for unknown routes
-      return <WajoobaPublicLayout>{children}</WajoobaPublicLayout>;
-  }
+  const renderLayout = () => {
+    switch (layout) {
+      case 'empty':
+        return <EmptyLayout>{children}</EmptyLayout>;
+      case 'wajooba-public':
+        return <WajoobaPublicLayout>{children}</WajoobaPublicLayout>;
+      case 'wajooba-admin':
+        return <WajoobaAdminLayout>{children}</WajoobaAdminLayout>;
+      case 'wajooba-student':
+        return <WajoobaStudentLayout>{children}</WajoobaStudentLayout>;
+      default:
+        // Default to public layout for unknown routes
+        return <WajoobaPublicLayout>{children}</WajoobaPublicLayout>;
+    }
+  };
+
+  return (
+    <>
+      {renderLayout()}
+      <ProgressSnackbar />
+    </>
+  );
 }
 
 /**
@@ -125,6 +144,15 @@ const getRouteLayout = (path: string): string | null => {
     '/about': 'wajooba-public',
     '/pricing': 'wajooba-public',
     '/features': 'wajooba-public',
+    // Dynamic public pages - common tenant web pages
+    '/calendar': 'wajooba-public',
+    '/events': 'wajooba-public',
+    '/mediagallery': 'wajooba-public',
+    '/forms': 'wajooba-public',
+    '/merchandise': 'wajooba-public',
+    '/donations': 'wajooba-public',
+    '/memberships': 'wajooba-public',
+    '/termsofservice': 'wajooba-public',
     
     // Generic dashboard - redirects based on role
     '/dashboard': 'wajooba-admin',

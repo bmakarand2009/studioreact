@@ -21,10 +21,22 @@ import StudentCoursesPage from '@/app/student/courses/page';
 import PublicAboutPage from '@/app/(public)/about/page';
 import PublicContactPage from '@/app/(public)/contact/page';
 import PublicCoursesPage from '@/app/(public)/courses/page';
+import PublicEventsPage from '@/app/(public)/events/page';
+import DynamicPublicPage from '@/app/(public)/[slug]/page';
+import ConnectionErrorPage from '@/app/error-connection/page';
 import NotFound from '@/app/not-found';
 
 const router = createBrowserRouter(
   [
+    // Error page route - outside layout wrapper
+    {
+      path: '/error-connection',
+      element: (
+        <Providers>
+          <ConnectionErrorPage />
+        </Providers>
+      ),
+    },
     {
       element: (
         <Providers>
@@ -34,13 +46,7 @@ const router = createBrowserRouter(
         </Providers>
       ),
       children: [
-        // Public
-        { path: '/', element: <HomePage /> },
-        { path: '/about', element: <PublicAboutPage /> },
-        { path: '/contact', element: <PublicContactPage /> },
-        { path: '/courses', element: <PublicCoursesPage /> },
-
-        // Auth
+        // Auth (must come before dynamic routes)
         { path: '/login', element: <LoginPage /> },
         { path: '/forgot-password', element: <ForgotPasswordPage /> },
 
@@ -60,6 +66,16 @@ const router = createBrowserRouter(
         { path: '/student/assessments', element: <StudentAssessmentsPage /> },
         { path: '/student/calendar', element: <StudentCalendarPage /> },
         { path: '/student/store', element: <StudentStorePage /> },
+
+        // Public (specific routes first)
+        { path: '/', element: <HomePage /> },
+        { path: '/about', element: <PublicAboutPage /> },
+        { path: '/contact', element: <PublicContactPage /> },
+        { path: '/courses', element: <PublicCoursesPage /> },
+        { path: '/events', element: <PublicEventsPage /> },
+        
+        // Dynamic public pages (catch-all for tenant web pages - must come last before fallback)
+        { path: '/:slug', element: <DynamicPublicPage /> },
 
         // Fallback
         { path: '*', element: <NotFound /> },

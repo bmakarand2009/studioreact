@@ -294,6 +294,13 @@ class EventDetailService {
       return null;
     }
   }
+
+  async regenerateMeetingUrl(eventId: string, payload: Record<string, any>): Promise<any> {
+    return this.request<any>(`/snode/erule/${eventId}/regenerateurl`, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    });
+  }
 }
 
 export const eventDetailService = new EventDetailService();

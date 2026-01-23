@@ -14,6 +14,7 @@ export class ImageUtils {
    * @param width - Desired width in pixels
    * @param height - Desired height in pixels
    * @param crop - Crop mode: 'fill', 'fit', 'scale', 'thumb'
+   * @param aspectRatio - Aspect ratio (e.g., '3:2', '16:9'). If provided, ensures exact aspect ratio
    * @returns Optimized Cloudinary URL
    */
   static buildCloudinaryUrl(
@@ -21,7 +22,8 @@ export class ImageUtils {
     imagePath: string | undefined,
     width: number = 480,
     height: number = 320,
-    crop: 'fill' | 'fit' | 'scale' | 'thumb' = 'fill'
+    crop: 'fill' | 'fit' | 'scale' | 'thumb' = 'fill',
+    aspectRatio?: string
   ): string {
     if (!imagePath || !cloudName) {
       return this.PLACEHOLDER;
@@ -30,7 +32,18 @@ export class ImageUtils {
     // Remove leading slash if present
     const cleanPath = imagePath.startsWith('/') ? imagePath.substring(1) : imagePath;
 
-    return `https://res.cloudinary.com/${cloudName}/image/upload/c_${crop},h_${height},w_${width}/${cleanPath}`;
+    // Build transformation string
+    let transformations = `c_${crop}`;
+    
+    // Add aspect ratio if specified
+    if (aspectRatio) {
+      transformations += `,ar_${aspectRatio}`;
+    }
+    
+    // Add dimensions
+    transformations += `,w_${width},h_${height}`;
+
+    return `https://res.cloudinary.com/${cloudName}/image/upload/${transformations}/${cleanPath}`;
   }
 
   /**
