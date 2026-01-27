@@ -5,7 +5,6 @@ import { useState } from 'react';
 import { 
   Users, 
   ArrowLeft, 
-  Plus, 
   Search, 
   Filter,
   MoreVertical,

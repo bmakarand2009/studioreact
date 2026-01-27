@@ -38,20 +38,22 @@ export function Layout({ children }: LayoutProps) {
   // Use ref to track previous values and detect changes
   const prevValuesRef = useRef({ pathname, isLoading, hasUser: !!user, layout });
 
-  // Check what changed
-  const prevValues = prevValuesRef.current;
-  if (prevValues.pathname !== pathname || 
-      prevValues.isLoading !== isLoading || 
-      prevValues.hasUser !== !!user || 
-      prevValues.layout !== layout) {
-    console.log('Layout: State changed', {
-      pathnameChanged: prevValues.pathname !== pathname,
-      isLoadingChanged: prevValues.isLoading !== isLoading,
-      userChanged: prevValues.hasUser !== !!user,
-      layoutChanged: prevValues.layout !== layout
-    });
-    prevValuesRef.current = { pathname, isLoading, hasUser: !!user, layout };
-  }
+  // Check what changed - moved to useEffect to avoid accessing refs during render
+  useEffect(() => {
+    const prevValues = prevValuesRef.current;
+    if (prevValues.pathname !== pathname || 
+        prevValues.isLoading !== isLoading || 
+        prevValues.hasUser !== !!user || 
+        prevValues.layout !== layout) {
+      console.log('Layout: State changed', {
+        pathnameChanged: prevValues.pathname !== pathname,
+        isLoadingChanged: prevValues.isLoading !== isLoading,
+        userChanged: prevValues.hasUser !== !!user,
+        layoutChanged: prevValues.layout !== layout
+      });
+      prevValuesRef.current = { pathname, isLoading, hasUser: !!user, layout };
+    }
+  }, [pathname, isLoading, user, layout]);
 
   // Show loading state only when necessary
   // Only show loading when checking for auth tokens on the root route

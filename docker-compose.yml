@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      # Pass build-time arguments (for Vite build-time embedding)
+      args:
+        VITE_API_URL: ${VITE_API_URL:-https://api.wajooba.me}
+        VITE_IS_DEV_MODE: ${VITE_IS_DEV_MODE:-true}
+        VITE_DEV_TENANT_NAME: ${VITE_DEV_TENANT_NAME:-marksampletest}
+        VITE_APP_VERSION: ${VITE_APP_VERSION:-1.0.0}
+        VITE_ENABLE_ANALYTICS: ${VITE_ENABLE_ANALYTICS:-false}
+        VITE_ENABLE_MOCK_DATA: ${VITE_ENABLE_MOCK_DATA:-false}
+        VITE_ENABLE_SENTRY: ${VITE_ENABLE_SENTRY:-false}
+        VITE_DISABLE_DOMAIN_CHECK: ${VITE_DISABLE_DOMAIN_CHECK:-false}
+        VITE_GA_ID: ${VITE_GA_ID:-}
+        VITE_SENTRY_DSN: ${VITE_SENTRY_DSN:-}
+        VITE_WAJOOBA_API_KEY: ${VITE_WAJOOBA_API_KEY:-}
+    ports:
+      - "5173:5173"  # Map host port 5173 to container port 5173
+    # Load environment variables from .env file
+    env_file:
+      - .env
+    # Override or add additional runtime variables (without VITE_ prefix for Docker runtime)
+    environment:
+      # Runtime Docker variables (without VITE_ prefix) - checked first
+      - API_URL=${VITE_API_URL:-https://api.wajooba.me}
+      - IS_DEV_MODE=${VITE_IS_DEV_MODE:-true}
+      - DEV_TENANT_NAME=${VITE_DEV_TENANT_NAME:-marksampletest}
+      - APP_VERSION=${VITE_APP_VERSION:-1.0.0}
+      - ENABLE_ANALYTICS=${VITE_ENABLE_ANALYTICS:-false}
+      - ENABLE_MOCK_DATA=${VITE_ENABLE_MOCK_DATA:-false}
+      - ENABLE_SENTRY=${VITE_ENABLE_SENTRY:-false}
+      - DISABLE_DOMAIN_CHECK=${VITE_DISABLE_DOMAIN_CHECK:-false}
+      # Optional: API Key (can be set without VITE_ prefix for runtime)
+      - WAJOOBA_API_KEY=${WAJOOBA_API_KEY:-}
+      # Vite build-time variables (with VITE_ prefix) - also loaded from .env
+      - VITE_API_URL=${VITE_API_URL:-https://api.wajooba.me}
+      - VITE_IS_DEV_MODE=${VITE_IS_DEV_MODE:-true}
+      - VITE_DEV_TENANT_NAME=${VITE_DEV_TENANT_NAME:-marksampletest}
+      - VITE_APP_VERSION=${VITE_APP_VERSION:-1.0.0}
+      - VITE_ENABLE_ANALYTICS=${VITE_ENABLE_ANALYTICS:-false}
+      - VITE_ENABLE_MOCK_DATA=${VITE_ENABLE_MOCK_DATA:-false}
+      - VITE_ENABLE_SENTRY=${VITE_ENABLE_SENTRY:-false}
+      - VITE_DISABLE_DOMAIN_CHECK=${VITE_DISABLE_DOMAIN_CHECK:-false}
+      - VITE_WAJOOBA_API_KEY=${VITE_WAJOOBA_API_KEY:-}
+      # Optional external services
+      - VITE_GA_ID=${VITE_GA_ID:-}
+      - VITE_SENTRY_DSN=${VITE_SENTRY_DSN:-}
+    restart: unless-stopped

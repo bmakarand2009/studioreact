@@ -3,17 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
 import { 
   Search, 
-  Filter, 
   BookOpen, 
-  Clock, 
-  Users, 
-  Star,
-  ArrowRight,
   Play,
   Loader2
 } from 'lucide-react';
-import { appLoadService, TenantDetails } from '@/app/core/app-load';
-import { APP_CONFIG } from '@/constants';
+import { appLoadService } from '@/app/core/app-load';
 import { ImageUtils } from '@/utils/imageUtils';
 
 interface Course {
@@ -40,7 +34,6 @@ export default function CourseCatalogPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const [tenantDetails, setTenantDetails] = useState<TenantDetails | null>(null);
 
   // Fetch tenant details and courses
   useEffect(() => {
@@ -60,10 +53,8 @@ export default function CourseCatalogPage() {
           return;
         }
 
-        setTenantDetails(tenant);
-
         // Fetch courses from API
-        const apiUrl = `${APP_CONFIG.apiBaseUrl}/snode/icategory/public/?tid=${tenant.tenantId}`;
+        const apiUrl = `${import.meta.env.VITE_API_URL || 'https://api.wajooba.me'}/snode/icategory/public/?tid=${tenant.tenantId}`;
         const response = await fetch(apiUrl, {
           method: 'GET',
           headers: {
@@ -339,7 +330,7 @@ export default function CourseCatalogPage() {
       <div className="bg-gradient-to-r from-primary-600 to-brand-600 py-12">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-2xl font-bold text-white mb-4">
-            Can't Find What You're Looking For?
+            Can&apos;t Find What You&apos;re Looking For?
           </h2>
           <p className="text-lg text-primary-100 mb-6">
             Contact our team to discuss custom course development or specific learning needs.

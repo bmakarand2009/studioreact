@@ -47,6 +47,13 @@ export default function DynamicPublicPage() {
     }
   }, [slug]);
 
+  // Handle external links - redirect if needed (must be before early returns)
+  useEffect(() => {
+    if (pageData?.isExternalLink && pageData.externalLink) {
+      window.location.href = pageData.externalLink;
+    }
+  }, [pageData]);
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -61,19 +68,12 @@ export default function DynamicPublicPage() {
         <div className="text-center">
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Page Not Found</h1>
           <p className="text-gray-600 dark:text-gray-400">
-            The page you're looking for doesn't exist.
+            The page you&apos;re looking for doesn&apos;t exist.
           </p>
         </div>
       </div>
     );
   }
-
-  // Handle external links - redirect if needed
-  useEffect(() => {
-    if (pageData?.isExternalLink && pageData.externalLink) {
-      window.location.href = pageData.externalLink;
-    }
-  }, [pageData]);
 
   if (pageData?.isExternalLink && pageData.externalLink) {
     return (

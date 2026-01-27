@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
 import { 
@@ -7,15 +7,13 @@ import {
   Clock, 
   MapPin,
   Video,
-  Loader2,
   DollarSign,
   CheckCircle,
   Heart,
   ExternalLink,
+  Loader2,
 } from 'lucide-react';
-import { appLoadService, TenantDetails } from '@/app/core/app-load';
-import { APP_CONFIG } from '@/constants';
-import { ImageUtils } from '@/utils/imageUtils';
+import { appLoadService } from '@/app/core/app-load';
 import { eventService } from '@/services/eventService';
 import { Event } from '@/types/event';
 
@@ -25,7 +23,6 @@ export default function EventsListPage() {
   const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [tenantDetails, setTenantDetails] = useState<TenantDetails | null>(null);
 
   // Fetch tenant details and events
   useEffect(() => {
@@ -44,8 +41,6 @@ export default function EventsListPage() {
           setIsLoading(false);
           return;
         }
-
-        setTenantDetails(tenant);
 
         // Fetch events from API using orgGuId
         const orgGuId = tenant.orgGuId || tenant.tenantId;
@@ -117,7 +112,7 @@ export default function EventsListPage() {
     const paymentInfo = eventService.getPaymentTypeInfo(event);
     if (!paymentInfo) return null;
 
-    const iconMap: Record<string, React.ComponentType<any>> = {
+    const iconMap: Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>>> = {
       'paid': DollarSign,
       'free': CheckCircle,
       'donation': Heart,
@@ -359,7 +354,7 @@ export default function EventsListPage() {
       <div className="bg-gradient-to-r from-primary-600 to-brand-600 py-12">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-2xl font-bold text-white mb-4">
-            Can't Find What You're Looking For?
+            Can&apos;t Find What You&apos;re Looking For?
           </h2>
           <p className="text-lg text-primary-100 mb-6">
             Contact our team to learn more about upcoming events or discuss your event needs.

@@ -60,7 +60,7 @@ function WebsiteSettingsPage() {
 
   const watchedValues = watch();
 
-  const onSubmit = async (data: WebsiteFormData) => {
+  const onSubmit = async () => {
     setIsLoading(true);
     try {
       // Simulate API call

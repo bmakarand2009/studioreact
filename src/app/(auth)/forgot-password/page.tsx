@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Button, Input, Alert, AlertTitle, AlertDescription } from '@/components/ui';
+import { Button, Input, Alert, AlertDescription } from '@/components/ui';
 import { 
   Mail, 
   ArrowLeft,
@@ -71,7 +71,7 @@ export default function ForgotPasswordPage() {
               </h2>
               
               <p className="text-gray-600 dark:text-gray-400 mb-6">
-                We've sent a password reset link to your email address. Please check your inbox and follow the instructions to reset your password.
+                We&apos;ve sent a password reset link to your email address. Please check your inbox and follow the instructions to reset your password.
               </p>
               
               <div className="space-y-4">
@@ -82,7 +82,7 @@ export default function ForgotPasswordPage() {
                 </Link>
                 
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Didn't receive the email?{' '}
+                  Didn&apos;t receive the email?{' '}
                   <button
                     onClick={() => setIsSuccess(false)}
                     className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium transition-colors"
@@ -100,7 +100,7 @@ export default function ForgotPasswordPage() {
           <div className="text-center text-white">
             <h2 className="text-4xl font-bold mb-4">Password Reset</h2>
             <p className="text-xl text-deep-100 max-w-md">
-              No worries, we'll send you reset instructions. Just enter your email address and we'll take care of the rest.
+              No worries, we&apos;ll send you reset instructions. Just enter your email address and we&apos;ll take care of the rest.
             </p>
           </div>
         </div>
@@ -134,7 +134,7 @@ export default function ForgotPasswordPage() {
               Forgot your password?
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
-              No worries, we'll send you reset instructions.
+              No worries, we&apos;ll send you reset instructions.
             </p>
           </div>
 

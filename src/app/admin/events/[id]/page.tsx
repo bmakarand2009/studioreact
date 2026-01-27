@@ -11,7 +11,6 @@ import {
   Tag,
   Trash2,
   UploadCloud,
-  User,
   Wand2,
 } from 'lucide-react';
 
@@ -229,7 +228,6 @@ const AddEditEventPage = () => {
   const [preferences, setPreferences] = useState<EventPreference | null>(null);
   const [eventData, setEventData] = useState<EventDetailResponse | null>(null);
   const [categories, setCategories] = useState<EventCategory[]>([]);
-  const [showRegenerateDialog, setShowRegenerateDialog] = useState<boolean>(false);
   const [templateState, setTemplateState] = useState<TemplateState>({
     html: DEFAULT_TEMPLATE_HTML,
     json: {},
@@ -497,7 +495,7 @@ const AddEditEventPage = () => {
     } finally {
       setIsPageLoading(false);
     }
-  }, [eventId, hydrateEvent, hydrateLocations, loadTemplate, toast, formState.meetingProvider]);
+  }, [eventId, hydrateEvent, hydrateLocations, loadTemplate, toast, formState.meetingProvider, formState.categoryGuId]);
 
   useEffect(() => {
     loadInitialData();
@@ -785,7 +783,7 @@ const AddEditEventPage = () => {
           ? formState.onlineMeetPassword
           : undefined,
     };
-  }, [formState, schedules]);
+  }, [formState, schedules, preferences]);
 
   const handleSaveStepOne = useCallback(async () => {
     if (!validateStepOne()) {
@@ -832,7 +830,7 @@ const AddEditEventPage = () => {
     } finally {
       setIsSaving(false);
     }
-  }, [buildEventPayload, eventAiContext, hydrateEvent, meetingProviders, navigate, primaryEventId, preferences, toast, updateFormState, validateStepOne]);
+  }, [buildEventPayload, eventAiContext, hydrateEvent, meetingProviders, navigate, primaryEventId, preferences, toast, updateFormState, validateStepOne, formState.longDescription, formState.shortDescription]);
 
   const handleTemplateSave = useCallback(
     async (redirectAfterSave: boolean) => {
@@ -844,7 +842,7 @@ const AddEditEventPage = () => {
       let parsedJson: Record<string, any> = templateState.json;
       try {
         parsedJson = JSON.parse(templateJsonText || '{}');
-      } catch (error) {
+      } catch {
         toast.error('Template JSON is invalid. Please fix it before saving.');
         return;
       }
@@ -883,7 +881,7 @@ const AddEditEventPage = () => {
         setIsTemplateSaving(false);
       }
     },
-    [eventData, formState.name, navigate, primaryEventId, templateJsonText, templateState.html, templateState.templateId, tenantOrgId, toast],
+    [eventData, formState.name, navigate, primaryEventId, templateJsonText, templateState.html, templateState.json, templateState.templateId, tenantOrgId, toast],
   );
 
   const handleRegenerateTemplate = useCallback(async () => {

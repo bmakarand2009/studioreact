@@ -9,8 +9,6 @@ import {
   Settings, 
   TestTube,
   CheckCircle,
-  XCircle,
-  AlertCircle,
   Loader2,
   Mail,
   MessageSquare,
@@ -18,7 +16,7 @@ import {
   BarChart3,
   Link
 } from 'lucide-react';
-import { Button, Input, Switch, Alert, AlertTitle, AlertDescription } from '@/components/ui';
+import { Button, Switch, Alert, AlertTitle, AlertDescription } from '@/components/ui';
 import { settingsService, IntegrationSettings } from '@/services/settingsService';
 
 function IntegrationsSettingsPage() {
@@ -144,7 +142,7 @@ function IntegrationsSettingsPage() {
         ...prev,
         [integrationId]: result
       }));
-    } catch (error) {
+    } catch {
       setTestResults(prev => ({
         ...prev,
         [integrationId]: {

@@ -303,7 +303,7 @@ class TranslocoService {
   /**
    * Get static translations (fallback)
    */
-  private getStaticTranslations(language: string, namespace: string): Translation {
+  private getStaticTranslations(_language: string, _namespace: string): Translation {
     // This would contain static translations for each language/namespace
     // For now, return empty object - in production, you'd have these pre-loaded
     return {};

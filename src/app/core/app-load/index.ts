@@ -117,6 +117,7 @@ export interface CustomFieldData {
   type: CustomFieldType;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export enum CustomFieldType {
   Checkbox = "checkbox",
   Dropdown = "dropdown",
@@ -126,6 +127,7 @@ export enum CustomFieldType {
   Text = "text",
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export enum FormType {
   StudentRegistration = "STUDENT_REGISTRATION",
 }
@@ -279,11 +281,11 @@ export class AppLoadService {
       this._isInitializing = false;
       
       return details;
-    } catch (error) {
-      console.error('AppLoadService: Initialization error:', error);
+    } catch (err) {
+      console.error('AppLoadService: Initialization error:', err);
       this._isInitializing = false;
       this._hasError = true;
-      this._error = error instanceof Error ? error : new Error('Failed to connect to Wajooba servers');
+      this._error = err instanceof Error ? err : new Error('Failed to connect to Wajooba servers');
       return null;
     }
   }

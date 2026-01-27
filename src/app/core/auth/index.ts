@@ -3,7 +3,7 @@
  * Handles user authentication, token management, and session handling
  */
 
-import { STORAGE_KEYS, API_CONFIG, HTTP_STATUS } from '../app-constants';
+import { STORAGE_KEYS, API_CONFIG } from '../app-constants';
 
 export interface User {
   id: string;

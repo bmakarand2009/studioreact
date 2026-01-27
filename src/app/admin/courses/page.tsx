@@ -5,7 +5,6 @@ import {
   Search, 
   BookOpen, 
   Clock,
-  Loader2,
   AlertCircle
 } from 'lucide-react';
 import { Button, Pagination } from '@/components/ui';

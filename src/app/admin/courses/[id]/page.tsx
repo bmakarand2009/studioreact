@@ -210,7 +210,7 @@ const AddEditCoursePage = () => {
   }, [durationLabel, formState, staffList, tenantDetails]);
 
   useEffect(() => {
-    setFilteredCategories((prev) => {
+    setFilteredCategories(() => {
       if (!categorySearchQuery) {
         return [...existingCategories];
       }
@@ -1092,7 +1092,7 @@ const AddEditCoursePage = () => {
                         const parsed = JSON.parse(event.target.value);
                         setTemplateState((prev) => ({ ...prev, json: parsed }));
                         toast.success('Template structure updated.');
-                      } catch (error) {
+                      } catch {
                         toast.error('Invalid JSON structure.');
                       }
                     }}
