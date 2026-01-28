@@ -8,6 +8,7 @@ import VerticalNavigation from '@/components/navigation/vertical-navigation';
 import Header from '@/components/layout/header';
 
 import { MediaSliderPanel } from '@/components/media-slider';
+import { AISidebarPanel } from '@/components/ai-sidebar';
 import { SidebarPayload } from '@/services/sidebarControllerService';
 import { cn } from '@/utils/cn';
 
@@ -21,7 +22,9 @@ export default function WajoobaAdminLayout({ children }: WajoobaAdminLayoutProps
   const [sidebarPinned, setSidebarPinned] = useState(true);
   const [isHovering, setIsHovering] = useState(false);
   const [mediaSliderOpen, setMediaSliderOpen] = useState(false);
+  const [aiSidebarOpen, setAISidebarOpen] = useState(false);
   const isScreenSmall = useMediaQuery('(max-width: 768px)');
+  const isLargeScreen = useMediaQuery('(min-width: 1440px)');
   const { navigation } = useNavigation();
   const { user, logout } = useAuth();
 
@@ -47,6 +50,7 @@ export default function WajoobaAdminLayout({ children }: WajoobaAdminLayoutProps
   // Close sidebar on screen size change
   useEffect(() => {
     if (!isScreenSmall) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSidebarOpen(false);
     }
   }, [isScreenSmall]);
@@ -67,6 +71,7 @@ export default function WajoobaAdminLayout({ children }: WajoobaAdminLayoutProps
   // Auto-collapse logic
   useEffect(() => {
     if (!sidebarPinned && !isHovering && !isScreenSmall) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSidebarCollapsed(true);
     } else if (!sidebarPinned && isHovering && !isScreenSmall) {
       setSidebarCollapsed(false);
@@ -75,35 +80,97 @@ export default function WajoobaAdminLayout({ children }: WajoobaAdminLayoutProps
     }
   }, [sidebarPinned, isHovering, isScreenSmall]);
 
+  // Keep AI sidebar open on large screens - only update state, don't dispatch event
+  // The sidebar controller will handle the event dispatch when it opens
+  useEffect(() => {
+    if (isLargeScreen) {
+      // On large screens, ensure sidebar state is open for layout purposes
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setAISidebarOpen((prev) => {
+        if (!prev) {
+          return true;
+        }
+        return prev;
+      });
+    }
+  }, [isLargeScreen]);
+
   useEffect(() => {
     const handleSidebarLayout = (event: Event) => {
       const detail = (event as CustomEvent<SidebarPayload>).detail;
-      if (!detail || detail.name !== 'mediaSlider') {
+      if (!detail) {
         return;
       }
-      setMediaSliderOpen(detail.open);
-      if (detail.open) {
-        previousSidebarStateRef.current = {
-          pinned: sidebarPinnedRef.current,
-          collapsed: sidebarCollapsedRef.current,
-        };
-        forcedFoldRef.current = true;
-        if (sidebarPinnedRef.current) {
-          setSidebarPinned(false);
+
+      // Handle media slider
+      if (detail.name === 'mediaSlider') {
+        setMediaSliderOpen(detail.open);
+        if (detail.open) {
+          previousSidebarStateRef.current = {
+            pinned: sidebarPinnedRef.current,
+            collapsed: sidebarCollapsedRef.current,
+          };
+          forcedFoldRef.current = true;
+          if (sidebarPinnedRef.current) {
+            setSidebarPinned(false);
+          }
+          setSidebarCollapsed(true);
+        } else {
+          // Use functional update to check current aiSidebarOpen state
+          setAISidebarOpen((currentAIOpen) => {
+            if (forcedFoldRef.current && !currentAIOpen && !isLargeScreen) {
+              setSidebarPinned(previousSidebarStateRef.current.pinned);
+              setSidebarCollapsed(previousSidebarStateRef.current.collapsed);
+              forcedFoldRef.current = false;
+            }
+            return currentAIOpen;
+          });
         }
-        setSidebarCollapsed(true);
-      } else if (forcedFoldRef.current) {
-        setSidebarPinned(previousSidebarStateRef.current.pinned);
-        setSidebarCollapsed(previousSidebarStateRef.current.collapsed);
-        forcedFoldRef.current = false;
+      }
+
+      // Handle AI sidebar
+      if (detail.name === 'aiSidebar') {
+        // On large screens, always keep sidebar open state
+        const shouldBeOpen = isLargeScreen || detail.open;
+        
+        // Use functional update to avoid dependency on aiSidebarOpen
+        setAISidebarOpen((prev) => {
+          // Only update if value actually changed to prevent unnecessary re-renders
+          if (shouldBeOpen !== prev) {
+            return shouldBeOpen;
+          }
+          return prev;
+        });
+        
+        if (shouldBeOpen) {
+          previousSidebarStateRef.current = {
+            pinned: sidebarPinnedRef.current,
+            collapsed: sidebarCollapsedRef.current,
+          };
+          forcedFoldRef.current = true;
+          if (sidebarPinnedRef.current) {
+            setSidebarPinned(false);
+          }
+          setSidebarCollapsed(true);
+        } else {
+          // Use ref to check current state instead of closure value
+          setMediaSliderOpen((currentMediaOpen) => {
+            if (forcedFoldRef.current && !currentMediaOpen) {
+              setSidebarPinned(previousSidebarStateRef.current.pinned);
+              setSidebarCollapsed(previousSidebarStateRef.current.collapsed);
+              forcedFoldRef.current = false;
+            }
+            return currentMediaOpen;
+          });
+        }
       }
     };
 
-    window.addEventListener('sidebar:layout-change', handleSidebarLayout as EventListener);
+    window.addEventListener('sidebar:layout-change', handleSidebarLayout);
     return () => {
-      window.removeEventListener('sidebar:layout-change', handleSidebarLayout as EventListener);
+      window.removeEventListener('sidebar:layout-change', handleSidebarLayout);
     };
-  }, []);
+  }, [isLargeScreen]); // Remove aiSidebarOpen and mediaSliderOpen from deps to prevent loops
 
   // Don't show loading state here - let the role guard handle it
   // The role guard will show appropriate loading messages
@@ -123,9 +190,10 @@ export default function WajoobaAdminLayout({ children }: WajoobaAdminLayoutProps
     <div
       className={cn(
         'flex h-screen bg-gray-100 dark:bg-gray-900 transition-[padding] duration-300',
-        mediaSliderOpen ? 'lg:pr-[420px]' : '',
+        // Always add padding for AI sidebar on large screens, or when media slider is open
+        (mediaSliderOpen || aiSidebarOpen || isLargeScreen) ? 'lg:pr-[420px]' : '',
       )}
-      data-sidebar-mode={mediaSliderOpen ? 'folded' : sidebarPinned ? 'pinned' : 'hover'}
+      data-sidebar-mode={(mediaSliderOpen || aiSidebarOpen || isLargeScreen) ? 'folded' : sidebarPinned ? 'pinned' : 'hover'}
     >
       {/* Sidebar */}
       <div
@@ -186,6 +254,7 @@ export default function WajoobaAdminLayout({ children }: WajoobaAdminLayoutProps
         </footer>
       </div>
       <MediaSliderPanel />
+      <AISidebarPanel />
     </div>
   );
 }

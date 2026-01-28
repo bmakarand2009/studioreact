@@ -2,7 +2,7 @@ import { ReactNode } from 'react';
 import { UserProvider } from '@/contexts/UserContext';
 import { PreviewProvider } from '@/contexts/PreviewContext';
 import { ToastProvider } from '@/components/ui/ToastProvider';
-import { MediaSliderProvider } from '@/components/media-slider';
+import { SidebarProvider } from '@/components/sidebars/SidebarProvider';
 import { AppInitializer } from './AppInitializer';
 
 interface ProvidersProps {
@@ -14,10 +14,10 @@ export function Providers({ children }: ProvidersProps) {
     <UserProvider>
       <PreviewProvider>
         <ToastProvider>
-          <MediaSliderProvider>
+          <SidebarProvider>
             <AppInitializer />
             {children}
-          </MediaSliderProvider>
+          </SidebarProvider>
         </ToastProvider>
       </PreviewProvider>
     </UserProvider>

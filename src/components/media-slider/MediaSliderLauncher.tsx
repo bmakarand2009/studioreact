@@ -1,7 +1,7 @@
 import { ReactNode, useMemo } from 'react';
 import { Button, ButtonProps } from '@/components/ui/Button';
 import { useMediaSlider, MediaSliderOpenOptions } from '@/hooks/useMediaSlider';
-import { useMediaSliderContext } from './MediaSliderProvider';
+import { useMediaSliderContext } from '@/components/sidebars/SidebarProvider';
 
 interface MediaSliderLauncherProps extends Omit<Partial<ButtonProps>, 'onSelect'> {
   children?: ReactNode;

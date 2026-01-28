@@ -7,8 +7,13 @@ class SidebarController {
   private listeners = new Map<string, Set<SidebarListener>>();
   private states = new Map<string, boolean>();
   private payloads = new Map<string, unknown>();
+  private currentOpenSidebar: string | null = null;
 
   open<T = unknown>(name: string, data?: T) {
+    // Close any currently open sidebar before opening a new one
+    if (this.currentOpenSidebar && this.currentOpenSidebar !== name) {
+      this.setState(this.currentOpenSidebar, false);
+    }
     this.setState(name, true, data);
   }
 
@@ -18,6 +23,12 @@ class SidebarController {
 
   toggle<T = unknown>(name: string, data?: T) {
     const next = !this.states.get(name);
+    if (next) {
+      // If opening, close any currently open sidebar first
+      if (this.currentOpenSidebar && this.currentOpenSidebar !== name) {
+        this.setState(this.currentOpenSidebar, false);
+      }
+    }
     this.setState(name, next, data);
   }
 
@@ -46,6 +57,14 @@ class SidebarController {
     }
 
     this.states.set(name, open);
+    
+    // Track currently open sidebar
+    if (open) {
+      this.currentOpenSidebar = name;
+    } else if (this.currentOpenSidebar === name) {
+      this.currentOpenSidebar = null;
+    }
+    
     const payload: SidebarPayload = {
       name,
       open,

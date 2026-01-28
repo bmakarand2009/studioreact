@@ -12,6 +12,14 @@ import AdminCoursesPage from '@/app/admin/courses/page';
 import AddEditCoursePage from '@/app/admin/courses/[id]/page';
 import AdminEventsPage from '@/app/admin/events/page';
 import AddEditEventPage from '@/app/admin/events/[id]/page';
+import AdminSettingsPage from '@/app/admin/settings/page';
+import AdminSettingsAccountPage from '@/app/admin/settings/account/page';
+import AdminSettingsWebsitePage from '@/app/admin/settings/website/page';
+import AdminSettingsDisplayPage from '@/app/admin/settings/display/page';
+import AdminSettingsPaymentPage from '@/app/admin/settings/payment/page';
+import AdminSettingsIntegrationsPage from '@/app/admin/settings/integrations/page';
+import AdminSettingsUsersPage from '@/app/admin/settings/users/page';
+import AdminSettingsRolesPage from '@/app/admin/settings/roles/page';
 import DashboardPage from '@/app/dashboard/page';
 import StudentDashboardPage from '@/app/student/dashboard/page';
 import StudentAssessmentsPage from '@/app/student/assessments/page';
@@ -59,6 +67,16 @@ const router = createBrowserRouter(
         { path: '/admin/events', element: <AdminEventsPage /> },
         { path: '/admin/events/add', element: <AddEditEventPage /> },
         { path: '/admin/events/edit/:id', element: <AddEditEventPage /> },
+
+        // Admin Settings
+        { path: '/admin/settings', element: <AdminSettingsPage /> },
+        { path: '/admin/settings/account', element: <AdminSettingsAccountPage /> },
+        { path: '/admin/settings/website', element: <AdminSettingsWebsitePage /> },
+        { path: '/admin/settings/display', element: <AdminSettingsDisplayPage /> },
+        { path: '/admin/settings/payment', element: <AdminSettingsPaymentPage /> },
+        { path: '/admin/settings/integrations', element: <AdminSettingsIntegrationsPage /> },
+        { path: '/admin/settings/users', element: <AdminSettingsUsersPage /> },
+        { path: '/admin/settings/roles', element: <AdminSettingsRolesPage /> },
 
         // Student
         { path: '/student/dashboard', element: <StudentDashboardPage /> },

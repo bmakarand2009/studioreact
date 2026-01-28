@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { XIcon, Trash2Icon, ImageIcon } from 'lucide-react';
 import { sidebarController, SidebarPayload } from '@/services/sidebarControllerService';
-import { useMediaSliderContext } from './MediaSliderProvider';
+import { useMediaSliderContext } from '@/components/sidebars/SidebarProvider';
 import { MediaAsset } from './types';
 import { MediaSliderOpenOptions } from '@/hooks/useMediaSlider';
 import { cn } from '@/utils/cn';
