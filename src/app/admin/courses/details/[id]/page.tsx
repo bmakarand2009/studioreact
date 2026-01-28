@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, useRef } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
   Edit,
@@ -102,9 +102,20 @@ const getDurationLabel = (value: string | undefined | null): string => {
   return trimmedValue;
 };
 
+const VALID_TABS = ["attendees", "content", "pricing", "setup"] as const;
+type TabKey = (typeof VALID_TABS)[number];
+
+const getTabFromSearch = (search: string | undefined | null): TabKey => {
+  if (!search) return "attendees";
+  const params = new URLSearchParams(search);
+  const tab = params.get("tab");
+  return VALID_TABS.includes(tab as TabKey) ? (tab as TabKey) : "attendees";
+};
+
 const CourseDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const toast = useToast();
 
   const [tenantDetails, setTenantDetails] = useState<TenantDetails | null>(
@@ -128,8 +139,32 @@ const CourseDetailsPage = () => {
     onConfirm: () => void | Promise<void>;
   } | null>(null);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<string>('attendees');
+  const [activeTab, setActiveTab] = useState<TabKey>(() =>
+    getTabFromSearch(window.location?.search),
+  );
   const [batches, setBatches] = useState<Batch[]>([]);
+
+  // Keep active tab in sync with URL (?tab=...)
+  useEffect(() => {
+    const urlTab = getTabFromSearch(location.search);
+    setActiveTab((current) => (current === urlTab ? current : urlTab));
+  }, [location.search]);
+
+  const handleTabChange = useCallback(
+    (tab: TabKey) => {
+      setActiveTab(tab);
+      const params = new URLSearchParams(location.search);
+      params.set("tab", tab);
+      navigate(
+        {
+          pathname: location.pathname,
+          search: params.toString(),
+        },
+        { replace: true },
+      );
+    },
+    [location.pathname, location.search, navigate],
+  );
 
   const bannerImageUrl = useMemo(() => {
     if (!courseData?.image1) {
@@ -302,7 +337,7 @@ const CourseDetailsPage = () => {
       } else {
         setCurrentBatch(null);
       }
-      
+
       // Load batches for attendees filter
       loadBatches();
     } catch (err: any) {
@@ -339,7 +374,7 @@ const CourseDetailsPage = () => {
       const filteredBatches = allBatches.filter((batch) => !batch.isDynamic);
       setBatches(filteredBatches);
     } catch (error: any) {
-      console.error('Failed to load batches:', error);
+      console.error("Failed to load batches:", error);
     }
   }, []);
 
@@ -624,55 +659,55 @@ const CourseDetailsPage = () => {
       {/* Main Content */}
       <main className="mx-auto mt-8 max-w-7xl px-6 lg:px-8">
         {/* Tabs */}
-        <div className="bg-white dark:bg-gray-800 rounded-t-lg">
-          <nav className="flex space-x-1 px-6" aria-label="Tabs">
+        <div className="bg-white dark:bg-slate-900 rounded-lg">
+          <nav className="flex space-x-1 p-3" aria-label="Tabs">
             <button
-              onClick={() => setActiveTab('attendees')}
+              onClick={() => handleTabChange("attendees")}
               className={`
-                py-3 px-4 font-medium text-sm transition-colors rounded-t-md
+              px-4 font-medium text-sm transition-colors rounded-lg
                 ${
-                  activeTab === 'attendees'
-                    ? 'bg-primary-600 text-white shadow-md border-b-4 border-primary-400'
-                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white border-b-2 border-transparent'
+                  activeTab === "attendees"
+                    ? "bg-primary-600 py-3 px-4 text-white shadow-md dark:bg-primary-500 dark:text-white"
+                    : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white"
                 }
               `}
             >
               Attendees
             </button>
             <button
-              onClick={() => setActiveTab('content')}
+              onClick={() => handleTabChange("content")}
               className={`
-                py-3 px-4 font-medium text-sm transition-colors rounded-t-md
+              px-4 font-medium text-sm transition-colors rounded-lg
                 ${
-                  activeTab === 'content'
-                    ? 'bg-primary-600 text-white shadow-md border-b-4 border-primary-400'
-                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white border-b-2 border-transparent'
+                  activeTab === "content"
+                    ? "bg-primary-600 py-3 px-4 text-white shadow-md dark:bg-primary-500 dark:text-white"
+                    : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white"
                 }
               `}
             >
               Content
             </button>
             <button
-              onClick={() => setActiveTab('pricing')}
+              onClick={() => handleTabChange("pricing")}
               className={`
-                py-3 px-4 font-medium text-sm transition-colors rounded-t-md
+              px-4 font-medium text-sm transition-colors rounded-lg
                 ${
-                  activeTab === 'pricing'
-                    ? 'bg-primary-600 text-white shadow-md border-b-4 border-primary-400'
-                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white border-b-2 border-transparent'
+                  activeTab === "pricing"
+                    ? "bg-primary-600 py-3 px-4 text-white shadow-md dark:bg-primary-500 dark:text-white"
+                    : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white"
                 }
               `}
             >
               Pricing
             </button>
             <button
-              onClick={() => setActiveTab('setup')}
+              onClick={() => handleTabChange("setup")}
               className={`
-                py-3 px-4 font-medium text-sm transition-colors rounded-t-md
+              px-4 font-medium text-sm transition-colors rounded-lg
                 ${
-                  activeTab === 'setup'
-                    ? 'bg-primary-600 text-white shadow-md border-b-4 border-primary-400'
-                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white border-b-2 border-transparent'
+                  activeTab === "setup"
+                    ? "bg-primary-600 py-3 px-4 text-white shadow-md dark:bg-primary-500 dark:text-white"
+                    : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white"
                 }
               `}
             >
@@ -683,18 +718,20 @@ const CourseDetailsPage = () => {
 
         {/* Tab Content */}
         <div className="mt-6">
-          {activeTab === 'attendees' && (
-            <AttendeesList
-              productId={id || ''}
-              productName={courseData.name || ''}
-              productType="course"
-              paymentType={courseData.paymentType}
-              batches={batches}
-              currentBatchId={currentBatch?.guId}
-            />
+          {activeTab === "attendees" && (
+            <div className="rounded-lg bg-white p-8 shadow-xl shadow-primary-500/5 dark:border-slate-800 dark:bg-slate-900">
+              <AttendeesList
+                productId={id || ""}
+                productName={courseData.name || ""}
+                productType="course"
+                paymentType={courseData.paymentType}
+                batches={batches}
+                currentBatchId={currentBatch?.guId}
+              />
+            </div>
           )}
 
-          {activeTab === 'content' && (
+          {activeTab === "content" && (
             <div className="space-y-8">
               {/* Course Banner */}
               <section className="rounded-3xl border border-slate-200 bg-white p-8 shadow-xl shadow-primary-500/5 dark:border-slate-800 dark:bg-slate-900">
@@ -806,14 +843,16 @@ const CourseDetailsPage = () => {
             </div>
           )}
 
-          {activeTab === 'pricing' && (
+          {activeTab === "pricing" && (
             <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-xl shadow-primary-500/5 dark:border-slate-800 dark:bg-slate-900">
-              <p className="text-slate-600 dark:text-slate-400">Pricing content will be added here.</p>
+              <p className="text-slate-600 dark:text-slate-400">
+                Pricing content will be added here.
+              </p>
             </div>
           )}
 
-          {activeTab === 'setup' && courseData && (
-            <div className="rounded-lg border border-slate-200 bg-white p-8 shadow-xl shadow-primary-500/5 dark:border-slate-800 dark:bg-slate-900">
+          {activeTab === "setup" && courseData && (
+            <div className="rounded-lg bg-white p-8 shadow-xl shadow-primary-500/5 dark:border-slate-800 dark:bg-slate-900">
               <CourseSetup
                 productInfo={courseData}
                 isMasterTenant={tenantDetails?.tenantId === courseData?.tid}

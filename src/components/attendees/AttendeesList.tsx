@@ -27,6 +27,8 @@ import { useNavigate } from "react-router-dom";
 import { usePreview } from "@/contexts/PreviewContext";
 import { contactService } from "@/services/contactService";
 import { authService } from "@/services/authService";
+import { AddContactDialog } from "@/components/add-contact-dialog";
+import { SendEmailDialog } from "@/components/send-email-dialog";
 
 export interface AttendeesListProps {
   productId: string;
@@ -76,6 +78,8 @@ export const AttendeesList = ({
   const [deletingAttendeeId, setDeletingAttendeeId] = useState<string | null>(
     null,
   );
+  const [showAddContactDialog, setShowAddContactDialog] = useState(false);
+  const [showSendEmailDialog, setShowSendEmailDialog] = useState(false);
 
   // Debounced search
   useEffect(() => {
@@ -189,6 +193,34 @@ export const AttendeesList = ({
     navigate(`/admin/contacts/${attendee.guId}/details`);
   };
 
+  const handleAddContact = () => {
+    setShowAddContactDialog(true);
+  };
+
+  const handleContactCreated = async (contactId: string) => {
+    setShowAddContactDialog(false);
+    try {
+      // Automatically enroll the newly created contact as an attendee
+      const payload = {
+        productId,
+        productType,
+        contactId,
+        productName,
+        courseBatchId: selectedBatchId,
+      };
+
+      const newAttendee = await attendeesService.addAttendee(payload);
+      toast.success("Attendee added successfully");
+      
+      // Refresh the attendees list
+      await loadAttendees();
+      
+      // Optionally scroll to the new attendee or highlight it
+    } catch (error: any) {
+      toast.error(error.message || "Failed to add attendee");
+    }
+  };
+
   const getCurrencyCode = (currency: string | null | undefined): string => {
     return currency ? currency.toUpperCase() : "USD";
   };
@@ -222,12 +254,17 @@ export const AttendeesList = ({
             adds member manually.
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm">
-            <Mail/>
+        <div className="flex items-center text-primary-600">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowSendEmailDialog(true)}
+            title="Send Email"
+          >
+            <Mail className="h-5 w-5" />
           </Button>
-          <Button variant="outline" size="sm">
-            <MessageSquare />
+          <Button variant="ghost" size="sm" title="Send Message">
+            <MessageSquare className="h-5 w-5" />
           </Button>
         </div>
       </div>
@@ -244,7 +281,12 @@ export const AttendeesList = ({
             className="pl-10"
           />
         </div>
-        <Button variant="primary" size="sm" className="w-full sm:w-auto">
+        <Button
+          variant="primary"
+          size="sm"
+          className="w-full sm:w-auto"
+          onClick={handleAddContact}
+        >
           <Plus className="h-4 w-4 mr-2" />
           Add Contact
         </Button>
@@ -327,7 +369,7 @@ export const AttendeesList = ({
                           </button>
                           <button
                             onClick={() => handleViewProfile(attendee)}
-                            className="text-primary-600 dark:text-primary-400 hover:underline font-medium"
+                            className="text-slate-600 dark:text-slate-400 hover:underline font-medium"
                           >
                             {attendee.firstName} {attendee.lastName}
                           </button>
@@ -488,6 +530,44 @@ export const AttendeesList = ({
           isLoading={deletingAttendeeId !== null}
         />
       )}
+
+      {/* Add Contact Dialog */}
+      <AddContactDialog
+        isOpen={showAddContactDialog}
+        onClose={(contactId) => {
+          if (contactId) {
+            handleContactCreated(contactId);
+          } else {
+            setShowAddContactDialog(false);
+          }
+        }}
+        initialValues={{
+          firstName: searchText.split(/\s+/)[0] || "",
+          lastName: searchText.split(/\s+/)[1] || "",
+        }}
+      />
+
+      {/* Send Email Dialog */}
+      <SendEmailDialog
+        isOpen={showSendEmailDialog}
+        onClose={(success) => {
+          setShowSendEmailDialog(false);
+          if (success) {
+            // Optionally refresh attendees list or show success message
+          }
+        }}
+        selectedContacts={Array.from(selectedAttendees).join(",")}
+        productId={productId}
+        productType={productType}
+        batchId={selectedBatchId}
+        productName={productName}
+        noOfAttendees={pagination.totalRecords}
+        toEmailLabel={
+          selectedAttendees.size > 0
+            ? `${selectedAttendees.size} Selected Contact${selectedAttendees.size !== 1 ? "s" : ""}`
+            : `All Attendees of ${productName} (${pagination.totalRecords})`
+        }
+      />
     </div>
   );
 };

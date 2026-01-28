@@ -121,6 +121,64 @@ export class ContactService {
       localStorage.removeItem('adminToken');
     }
   }
+
+  /**
+   * Add a new contact/client
+   * @param payload - Contact data
+   * @returns Promise with created contact data including id
+   */
+  async addClient(payload: {
+    name?: string;
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    phone: string;
+    grnNumber?: string;
+    password?: string;
+    hasSignedWaiverForm?: boolean;
+    subscribeToMailingList?: boolean;
+    detailedCustomFields?: any[];
+  }): Promise<{ id: string; [key: string]: any }> {
+    try {
+      const token = authService.accessToken;
+      const url = `${this.baseUrl}/rest/contact/`;
+      
+      // Ensure detailedCustomFields is always an array
+      const requestPayload = {
+        ...payload,
+        detailedCustomFields: payload.detailedCustomFields || [],
+      };
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestPayload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error?.message || `Failed to add contact: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      // Handle different response formats
+      if (data.error) {
+        throw new Error(data.error.error?.message || data.error.message || 'Failed to add contact');
+      }
+
+      return {
+        id: data.id || data.guId || data._id || data.guid,
+        ...data,
+      };
+    } catch (error: any) {
+      console.error('Error adding contact:', error);
+      throw error;
+    }
+  }
 }
 
 export const contactService = new ContactService();
