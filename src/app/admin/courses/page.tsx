@@ -100,7 +100,7 @@ export default function CoursesListPage() {
    * Navigate to course details
    */
   const handleCourseClick = (courseId: string) => {
-    navigate(`/admin/courses/edit/${courseId}`);
+    navigate(`/admin/courses/${courseId}`);
   };
 
   /**

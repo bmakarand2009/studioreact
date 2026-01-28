@@ -343,16 +343,16 @@ export default function Header({ onMenuClick, onTogglePin, sidebarPinned, user, 
               
               {/* Preview Menu */}
               {showPreviewMenu && (
-                <div className="absolute right-0 top-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 min-w-[150px]">
+                <div className="absolute right-0 top-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 min-w-[150px] overflow-hidden">
                   <button
-                    className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 transition-colors"
+                    className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 transition-colors rounded-t-lg"
                     onClick={handlePreviewPublic}
                   >
                     <Globe className="h-4 w-4" />
                     <span>Public</span>
                   </button>
                   <button
-                    className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 transition-colors border-t border-gray-200 dark:border-gray-700"
+                    className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 transition-colors border-t border-gray-200 dark:border-gray-700 rounded-b-lg"
                     onClick={handlePreviewStudent}
                   >
                     <User className="h-4 w-4" />

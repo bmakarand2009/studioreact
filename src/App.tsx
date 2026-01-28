@@ -10,6 +10,7 @@ import ForgotPasswordPage from '@/app/(auth)/forgot-password/page';
 import AdminDashboardPage from '@/app/admin/dashboard/page';
 import AdminCoursesPage from '@/app/admin/courses/page';
 import AddEditCoursePage from '@/app/admin/courses/[id]/page';
+import CourseDetailsPage from '@/app/admin/courses/details/[id]/page';
 import AdminEventsPage from '@/app/admin/events/page';
 import AddEditEventPage from '@/app/admin/events/[id]/page';
 import AdminSettingsPage from '@/app/admin/settings/page';
@@ -63,6 +64,7 @@ const router = createBrowserRouter(
         { path: '/admin/dashboard', element: <AdminDashboardPage /> },
         { path: '/admin/courses', element: <AdminCoursesPage /> },
         { path: '/admin/courses/add', element: <AddEditCoursePage /> },
+        { path: '/admin/courses/:id', element: <CourseDetailsPage /> },
         { path: '/admin/courses/edit/:id', element: <AddEditCoursePage /> },
         { path: '/admin/events', element: <AdminEventsPage /> },
         { path: '/admin/events/add', element: <AddEditEventPage /> },
