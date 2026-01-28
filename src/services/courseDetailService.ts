@@ -214,6 +214,59 @@ class CourseDetailService {
 
     return response.json();
   }
+
+  /**
+   * Delete a course (soft delete - sets isDeleted flag)
+   */
+  async deleteCourse(guId: string): Promise<any> {
+    const response = await fetch(`${this.baseUrl}/rest/itemCategory/${guId}`, {
+      method: 'DELETE',
+      headers: this.buildHeaders(),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error?.message || `Failed to delete course: ${response.status}`);
+    }
+
+    return response.json();
+  }
+
+  /**
+   * Restore a deleted course (undo delete - sets isDeleted to false)
+   */
+  async restoreCourse(guId: string, payload: { isDeleted: boolean }): Promise<any> {
+    const response = await fetch(`${this.baseUrl}/rest/itemCategory/${guId}`, {
+      method: 'PUT',
+      headers: this.buildHeaders(),
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error?.message || `Failed to restore course: ${response.status}`);
+    }
+
+    return response.json();
+  }
+
+  /**
+   * Update email settings for a course
+   */
+  async updateEmail(guId: string, payload: any): Promise<any> {
+    const response = await fetch(`${this.baseUrl}/snode/icategory/${guId}`, {
+      method: 'PUT',
+      headers: this.buildHeaders(),
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error?.message || `Failed to update email settings: ${response.status}`);
+    }
+
+    return response.json();
+  }
 }
 
 export const courseDetailService = new CourseDetailService();

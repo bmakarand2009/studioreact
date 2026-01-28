@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { X, Plus, Edit, Trash2 } from 'lucide-react';
-import { Button } from '@/components/ui';
+import { Button, ConfirmationDialog } from '@/components/ui';
 import { Input } from '@/components/ui';
 import { useToast } from '@/components/ui/ToastProvider';
 import { batchService, Batch } from '@/services/batchService';
@@ -41,6 +41,14 @@ export const BatchManagementDialog = ({
   const [selectedBatchId, setSelectedBatchId] = useState<string | undefined>(currentBatchId);
   const batchNameInputRef = useRef<HTMLInputElement>(null);
   const toast = useToast();
+  const [confirmDialog, setConfirmDialog] = useState<{
+    isOpen: boolean;
+    title: string;
+    description?: string;
+    confirmText?: string;
+    variant?: 'danger' | 'warning' | 'info' | 'success';
+    onConfirm: () => void | Promise<void>;
+  } | null>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -119,54 +127,63 @@ export const BatchManagementDialog = ({
     }
   };
 
-  const handleDeleteBatch = async (batch: Batch) => {
-    if (!confirm('Are you sure you want to delete this batch?')) {
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      await batchService.deleteBatch(batch.guId);
-      toast.success('Batch deleted successfully');
-      await loadBatches();
-      // If deleted batch was the current batch, reset selection
-      if (selectedBatchId === batch.guId) {
-        setSelectedBatchId(undefined);
-      }
-      onBatchChanged();
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to delete batch');
-    } finally {
-      setIsLoading(false);
-    }
+  const handleDeleteBatch = (batch: Batch) => {
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Delete Batch',
+      description: 'Are you sure you want to delete this batch? This action cannot be undone.',
+      confirmText: 'Delete',
+      variant: 'danger',
+      onConfirm: async () => {
+        setIsLoading(true);
+        try {
+          await batchService.deleteBatch(batch.guId);
+          toast.success('Batch deleted successfully');
+          await loadBatches();
+          // If deleted batch was the current batch, reset selection
+          if (selectedBatchId === batch.guId) {
+            setSelectedBatchId(undefined);
+          }
+          onBatchChanged();
+        } catch (error: any) {
+          toast.error(error.message || 'Failed to delete batch');
+        } finally {
+          setIsLoading(false);
+        }
+      },
+    });
   };
 
-  const handleChangeCourseBatch = async (batchId: string) => {
-    if (!confirm('Change current batch?')) {
-      setSelectedBatchId(currentBatchId);
-      return;
-    }
+  const handleChangeCourseBatch = (batchId: string) => {
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Change Current Batch',
+      description: 'Are you sure you want to change the current batch?',
+      confirmText: 'Change',
+      variant: 'info',
+      onConfirm: async () => {
+        setIsLoading(true);
+        try {
+          const batch = batches.find((b) => b.guId === batchId);
+          if (!batch) {
+            throw new Error('Batch not found');
+          }
 
-    setIsLoading(true);
-    try {
-      const batch = batches.find((b) => b.guId === batchId);
-      if (!batch) {
-        throw new Error('Batch not found');
-      }
-
-      await batchService.updateCourseBatch(itemId, {
-        name: itemName,
-        courseBatchId: batchId,
-      });
-      toast.success('Batch updated successfully');
-      setSelectedBatchId(batchId);
-      onBatchChanged();
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to update course batch');
-      setSelectedBatchId(currentBatchId);
-    } finally {
-      setIsLoading(false);
-    }
+          await batchService.updateCourseBatch(itemId, {
+            name: itemName,
+            courseBatchId: batchId,
+          });
+          toast.success('Batch updated successfully');
+          setSelectedBatchId(batchId);
+          onBatchChanged();
+        } catch (error: any) {
+          toast.error(error.message || 'Failed to update course batch');
+          setSelectedBatchId(currentBatchId);
+        } finally {
+          setIsLoading(false);
+        }
+      },
+    });
   };
 
   const handleShowAddBatch = () => {
@@ -221,11 +238,6 @@ export const BatchManagementDialog = ({
         <div className="flex-1 overflow-y-auto p-6">
           {!isAddBatch && !isUpdateBatch && (
             <div className="space-y-4">
-              <Button onClick={handleShowAddBatch} className="w-full" variant="default">
-                <Plus className="h-4 w-4 mr-2" />
-                Add Batch
-              </Button>
-
               {isLoading && batches.length === 0 ? (
                 <div className="text-center py-8 text-slate-500">Loading batches...</div>
               ) : batches.length === 0 ? (
@@ -267,10 +279,10 @@ export const BatchManagementDialog = ({
                         </button>
                         <button
                           onClick={() => handleDeleteBatch(batch)}
-                          className="p-1.5 rounded hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+                          className="p-1.5 rounded hover:bg-secondary-100 dark:hover:bg-secondary-900/30 transition-colors"
                           aria-label="Delete batch"
                         >
-                          <Trash2 className="h-4 w-4 text-red-600 dark:text-red-400" />
+                          <Trash2 className="h-4 w-4 text-secondary-500 dark:text-secondary-400" />
                         </button>
                       </div>
                     </div>
@@ -300,17 +312,46 @@ export const BatchManagementDialog = ({
         </div>
 
         {/* Footer */}
-        {(isAddBatch || isUpdateBatch) && (
-          <div className="flex items-center justify-end gap-3 p-6 border-t border-slate-200 dark:border-slate-700">
-            <Button onClick={handleHideEditMode} variant="outline">
-              Cancel
+        <div className="flex items-center justify-end gap-3 px-6 py-3 border-t border-slate-200 dark:border-slate-700">
+          {!isAddBatch && !isUpdateBatch ? (
+            <Button onClick={handleShowAddBatch} variant="primary" size="sm">
+              <Plus className="h-4 w-4 mr-2" />
+              Add Batch
             </Button>
-            <Button onClick={handleSubmit} disabled={!batchName.trim() || isLoading}>
-              {isLoading ? 'Saving...' : 'Submit'}
-            </Button>
-          </div>
-        )}
+          ) : (
+            <div className="flex items-center gap-3">
+              <Button onClick={handleHideEditMode} variant="outline" size="sm">
+                Cancel
+              </Button>
+              <Button onClick={handleSubmit} disabled={!batchName.trim() || isLoading} size="sm">
+                {isLoading ? 'Saving...' : 'Submit'}
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
+      
+      {/* Confirmation Dialog */}
+      {confirmDialog && (
+        <ConfirmationDialog
+          isOpen={confirmDialog.isOpen}
+          onClose={(confirmed) => {
+            if (!confirmed) {
+              // If canceling batch change, reset selection
+              if (confirmDialog.title === 'Change Current Batch') {
+                setSelectedBatchId(currentBatchId);
+              }
+            }
+            setConfirmDialog(null);
+          }}
+          title={confirmDialog.title}
+          description={confirmDialog.description}
+          confirmText={confirmDialog.confirmText}
+          variant={confirmDialog.variant}
+          onConfirm={confirmDialog.onConfirm}
+          isLoading={isLoading}
+        />
+      )}
     </div>
   );
 };

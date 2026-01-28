@@ -15,4 +15,6 @@ export { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '.
 // Pagination Components
 export { Pagination } from './Pagination';
 
+// Dialog Components
+export { ConfirmationDialog, type ConfirmationDialogProps, type ConfirmationDialogVariant } from './ConfirmationDialog';
 
