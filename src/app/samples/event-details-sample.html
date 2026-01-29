@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Event Details - EventHub</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ec7f13",
+                        "background-light": "#f8f7f6",
+                        "background-dark": "#221910",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer base {
+            body {
+                font-family: 'Plus Jakarta Sans', sans-serif;
+            }
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .hero-scrim {
+            background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.4) 40%, rgba(0,0,0,0.8) 100%);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-[#181411] dark:text-white transition-colors duration-300">
+<header class="sticky top-0 z-50 w-full bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-solid border-[#f4f2f0] dark:border-[#3d2e1f] px-4 lg:px-40 py-3">
+<div class="max-w-[1200px] mx-auto flex items-center justify-between whitespace-nowrap">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-4 text-[#181411] dark:text-white">
+<div class="size-6 text-primary">
+<svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M44 11.2727C44 14.0109 39.8386 16.3957 33.69 17.6364C39.8386 18.877 44 21.2618 44 24C44 26.7382 39.8386 29.123 33.69 30.3636C39.8386 31.6043 44 33.9891 44 36.7273C44 40.7439 35.0457 44 24 44C12.9543 44 4 40.7439 4 36.7273C4 33.9891 8.16144 31.6043 14.31 30.3636C8.16144 29.123 4 26.7382 4 24C4 21.2618 8.16144 18.877 14.31 17.6364C8.16144 16.3957 4 14.0109 4 11.2727C4 7.25611 12.9543 4 24 4C35.0457 4 44 7.25611 44 11.2727Z" fill="currentColor"></path>
+</svg>
+</div>
+<h2 class="text-lg font-bold leading-tight tracking-[-0.015em]">EventHub</h2>
+</div>
+<nav class="hidden md:flex items-center gap-9">
+<a class="text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">Events</a>
+<a class="text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">Organize</a>
+<a class="text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">About</a>
+</nav>
+</div>
+<div class="flex flex-1 justify-end gap-4 lg:gap-8 items-center">
+<label class="hidden sm:flex flex-col min-w-40 !h-10 max-w-64">
+<div class="flex w-full flex-1 items-stretch rounded-lg h-full bg-[#f4f2f0] dark:bg-[#3d2e1f]">
+<div class="text-[#897561] flex items-center justify-center pl-4">
+<span class="material-symbols-outlined text-xl">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 border-none bg-transparent focus:outline-0 focus:ring-0 text-[#181411] dark:text-white placeholder:text-[#897561] px-4 pl-2 text-base font-normal" placeholder="Search events" value=""/>
+</div>
+</label>
+<button class="hidden sm:flex min-w-[84px] cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:opacity-90 transition-opacity">
+<span>Sign Up</span>
+</button>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border-2 border-primary/20" data-alt="User profile avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDxc3ntHBlQckOR6acnYUzg2jl_nQ899rR4PU4BIzf6Sb87p-N91Bv6VJaGU3usG2k53YuL0c03cU_2caRMEEgMF_0brtlmVU7MkzSbcInV0RGjGnCalOYeZsrLMCEQjMSH0dMir_oaf8pV5QUvvyH-uQqQnFq1L6lwGzpG70WrxPMjYolNRWppEycFelGblkmHUnEhJnZhFCpvEcPgsVpWn0OFiUC5LwMiLS4Sqd5Fg6AP89mF3T4hQ6WKmIJqjN0yv_BMTuHhRyM");'></div>
+</div>
+</div>
+</header>
+<main class="max-w-[1200px] mx-auto px-4 lg:px-10 py-8">
+<div class="relative w-full rounded-2xl overflow-hidden mb-12 shadow-2xl shadow-black/10 group h-[450px] lg:h-[550px]">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" data-alt="Modern office space with creative professionals" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBHN3sYU9FZpW4cZtwFmNpMinn7lFy6olvb2zh-_0ibIHb2XMa00pcXeQOVSRHKeSQDpEhnKokE8Uq6mEiW_HyiAjgGYEQ7EcYEL0mKQ7CdkryAj3R0XVgwDlvyOqoXOn86UJVPG5fFZTdLTbpFgxUhVokSG_zRdu8KOz7YQU12nry_YsNnJdrx1hbuiGR954GgYK6Kd1OO6ZO0AOPNlT1YcacOlLzYCxROQ8n4H6lO_F_fnymfrUkLgsl7WfN9YgP46N6IZllEFC0");'></div>
+<div class="absolute inset-0 hero-scrim"></div>
+<div class="absolute inset-0 flex flex-col justify-end p-6 lg:p-12">
+<div class="max-w-3xl space-y-6">
+<div class="flex gap-3 flex-wrap">
+<div class="flex h-8 items-center justify-center gap-x-2 rounded-lg bg-black/40 backdrop-blur-xl px-3 border border-white/20 shadow-lg">
+<span class="material-symbols-outlined text-white text-lg">videocam</span>
+<p class="text-white text-xs font-bold uppercase tracking-wider">Online Event</p>
+</div>
+<div class="flex h-8 items-center justify-center gap-x-2 rounded-lg bg-primary px-3 shadow-lg ring-1 ring-white/20">
+<span class="material-symbols-outlined text-white text-lg">bolt</span>
+<p class="text-white text-xs font-bold uppercase tracking-wider">Technology</p>
+</div>
+</div>
+<h1 class="text-white text-4xl lg:text-6xl font-extrabold leading-tight tracking-tight [text-shadow:_0_2px_10px_rgb(0_0_0_/_40%)]">
+                    Design Systems Summit 2024
+                </h1>
+<div class="inline-flex items-center gap-3 bg-black/40 hover:bg-black/50 transition-colors backdrop-blur-xl p-1.5 pr-5 rounded-full border border-white/20 shadow-xl">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-10 w-10 border border-white/30" data-alt="Host Sarah Jenkins portrait" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDSoOEtiXHCngyvs74o1jlAFc7vJPHl1MMt_g5WC8Y-zaGwF5Lcht6yz6cn7Dwcihsf_OSu-USJvliJtJoo-dX0B-Xq_UFIRjB9129R83_P1bZv8lozHejt_4DLbLuTYdxwgVnJUv92KtlUR67keme4E75WkXQxviIN_CO4bgOqcqmNi-DJopU_HxQt5iSaPY983bWK87XaTRdiqqh5D0c_j1O9VZbabW6BJsjahRFfFR4FfvF7VJV5mdXxdFT5FzZBdaOrjyw_tcY");'></div>
+<div class="flex flex-col">
+<span class="text-white/60 text-[10px] font-bold uppercase tracking-widest leading-none mb-0.5">Hosted by</span>
+<p class="text-white text-sm font-semibold">Sarah Jenkins • Lead Designer at PixelFlow</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+<div class="lg:col-span-8 space-y-12">
+<section>
+<p class="text-xl lg:text-2xl text-primary font-medium leading-relaxed mb-6">
+                    Join 5,000+ designers and engineers to learn about the future of design systems, accessibility, and component-driven architecture.
+                </p>
+<div class="space-y-4 text-gray-700 dark:text-gray-300 leading-7 text-lg">
+<h2 class="text-2xl font-bold text-[#181411] dark:text-white">About the Event</h2>
+<p>In this comprehensive multi-day summit, we will dive deep into the technicalities of building scalable UI libraries. Whether you are a solo developer or part of a large enterprise team, this event is designed to give you actionable insights.</p>
+<p>We've gathered industry leaders from Figma, Airbnb, and Google to share their workflows and the challenges they faced while maintaining massive component libraries. Our goal is to empower you with the tools needed to create consistent, high-quality user experiences across any platform.</p>
+</div>
+</section>
+<section>
+<h2 class="text-2xl font-bold text-[#181411] dark:text-white mb-6">Multi-day Schedule</h2>
+<div class="overflow-hidden rounded-xl border border-[#f4f2f0] dark:border-[#3d2e1f] bg-white dark:bg-background-dark/50 shadow-sm">
+<div class="divide-y divide-[#f4f2f0] dark:divide-[#3d2e1f]">
+<div class="p-6 hover:bg-background-light dark:hover:bg-white/5 transition-colors">
+<div class="flex items-start gap-4">
+<div class="bg-primary/10 text-primary px-3 py-1 rounded font-bold text-sm shrink-0 uppercase">Oct 12</div>
+<div class="flex-1">
+<h3 class="font-bold text-lg mb-1">Foundations of Design Tokens</h3>
+<p class="text-sm text-[#897561] mb-2">9:00 AM - 11:30 AM EST</p>
+<p class="text-gray-600 dark:text-gray-400">Deep dive into semantic naming conventions and cross-platform token management.</p>
+</div>
+</div>
+</div>
+<div class="p-6 hover:bg-background-light dark:hover:bg-white/5 transition-colors">
+<div class="flex items-start gap-4">
+<div class="bg-primary/10 text-primary px-3 py-1 rounded font-bold text-sm shrink-0 uppercase">Oct 13</div>
+<div class="flex-1">
+<h3 class="font-bold text-lg mb-1">Scaling React Components</h3>
+<p class="text-sm text-[#897561] mb-2">1:00 PM - 3:00 PM EST</p>
+<p class="text-gray-600 dark:text-gray-400">How to handle documentation and versioning in complex monorepos.</p>
+</div>
+</div>
+</div>
+<div class="p-6 hover:bg-background-light dark:hover:bg-white/5 transition-colors">
+<div class="flex items-start gap-4">
+<div class="bg-primary/10 text-primary px-3 py-1 rounded font-bold text-sm shrink-0 uppercase">Oct 14</div>
+<div class="flex-1">
+<h3 class="font-bold text-lg mb-1">Accessibility in Systems</h3>
+<p class="text-sm text-[#897561] mb-2">10:00 AM - 12:00 PM EST</p>
+<p class="text-gray-600 dark:text-gray-400">Ensuring WCAG 2.1 compliance at the component level for all users.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="bg-white dark:bg-background-dark/50 border border-[#f4f2f0] dark:border-[#3d2e1f] p-8 rounded-xl shadow-sm">
+<h2 class="text-xl font-bold mb-6">About the Organizer</h2>
+<div class="flex flex-col md:flex-row gap-6 items-start">
+<div class="size-24 bg-center bg-no-repeat bg-cover rounded-xl shrink-0" data-alt="Sarah Jenkins professional headshot" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCnrO4MYjhsk4HOnJeZktWVe2MayQRFQOKeZrbJvrrBv1AOeXVUDdW4-HVMSQYuvveSyS9i3J9LIsMTyNXFaFnggBLA0DinlQPP4IV7KTQ-tXU6KBRXKeoHjGZkZvUKdyVyYWtgKOuh4TMd1yd68IyZ3kugdULNAi1tgQ3jT8fOwjcu5fDwAYIe3Qb9k8kVIBJrkWXPgLuEnqwC5-Ipy_pZ4O3_f-gK6i4TYYDEgRilVfTKGHFvpp7JvIQ0ZSeu3Okx6X1LQ_BHRmw");'></div>
+<div class="space-y-3">
+<div>
+<h3 class="text-lg font-bold">Sarah Jenkins</h3>
+<p class="text-primary text-sm font-medium">Design Systems Lead at PixelFlow</p>
+</div>
+<p class="text-gray-600 dark:text-gray-400">Sarah has spent over a decade building tools for designers. She previously led the design ops team at Buffer and is a frequent speaker at CSSConf and Awwwards events.</p>
+<div class="flex gap-4">
+<a class="text-[#897561] hover:text-primary transition-colors flex items-center gap-1" href="#">
+<span class="material-symbols-outlined text-xl">language</span>
+<span class="text-sm">Website</span>
+</a>
+<a class="text-[#897561] hover:text-primary transition-colors flex items-center gap-1" href="#">
+<span class="material-symbols-outlined text-xl">link</span>
+<span class="text-sm">Twitter</span>
+</a>
+<a class="text-[#897561] hover:text-primary transition-colors flex items-center gap-1" href="#">
+<span class="material-symbols-outlined text-xl">group</span>
+<span class="text-sm">LinkedIn</span>
+</a>
+</div>
+</div>
+</div>
+</section>
+</div>
+<div class="lg:col-span-4">
+<div class="sticky top-24 space-y-6">
+<div class="bg-white dark:bg-[#2d2218] rounded-xl border border-[#f4f2f0] dark:border-[#3d2e1f] p-6 shadow-xl shadow-black/5">
+<div class="mb-6">
+<p class="text-sm text-[#897561] font-medium uppercase tracking-wider mb-1">Registration</p>
+<div class="flex items-baseline gap-2">
+<span class="text-3xl font-extrabold text-[#181411] dark:text-white">$49.00</span>
+<span class="text-[#897561] text-sm">per person</span>
+</div>
+</div>
+<div class="space-y-5 mb-8">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-lg bg-background-light dark:bg-white/5 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">calendar_today</span>
+</div>
+<div>
+<p class="text-sm font-bold">Date &amp; Time</p>
+<p class="text-xs text-[#897561]">Oct 12 - Oct 14, 2024</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-lg bg-background-light dark:bg-white/5 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">location_on</span>
+</div>
+<div>
+<p class="text-sm font-bold">Location</p>
+<div class="flex items-center gap-2">
+<p class="text-xs text-[#897561]">Virtual Event</p>
+<a class="text-xs text-primary font-bold hover:underline" href="#">View Map</a>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-lg bg-background-light dark:bg-white/5 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">link</span>
+</div>
+<div>
+<p class="text-sm font-bold">Online Link</p>
+<p class="text-xs text-[#897561]">Zoom webinar invitation</p>
+</div>
+</div>
+</div>
+<button class="w-full bg-primary text-white py-4 rounded-xl font-bold text-lg hover:opacity-90 active:scale-[0.98] transition-all shadow-lg shadow-primary/20">
+                        Register Now
+                    </button>
+<p class="text-center text-[#897561] text-xs mt-4 px-4">
+                        Registration includes lifetime access to recording and resources.
+                    </p>
+</div>
+<div class="rounded-xl overflow-hidden h-40 relative group cursor-pointer border border-[#f4f2f0] dark:border-[#3d2e1f]">
+<img alt="Map preview of event location" class="w-full h-full object-cover" data-location="San Francisco" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCrTJWlma4Wfv-9Meg_ZzuxJjlBYv7go16lnaBD-_eAphPXvnYb3Gg4KPp2Kck5ASS2JAHqC9F0fval2_TQ_H9ToYFX8yRKwTaDPZvJYMDzyy70CVvdS25Lzke57ncAot6_n6jQYEyJiS5pp3GkoDh8bnNrY5AShEexUY6PJXJcwG3ugM26zl9L4vezusrABGF7FUvG6sNPuVfcd78my71hqwPjcYiqKVdxmh7gbVOMob_gpiVvycZbFLIwtcQOlUb05vcpG2q1O4A"/>
+<div class="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex items-center justify-center">
+<div class="bg-white py-2 px-4 rounded-full text-sm font-bold text-black flex items-center gap-2 shadow-lg">
+<span class="material-symbols-outlined text-primary">near_me</span>
+                            Get Directions
+                        </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<footer class="border-t border-[#f4f2f0] dark:border-[#3d2e1f] py-12 px-4 lg:px-40 bg-white dark:bg-[#1a140d] mt-20">
+<div class="max-w-[1200px] mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+<div class="flex items-center gap-4 text-[#181411] dark:text-white opacity-60">
+<div class="size-6">
+<svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M44 11.2727C44 14.0109 39.8386 16.3957 33.69 17.6364C39.8386 18.877 44 21.2618 44 24C44 26.7382 39.8386 29.123 33.69 30.3636C39.8386 31.6043 44 33.9891 44 36.7273C44 40.7439 35.0457 44 24 44C12.9543 44 4 40.7439 4 36.7273C4 33.9891 8.16144 31.6043 14.31 30.3636C8.16144 29.123 4 26.7382 4 24C4 21.2618 8.16144 18.877 14.31 17.6364C8.16144 16.3957 4 14.0109 4 11.2727C4 7.25611 12.9543 4 24 4C35.0457 4 44 7.25611 44 11.2727Z" fill="currentColor"></path>
+</svg>
+</div>
+<h2 class="text-sm font-bold">© 2024 EventHub Inc.</h2>
+</div>
+<div class="flex gap-8 text-[#897561] text-sm">
+<a class="hover:text-primary" href="#">Privacy Policy</a>
+<a class="hover:text-primary" href="#">Terms of Service</a>
+<a class="hover:text-primary" href="#">Help Center</a>
+<a class="hover:text-primary" href="#">Contact</a>
+</div>
+</div>
+</footer>
+
+</body></html>
