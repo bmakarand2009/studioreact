@@ -31,7 +31,10 @@ import PublicAboutPage from '@/app/(public)/about/page';
 import PublicContactPage from '@/app/(public)/contact/page';
 import PublicCoursesPage from '@/app/(public)/courses/page';
 import PublicEventsPage from '@/app/(public)/events/page';
+import PublicEventDetailPage from '@/app/(public)/events/[id]/page';
 import DynamicPublicPage from '@/app/(public)/[slug]/page';
+import EventCheckoutPage from '@/app/(public)/checkout/EventCheckoutPage';
+import CourseCheckoutPage from '@/app/(public)/checkout/CourseCheckoutPage';
 import ConnectionErrorPage from '@/app/error-connection/page';
 import NotFound from '@/app/not-found';
 
@@ -93,7 +96,12 @@ const router = createBrowserRouter(
         { path: '/contact', element: <PublicContactPage /> },
         { path: '/courses', element: <PublicCoursesPage /> },
         { path: '/events', element: <PublicEventsPage /> },
-        
+        { path: '/events/:id', element: <PublicEventDetailPage /> },
+
+        // Public checkout
+        { path: '/checkout/event/:eventId/:itemId/:schedule', element: <EventCheckoutPage /> },
+        { path: '/checkout/course/:categoryId/:itemId', element: <CourseCheckoutPage /> },
+
         // Dynamic public pages (catch-all for tenant web pages - must come last before fallback)
         { path: '/:slug', element: <DynamicPublicPage /> },
 

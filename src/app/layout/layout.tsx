@@ -149,6 +149,7 @@ const getRouteLayout = (path: string): string | null => {
     // Dynamic public pages - common tenant web pages
     '/calendar': 'wajooba-public',
     '/events': 'wajooba-public',
+    '/checkout': 'wajooba-public',
     '/mediagallery': 'wajooba-public',
     '/forms': 'wajooba-public',
     '/merchandise': 'wajooba-public',

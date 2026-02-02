@@ -19,13 +19,16 @@ interface HorizontalNavigationProps {
   user: any;
   mobile?: boolean;
   onItemClick?: () => void;
+  /** Use light text (for dark header background e.g. public layout) */
+  variant?: 'default' | 'light';
 }
 
 export default function HorizontalNavigation({ 
   navigation, 
   user, 
   mobile = false, 
-  onItemClick 
+  onItemClick,
+  variant = 'default',
 }: HorizontalNavigationProps) {
   const location = useLocation();
   const pathname = location.pathname;
@@ -78,9 +81,13 @@ export default function HorizontalNavigation({
       ? 'block px-3 py-2 rounded-md text-base font-medium transition-colors'
       : 'px-3 py-2 rounded-md text-sm font-medium transition-colors';
     
-    const activeClasses = isActive(item.url)
-      ? 'bg-primary-600 text-white shadow-md'
-      : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white';
+    const activeClasses = variant === 'light'
+      ? (isActive(item.url)
+          ? 'bg-white/20 text-white shadow-md'
+          : 'text-white/90 hover:bg-white/15 hover:text-white')
+      : (isActive(item.url)
+          ? 'bg-primary-600 text-white shadow-md'
+          : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white');
 
     const className = `${baseClasses} ${activeClasses}`;
 

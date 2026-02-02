@@ -18,3 +18,6 @@ export { Pagination } from './Pagination';
 // Dialog Components
 export { ConfirmationDialog, type ConfirmationDialogProps, type ConfirmationDialogVariant } from './ConfirmationDialog';
 
+// Image Lightbox
+export { ImageLightbox, type ImageLightboxProps } from './ImageLightbox';
+

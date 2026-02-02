@@ -9,7 +9,8 @@ import { ImageUtils } from '@/utils/imageUtils';
 import HorizontalNavigation from '@/components/navigation/horizontal-navigation';
 
 import { Button } from '@/components/ui';
-import { MenuIcon, XIcon } from 'lucide-react';
+import { MenuIcon, XIcon, Sun, Moon } from 'lucide-react';
+import { useUIStore } from '@/stores/uiStore';
 
 interface WajoobaPublicLayoutProps {
   children: ReactNode;
@@ -25,6 +26,7 @@ export default function WajoobaPublicLayout({ children }: WajoobaPublicLayoutPro
   const { footerItems, legalItems } = useTenantMenu();
   const navigate = useNavigate();
   const tenantDetails = appLoadService.tenantDetails;
+  const { theme, toggleTheme } = useUIStore();
 
   console.log('WajoobaPublicLayout: State loaded', { 
     hasUser: !!user, 
@@ -67,7 +69,7 @@ export default function WajoobaPublicLayout({ children }: WajoobaPublicLayoutPro
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
       {/* Header with Public Navigation */}
-      <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
+      <header className="bg-gradient-to-r from-primary-600 to-brand-600 dark:from-primary-700 dark:to-brand-700 shadow-sm border-b border-primary-700/30 dark:border-primary-500/30 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
@@ -114,20 +116,35 @@ export default function WajoobaPublicLayout({ children }: WajoobaPublicLayoutPro
               <HorizontalNavigation
                 navigation={navigation.publicNavigation}
                 user={user}
+                variant="light"
               />
             </div>
 
             {/* CTA Buttons & Mobile Menu */}
             <div className="flex items-center space-x-4">
-              {/* CTA Buttons */}
+              {/* Theme toggle (night mode) */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleTheme}
+                className="text-white hover:bg-white/15 hover:text-white"
+                aria-label="Toggle dark mode"
+              >
+                {theme === 'dark' ? (
+                  <Sun className="h-5 w-5" />
+                ) : (
+                  <Moon className="h-5 w-5" />
+                )}
+              </Button>
 
+              {/* CTA Buttons */}
               <div className="hidden md:flex items-center space-x-3">
                 {user ? 
-                  <Button variant="primary" size="sm" onClick={handleDashboardClick}>
+                  <Button variant="primary" size="sm" onClick={handleDashboardClick} className="bg-white text-primary-600 hover:bg-white/90">
                     Dashboard
                   </Button>
                 :
-                  <Button variant="ghost" size="sm" onClick={() => navigate('/login')}>
+                  <Button variant="ghost" size="sm" onClick={() => navigate('/login')} className="text-white hover:bg-white/15 hover:text-white border-white/30">
                     Sign In
                   </Button>
                 }
@@ -138,7 +155,7 @@ export default function WajoobaPublicLayout({ children }: WajoobaPublicLayoutPro
                 variant="ghost"
                 size="sm"
                 onClick={toggleMobileMenu}
-                className="md:hidden"
+                className="md:hidden text-white hover:bg-white/15 hover:text-white"
               >
                 {mobileMenuOpen ? <XIcon className="h-5 w-5" /> : <MenuIcon className="h-5 w-5" />}
               </Button>
@@ -157,6 +174,22 @@ export default function WajoobaPublicLayout({ children }: WajoobaPublicLayoutPro
                 onItemClick={() => setMobileMenuOpen(false)}
               />
               <div className="pt-4 pb-3 border-t border-gray-200 dark:border-gray-700">
+                <div className="flex items-center gap-2 mb-3">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={toggleTheme}
+                    className="flex-1"
+                    aria-label="Toggle dark mode"
+                  >
+                    {theme === 'dark' ? (
+                      <Sun className="h-4 w-4 mr-2" />
+                    ) : (
+                      <Moon className="h-4 w-4 mr-2" />
+                    )}
+                    {theme === 'dark' ? 'Light mode' : 'Dark mode'}
+                  </Button>
+                </div>
                 <div className="space-y-2">
                   {user ?
                     <Button variant="primary" size="sm" fullWidth onClick={handleDashboardClick}>
