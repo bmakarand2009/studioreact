@@ -24,7 +24,6 @@ export default function WajoobaAdminLayout({ children }: WajoobaAdminLayoutProps
   const [mediaSliderOpen, setMediaSliderOpen] = useState(false);
   const [aiSidebarOpen, setAISidebarOpen] = useState(false);
   const isScreenSmall = useMediaQuery('(max-width: 768px)');
-  const isLargeScreen = useMediaQuery('(min-width: 1440px)');
   const { navigation } = useNavigation();
   const { user, logout } = useAuth();
 
@@ -80,21 +79,6 @@ export default function WajoobaAdminLayout({ children }: WajoobaAdminLayoutProps
     }
   }, [sidebarPinned, isHovering, isScreenSmall]);
 
-  // Keep AI sidebar open on large screens - only update state, don't dispatch event
-  // The sidebar controller will handle the event dispatch when it opens
-  useEffect(() => {
-    if (isLargeScreen) {
-      // On large screens, ensure sidebar state is open for layout purposes
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setAISidebarOpen((prev) => {
-        if (!prev) {
-          return true;
-        }
-        return prev;
-      });
-    }
-  }, [isLargeScreen]);
-
   useEffect(() => {
     const handleSidebarLayout = (event: Event) => {
       const detail = (event as CustomEvent<SidebarPayload>).detail;
@@ -116,9 +100,8 @@ export default function WajoobaAdminLayout({ children }: WajoobaAdminLayoutProps
           }
           setSidebarCollapsed(true);
         } else {
-          // Use functional update to check current aiSidebarOpen state
           setAISidebarOpen((currentAIOpen) => {
-            if (forcedFoldRef.current && !currentAIOpen && !isLargeScreen) {
+            if (forcedFoldRef.current && !currentAIOpen) {
               setSidebarPinned(previousSidebarStateRef.current.pinned);
               setSidebarCollapsed(previousSidebarStateRef.current.collapsed);
               forcedFoldRef.current = false;
@@ -128,21 +111,11 @@ export default function WajoobaAdminLayout({ children }: WajoobaAdminLayoutProps
         }
       }
 
-      // Handle AI sidebar
+      // Handle AI sidebar — one sidebar at a time (controller already closes others)
       if (detail.name === 'aiSidebar') {
-        // On large screens, always keep sidebar open state
-        const shouldBeOpen = isLargeScreen || detail.open;
-        
-        // Use functional update to avoid dependency on aiSidebarOpen
-        setAISidebarOpen((prev) => {
-          // Only update if value actually changed to prevent unnecessary re-renders
-          if (shouldBeOpen !== prev) {
-            return shouldBeOpen;
-          }
-          return prev;
-        });
-        
-        if (shouldBeOpen) {
+        setAISidebarOpen(detail.open);
+
+        if (detail.open) {
           previousSidebarStateRef.current = {
             pinned: sidebarPinnedRef.current,
             collapsed: sidebarCollapsedRef.current,
@@ -153,7 +126,6 @@ export default function WajoobaAdminLayout({ children }: WajoobaAdminLayoutProps
           }
           setSidebarCollapsed(true);
         } else {
-          // Use ref to check current state instead of closure value
           setMediaSliderOpen((currentMediaOpen) => {
             if (forcedFoldRef.current && !currentMediaOpen) {
               setSidebarPinned(previousSidebarStateRef.current.pinned);
@@ -170,7 +142,7 @@ export default function WajoobaAdminLayout({ children }: WajoobaAdminLayoutProps
     return () => {
       window.removeEventListener('sidebar:layout-change', handleSidebarLayout);
     };
-  }, [isLargeScreen]); // Remove aiSidebarOpen and mediaSliderOpen from deps to prevent loops
+  }, []);
 
   // Don't show loading state here - let the role guard handle it
   // The role guard will show appropriate loading messages
@@ -190,10 +162,9 @@ export default function WajoobaAdminLayout({ children }: WajoobaAdminLayoutProps
     <div
       className={cn(
         'flex h-screen bg-gray-100 dark:bg-gray-900 transition-[padding] duration-300',
-        // Always add padding for AI sidebar on large screens, or when media slider is open
-        (mediaSliderOpen || aiSidebarOpen || isLargeScreen) ? 'lg:pr-[420px]' : '',
+        (mediaSliderOpen || aiSidebarOpen) ? 'lg:pr-[420px]' : '',
       )}
-      data-sidebar-mode={(mediaSliderOpen || aiSidebarOpen || isLargeScreen) ? 'folded' : sidebarPinned ? 'pinned' : 'hover'}
+      data-sidebar-mode={(mediaSliderOpen || aiSidebarOpen) ? 'folded' : sidebarPinned ? 'pinned' : 'hover'}
     >
       {/* Sidebar */}
       <div

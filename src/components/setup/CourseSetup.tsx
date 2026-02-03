@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Plus, Trash2, Link as LinkIcon } from 'lucide-react';
-import { Button, Switch, Select, SelectTrigger, SelectContent, SelectItem, SelectValue, Textarea, Input } from '@/components/ui';
+import { Button, ToggleSlider, Select, SelectTrigger, SelectContent, SelectItem, SelectValue, Textarea, Input } from '@/components/ui';
 import { setupService, EmailTemplate, CustomForm, Test, Product } from '@/services/setupService';
 import { courseDetailService } from '@/services/courseDetailService';
 import { useToast } from '@/components/ui/ToastProvider';
@@ -259,12 +259,13 @@ export function CourseSetup({
                 You can add contents like downloads, and digital content.
               </p>
             </div>
-            <Switch
+            <ToggleSlider
               checked={isOnlineCourse}
-              onCheckedChange={(checked) => {
+              onCheckedChange={(checked: boolean) => {
                 setIsOnlineCourse(checked);
                 handleSubmit();
               }}
+              aria-label="Online course"
             />
           </div>
 
@@ -277,12 +278,13 @@ export function CourseSetup({
                 Allows user registration for an introductory session.
               </p>
             </div>
-            <Switch
+            <ToggleSlider
               checked={isAllowDemoChapters}
-              onCheckedChange={(checked) => {
+              onCheckedChange={(checked: boolean) => {
                 setIsAllowDemoChapters(checked);
                 handleSubmit();
               }}
+              aria-label="Allow demo chapters"
             />
           </div>
 
@@ -343,12 +345,13 @@ export function CourseSetup({
                 Ensure your {productType} adheres to COPPA, safeguarding children under 13.
               </p>
             </div>
-            <Switch
+            <ToggleSlider
               checked={isCOPPACompliant}
-              onCheckedChange={(checked) => {
+              onCheckedChange={(checked: boolean) => {
                 setIsCOPPACompliant(checked);
                 handleSubmit();
               }}
+              aria-label="COPPA compliant"
             />
           </div>
 
@@ -362,13 +365,14 @@ export function CourseSetup({
                   Make {productType} available to franchises.
                 </p>
               </div>
-              <Switch
+              <ToggleSlider
                 checked={isFranchiseCourseEnabled}
                 disabled={!isMasterTenant}
-                onCheckedChange={(checked) => {
+                onCheckedChange={(checked: boolean) => {
                   setIsFranchiseCourseEnabled(checked);
                   handleSubmit();
                 }}
+                aria-label="Franchise course"
               />
             </div>
           )}
@@ -554,12 +558,13 @@ export function CourseSetup({
                 Activates personalized welcome emails for new attendees.
               </p>
             </div>
-            <Switch
+            <ToggleSlider
               checked={isSendWelcomeEmail}
-              onCheckedChange={(checked) => {
+              onCheckedChange={(checked: boolean) => {
                 setIsSendWelcomeEmail(checked);
                 handleSubmit();
               }}
+              aria-label="Send welcome email"
             />
           </div>
 
@@ -601,12 +606,13 @@ export function CourseSetup({
                 Notifies Admin when a new attendee registers for course.
               </p>
             </div>
-            <Switch
+            <ToggleSlider
               checked={registrationAdminNotification}
-              onCheckedChange={(checked) => {
+              onCheckedChange={(checked: boolean) => {
                 setRegistrationAdminNotification(checked);
                 handleSubmit();
               }}
+              aria-label="Registration admin notification"
             />
           </div>
 
@@ -657,12 +663,13 @@ export function CourseSetup({
                 Allows you to specify additional emails to which you would like to send a copy of admin emails
               </p>
             </div>
-            <Switch
+            <ToggleSlider
               checked={additionalEmailNotification}
-              onCheckedChange={(checked) => {
+              onCheckedChange={(checked: boolean) => {
                 setAdditionalEmailNotification(checked);
                 handleSubmit();
               }}
+              aria-label="Additional email notification"
             />
           </div>
 

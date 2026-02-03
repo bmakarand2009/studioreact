@@ -7,7 +7,6 @@ import { AISidebarOpenOptions } from '@/hooks/useAISidebar';
 import { cn } from '@/utils/cn';
 import { Button } from '@/components/ui/Button';
 import { marked } from 'marked';
-import { useMediaQuery } from '@/hooks/useMediaQuery';
 
 type AISidebarOptions = AISidebarOpenOptions;
 
@@ -49,21 +48,6 @@ export const AISidebarPanel = () => {
   const pollAttemptsRef = useRef(0);
   const maxPollAttempts = 10;
 
-  // Check if screen is larger than 15 inches (roughly 1440px)
-  const isLargeScreen = useMediaQuery('(min-width: 1440px)');
-  const hasAutoOpenedRef = useRef(false);
-  const openRef = useRef(open);
-  const isOpeningRef = useRef(false); // Prevent multiple simultaneous open calls
-
-  // Keep ref in sync with open state
-  useEffect(() => {
-    openRef.current = open;
-    // Reset opening flag when open becomes true
-    if (open) {
-      isOpeningRef.current = false;
-    }
-  }, [open]);
-
   const isDesignerMode = state.isDesignerMode || state.features.includes('designer');
 
   const scrollToBottom = useCallback(() => {
@@ -98,36 +82,6 @@ export const AISidebarPanel = () => {
       unsubscribe();
     };
   }, [handleSidebarChange]);
-
-  // Auto-open sidebar on large screens (>15 inches)
-  useEffect(() => {
-    if (isLargeScreen) {
-      // Only auto-open once when screen becomes large
-      if (!hasAutoOpenedRef.current && !openRef.current && !isOpeningRef.current) {
-        hasAutoOpenedRef.current = true;
-        isOpeningRef.current = true;
-        sidebarController.open(PANEL_NAME);
-      }
-    } else {
-      // Reset flag when screen becomes smaller
-      if (hasAutoOpenedRef.current) {
-        hasAutoOpenedRef.current = false;
-        isOpeningRef.current = false;
-      }
-    }
-  }, [isLargeScreen]);
-
-  // On large screens, prevent closing - monitor open state separately
-  // Use a separate effect that only runs when open changes to false on large screens
-  useEffect(() => {
-    // Only re-open if we're on large screen, sidebar was auto-opened, and it's now closed
-    if (isLargeScreen && hasAutoOpenedRef.current && !open && !isOpeningRef.current) {
-      // Re-open if somehow closed on large screen
-      // Use ref flag to prevent multiple simultaneous calls
-      isOpeningRef.current = true;
-      sidebarController.open(PANEL_NAME);
-    }
-  }, [isLargeScreen, open, scrollToBottom]); // Safe to include open - isOpeningRef prevents loops
 
   // Subscribe to external chat messages
   useEffect(() => {
@@ -492,8 +446,7 @@ export const AISidebarPanel = () => {
 
   const classes = cn(
     'fixed inset-y-0 right-0 z-[1000] w-full max-w-[420px] bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl transition-transform duration-300 ease-in-out flex flex-col',
-    // On large screens, always show (don't translate out)
-    isLargeScreen ? 'translate-x-0' : open ? 'translate-x-0' : 'translate-x-full',
+    open ? 'translate-x-0' : 'translate-x-full',
   );
 
   return (
@@ -501,7 +454,7 @@ export const AISidebarPanel = () => {
       <div
         ref={sidebarRef}
         className={classes}
-        aria-hidden={isLargeScreen ? false : !open}
+        aria-hidden={!open}
         data-ai-sidebar-panel
       >
         <header className="relative flex items-start justify-between px-6 pb-4 pt-6">
@@ -509,17 +462,14 @@ export const AISidebarPanel = () => {
             <Sparkles className="h-5 w-5 text-primary-500" />
             <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-50">AI Assistant</h2>
           </div>
-          {/* Only show close button on smaller screens */}
-          {!isLargeScreen && (
-            <button
-              type="button"
-              onClick={handleClose}
-              className="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
-            >
-              <XIcon className="h-5 w-5" />
-              <span className="sr-only">Close AI sidebar</span>
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={handleClose}
+            className="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
+          >
+            <XIcon className="h-5 w-5" />
+            <span className="sr-only">Close AI sidebar</span>
+          </button>
         </header>
 
         <div ref={chatHistoryRef} className="flex-1 overflow-y-auto px-6 pb-6 space-y-4">
@@ -688,16 +638,14 @@ export const AISidebarPanel = () => {
         </form>
       </div>
 
-      {/* Only show backdrop on smaller screens */}
-      {!isLargeScreen && (
-        <div
-          className={cn(
-            'fixed inset-0 z-[999] bg-slate-900/40 backdrop-blur-sm transition-opacity duration-300 lg:hidden',
-            open ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0',
-          )}
-          onClick={() => sidebarController.close(PANEL_NAME)}
-        />
-      )}
+      <div
+        className={cn(
+          'fixed inset-0 z-[999] bg-slate-900/40 backdrop-blur-sm transition-opacity duration-300',
+          open ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0',
+        )}
+        onClick={() => sidebarController.close(PANEL_NAME)}
+        aria-hidden="true"
+      />
     </>
   );
 };

@@ -9,6 +9,7 @@ export { Input, inputVariants } from './Input';
 export { Checkbox, checkboxVariants } from './Checkbox';
 export { Alert, AlertTitle, AlertDescription, alertVariants } from './Alert';
 export { Switch } from './Switch';
+export { ToggleSlider, type ToggleSliderProps } from './ToggleSlider';
 export { Textarea } from './Textarea';
 export { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from './Select';
 

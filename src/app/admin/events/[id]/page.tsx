@@ -234,8 +234,6 @@ const AddEditEventPage = () => {
     templateId: undefined,
   });
   const [templateJsonText, setTemplateJsonText] = useState<string>(JSON.stringify({}, null, 2));
-  const [qrImage, setQrImage] = useState<string | null>(null);
-
   const [isPageLoading, setIsPageLoading] = useState<boolean>(true);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isTemplateSaving, setIsTemplateSaving] = useState<boolean>(false);
@@ -340,28 +338,36 @@ const AddEditEventPage = () => {
       const firstActiveLocation = locationList.find((loc) => !loc.isDeleted);
       const defaultLocation = preferredLocation || preferences?.location || firstActiveLocation;
 
-      if (defaultLocation && !formState.locationId) {
-        setFormState((prev) => ({
-          ...prev,
-          locationId: defaultLocation?._id || '',
-          roomName: defaultLocation?.roomName || '',
-          location: defaultLocation?.address || '',
-          city: defaultLocation?.city || '',
-          state: defaultLocation?.state || '',
-          zipCode: defaultLocation?.zipCode || '',
-        }));
-      }
+      setFormState((prev) => {
+        if (defaultLocation && !prev.locationId) {
+          return {
+            ...prev,
+            locationId: defaultLocation?._id || '',
+            roomName: defaultLocation?.roomName || '',
+            location: defaultLocation?.address || '',
+            city: defaultLocation?.city || '',
+            state: defaultLocation?.state || '',
+            zipCode: defaultLocation?.zipCode || '',
+          };
+        }
+        return prev;
+      });
     },
-    [formState.locationId, preferences?.location],
+    [],
   );
 
   const hydrateEvent = useCallback(
-    async (event: EventDetailResponse, providerFallback?: MeetingProvider[]) => {
+    async (
+      event: EventDetailResponse,
+      providerFallback?: MeetingProvider[],
+      tenantName?: string | null,
+    ) => {
       setEventData(event);
 
       const currentTags = Array.isArray(event?.tagList) ? [...event.tagList] : [];
       const isOrganizer = Boolean(event?.isTeacher);
-      const meetingProviderId = event?.meetingProvider || formState.meetingProvider || providerFallback?.[0]?._id || '';
+      const meetingProviderId =
+        event?.meetingProvider || providerFallback?.[0]?._id || '';
 
       setFormState((prev) => ({
         ...prev,
@@ -370,7 +376,7 @@ const AddEditEventPage = () => {
         longDescription: event?.longDescription || '',
         image1: event?.imageUrl || '',
         authorType: isOrganizer ? 'organizer' : 'host',
-        host: event?.host || tenantDetails?.name || prev.host,
+        host: event?.host || tenantName || prev.host,
         organizerName: event?.teacher?.fullName || event?.teacher?.name || '',
         teacherId: event?.teacher?.guId || event?.teacher?.id || '',
         isTeacher: isOrganizer,
@@ -398,15 +404,8 @@ const AddEditEventPage = () => {
         const hydrated = event.scheduleList.map(hydrateScheduleRow);
         setSchedules(hydrated);
       }
-
-      if (event?.scheduleList?.[0]?.eventUrl) {
-        const qr = await eventDetailService.getQrCode(`events/${event.scheduleList[0].eventUrl}`);
-        if (qr) {
-          setQrImage(qr);
-        }
-      }
     },
-    [formState.meetingProvider, tenantDetails?.name],
+    [],
   );
 
   const loadTemplate = useCallback(async (eventIdForTemplate: string) => {
@@ -445,13 +444,16 @@ const AddEditEventPage = () => {
       setMeetingProviders(providers);
       setCategories(categoryList);
 
-      // Set default category from preferences if available
-      if (pref?.defaultEventCategory && !formState.categoryGuId) {
-        setFormState((prev) => ({ ...prev, categoryGuId: pref.defaultEventCategory || '' }));
-      } else if (categoryList.length > 0 && !formState.categoryGuId) {
-        // Fallback to first category if no default
-        setFormState((prev) => ({ ...prev, categoryGuId: categoryList[0].guId }));
-      }
+      // Set default category from preferences if available (functional update to avoid re-running effect when formState changes)
+      setFormState((prev) => {
+        if (pref?.defaultEventCategory && !prev.categoryGuId) {
+          return { ...prev, categoryGuId: pref.defaultEventCategory || '' };
+        }
+        if (categoryList.length > 0 && !prev.categoryGuId) {
+          return { ...prev, categoryGuId: categoryList[0].guId };
+        }
+        return prev;
+      });
 
       if (pref?.size) {
         setFormState((prev) => ({ ...prev, maxAttendees: String(pref.size) }));
@@ -471,13 +473,16 @@ const AddEditEventPage = () => {
 
       hydrateLocations(locationList, pref?.location || null);
 
-      if (providers.length && !formState.meetingProvider) {
-        setFormState((prev) => ({ ...prev, meetingProvider: providers[0]._id }));
-      }
+      setFormState((prev) => {
+        if (providers.length && !prev.meetingProvider) {
+          return { ...prev, meetingProvider: providers[0]._id };
+        }
+        return prev;
+      });
 
       if (eventId) {
         const event = await eventDetailService.getEvent(eventId);
-        await hydrateEvent(event, providers);
+        await hydrateEvent(event, providers, tenant?.name ?? null);
         const eventGuid = event?.id ?? event?.guId;
         if (eventGuid) {
           await loadTemplate(eventGuid);
@@ -495,7 +500,7 @@ const AddEditEventPage = () => {
     } finally {
       setIsPageLoading(false);
     }
-  }, [eventId, hydrateEvent, hydrateLocations, loadTemplate, toast, formState.meetingProvider, formState.categoryGuId]);
+  }, [eventId, hydrateEvent, hydrateLocations, loadTemplate, toast]);
 
   useEffect(() => {
     loadInitialData();
@@ -1774,13 +1779,6 @@ const AddEditEventPage = () => {
                     </MediaSliderLauncher>
                   </div>
                 </div>
-
-                {qrImage && (
-                  <div className="rounded-3xl border border-slate-200 bg-white p-4 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                    <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">Event QR code</p>
-                    <img src={`data:image/png;base64,${qrImage}`} alt="Event QR" className="mx-auto mt-4 h-40 w-40 object-contain" />
-                  </div>
-                )}
               </aside>
             </div>
 

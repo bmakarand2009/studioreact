@@ -296,19 +296,8 @@ export default function CourseCatalogPage() {
                     </div>
 
                     {/* Bottom row: duration chip and category chips in one row (chips scrollable); only show border when there are chips */}
-                    <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700 flex flex-col gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="w-full"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/checkout/course/${course.guId}/${course.guId}`);
-                        }}
-                      >
-                        {course.paymentType === 'FREE' ? 'Enroll' : 'Buy / Enroll'}
-                      </Button>
                     {(course.durationStr || (course.productTagList && course.productTagList.length > 0)) && (
+                    <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700 flex flex-col gap-2">
                     <div className="flex items-center gap-2 min-w-0">
                       {course.durationStr && (
                         <span className="shrink-0 inline-flex h-6 items-center justify-center gap-1.5 rounded-full bg-gray-100 dark:bg-gray-700 px-3 text-xs font-medium text-gray-700 dark:text-gray-300">
@@ -329,8 +318,8 @@ export default function CourseCatalogPage() {
                         </div>
                       )}
                     </div>
-                    )}
                     </div>
+                    )}
                   </div>
                 </div>
               ))}

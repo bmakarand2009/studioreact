@@ -24,6 +24,16 @@ cp .env.example .env.local
 npm run dev
 ```
 
+### CORS and API proxy (development)
+
+When running locally, the app talks to `https://api.wajooba.me`. Browsers block these requests (CORS) if the API does not allow your origin. To avoid that, the dev server proxies API calls:
+
+- **`.env.development`** sets `VITE_API_URL=/api`.
+- **`vite.config.ts`** proxies `/api` to `https://api.wajooba.me` (path prefix `/api` is removed).
+- All API requests from the app go to the same origin (e.g. `http://localhost:5173/api/...`) and Vite forwards them to the backend.
+
+To call the API directly (e.g. if the backend allows your origin), set `VITE_API_URL=https://api.wajooba.me` in `.env.development` or `.env.development.local`.
+
 ## 🏗️ Project Structure
 
 ```

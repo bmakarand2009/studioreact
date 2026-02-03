@@ -14,7 +14,7 @@
  * - Default: 'development' for `vite dev`, 'production' for `vite build`
  * 
  * Environment URLs:
- * - Development: api.wajooba.me (.env.development)
+ * - Development: /api (proxied to api.wajooba.me in dev to avoid CORS) or set VITE_API_URL in .env.development
  * - Staging: api.wajooba.xyz (.env.staging)
  * - Production: api.onwajooba.com (.env.production)
  * 

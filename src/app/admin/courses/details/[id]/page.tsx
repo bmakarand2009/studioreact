@@ -22,7 +22,7 @@ import {
   Layers,
 } from "lucide-react";
 
-import { Button, ConfirmationDialog } from "@/components/ui";
+import { Button, ConfirmationDialog, ToggleSlider } from "@/components/ui";
 import { useToast } from "@/components/ui/ToastProvider";
 import appLoadService, { TenantDetails } from "@/app/core/app-load";
 import { courseDetailService } from "@/services/courseDetailService";
@@ -143,6 +143,7 @@ const CourseDetailsPage = () => {
     getTabFromSearch(window.location?.search),
   );
   const [batches, setBatches] = useState<Batch[]>([]);
+  const [testToggleChecked, setTestToggleChecked] = useState(false);
 
   // Keep active tab in sync with URL (?tab=...)
   useEffect(() => {
@@ -470,7 +471,7 @@ const CourseDetailsPage = () => {
     <div className="min-h-screen bg-slate-50 pb-8 dark:bg-slate-950">
       {/* Header */}
       <header className="border-b border-slate-200 bg-white/80 backdrop-blur dark:border-slate-800 dark:bg-slate-900/70">
-        <div className="mx-auto max-w-5xl px-6 py-6 lg:px-10">
+        <div className="max-w-7xl mx-auto px-3 py-4 sm:px-6 sm:py-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-2 gap-4">
             <div className="flex items-center gap-4">
               <button
@@ -483,9 +484,19 @@ const CourseDetailsPage = () => {
               </button>
               <div>
                 <div className="flex items-center gap-2">
-                  <h1 className="text-xl font-bold text-slate-900 dark:text-white">
+                  <div className="m-0 p-0 text-xl font-bold leading-tight text-slate-900 dark:text-white">
                     Course Details
-                  </h1>
+                  </div>
+                  <ToggleSlider
+                    checked={testToggleChecked}
+                    onCheckedChange={async (checked: boolean) => {
+                      setTestToggleChecked(checked);
+                      await new Promise((r) => setTimeout(r, 800));
+                    }}
+                    aria-label="Toggle course visibility"
+                    labelOff="Private"
+                    labelOn="Published"
+                  />
                   {courseData?.isDisabled && (
                     <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-secondary-500 text-white">
                       Deleted
@@ -656,18 +667,22 @@ const CourseDetailsPage = () => {
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="mx-auto mt-8 max-w-7xl px-6 lg:px-8">
-        {/* Tabs */}
+      {/* Main Content - reduced padding on very small screens */}
+      <main className="mx-auto mt-4 max-w-7xl px-3 sm:mt-8 sm:px-6 lg:px-8">
+        {/* Tabs - scrollable on small screens */}
         <div className="bg-white dark:bg-slate-900 rounded-lg">
-          <nav className="flex space-x-1 p-3" aria-label="Tabs">
+          <nav
+            className="flex flex-nowrap gap-1 overflow-x-auto overflow-y-hidden p-2 sm:p-3 -mx-3 px-3 sm:mx-0 sm:px-0"
+            style={{ WebkitOverflowScrolling: 'touch' }}
+            aria-label="Tabs"
+          >
             <button
               onClick={() => handleTabChange("attendees")}
               className={`
-              px-4 font-medium text-sm transition-colors rounded-lg
+              shrink-0 whitespace-nowrap px-3 py-2 sm:px-4 sm:py-3 font-medium text-sm transition-colors rounded-lg
                 ${
                   activeTab === "attendees"
-                    ? "bg-primary-600 py-3 px-4 text-white shadow-md dark:bg-primary-500 dark:text-white"
+                    ? "bg-primary-600 text-white shadow-md dark:bg-primary-500 dark:text-white"
                     : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white"
                 }
               `}
@@ -677,10 +692,10 @@ const CourseDetailsPage = () => {
             <button
               onClick={() => handleTabChange("content")}
               className={`
-              px-4 font-medium text-sm transition-colors rounded-lg
+              shrink-0 whitespace-nowrap px-3 py-2 sm:px-4 sm:py-3 font-medium text-sm transition-colors rounded-lg
                 ${
                   activeTab === "content"
-                    ? "bg-primary-600 py-3 px-4 text-white shadow-md dark:bg-primary-500 dark:text-white"
+                    ? "bg-primary-600 text-white shadow-md dark:bg-primary-500 dark:text-white"
                     : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white"
                 }
               `}
@@ -690,10 +705,10 @@ const CourseDetailsPage = () => {
             <button
               onClick={() => handleTabChange("pricing")}
               className={`
-              px-4 font-medium text-sm transition-colors rounded-lg
+              shrink-0 whitespace-nowrap px-3 py-2 sm:px-4 sm:py-3 font-medium text-sm transition-colors rounded-lg
                 ${
                   activeTab === "pricing"
-                    ? "bg-primary-600 py-3 px-4 text-white shadow-md dark:bg-primary-500 dark:text-white"
+                    ? "bg-primary-600 text-white shadow-md dark:bg-primary-500 dark:text-white"
                     : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white"
                 }
               `}
@@ -703,10 +718,10 @@ const CourseDetailsPage = () => {
             <button
               onClick={() => handleTabChange("setup")}
               className={`
-              px-4 font-medium text-sm transition-colors rounded-lg
+              shrink-0 whitespace-nowrap px-3 py-2 sm:px-4 sm:py-3 font-medium text-sm transition-colors rounded-lg
                 ${
                   activeTab === "setup"
-                    ? "bg-primary-600 py-3 px-4 text-white shadow-md dark:bg-primary-500 dark:text-white"
+                    ? "bg-primary-600 text-white shadow-md dark:bg-primary-500 dark:text-white"
                     : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white"
                 }
               `}
@@ -716,10 +731,10 @@ const CourseDetailsPage = () => {
           </nav>
         </div>
 
-        {/* Tab Content */}
-        <div className="mt-6">
+        {/* Tab Content - reduced padding on very small screens */}
+        <div className="mt-4 sm:mt-6">
           {activeTab === "attendees" && (
-            <div className="rounded-lg bg-white p-8 shadow-xl shadow-primary-500/5 dark:border-slate-800 dark:bg-slate-900">
+            <div className="rounded-lg bg-white p-4 shadow-xl shadow-primary-500/5 dark:border-slate-800 dark:bg-slate-900 sm:p-6 lg:p-8">
               <AttendeesList
                 productId={id || ""}
                 productName={courseData.name || ""}
@@ -734,7 +749,7 @@ const CourseDetailsPage = () => {
           {activeTab === "content" && (
             <div className="space-y-8">
               {/* Course Banner */}
-              <section className="rounded-3xl border border-slate-200 bg-white p-8 shadow-xl shadow-primary-500/5 dark:border-slate-800 dark:bg-slate-900">
+              <section className="rounded-3xl border border-slate-200 bg-white p-4 shadow-xl shadow-primary-500/5 dark:border-slate-800 dark:bg-slate-900 sm:p-6 lg:p-8">
                 <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 dark:border-slate-700 dark:bg-slate-800">
                   <img
                     src={bannerImageUrl}
@@ -748,7 +763,7 @@ const CourseDetailsPage = () => {
               </section>
 
               {/* Course Information */}
-              <section className="rounded-3xl border border-slate-200 bg-white p-8 shadow-xl shadow-primary-500/5 dark:border-slate-800 dark:bg-slate-900">
+              <section className="rounded-3xl border border-slate-200 bg-white p-4 shadow-xl shadow-primary-500/5 dark:border-slate-800 dark:bg-slate-900 sm:p-6 lg:p-8">
                 <div className="space-y-6">
                   {/* Title */}
                   <div>
@@ -844,7 +859,7 @@ const CourseDetailsPage = () => {
           )}
 
           {activeTab === "pricing" && (
-            <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-xl shadow-primary-500/5 dark:border-slate-800 dark:bg-slate-900">
+            <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-xl shadow-primary-500/5 dark:border-slate-800 dark:bg-slate-900 sm:p-6 lg:p-8">
               <p className="text-slate-600 dark:text-slate-400">
                 Pricing content will be added here.
               </p>
@@ -852,7 +867,7 @@ const CourseDetailsPage = () => {
           )}
 
           {activeTab === "setup" && courseData && (
-            <div className="rounded-lg bg-white p-8 shadow-xl shadow-primary-500/5 dark:border-slate-800 dark:bg-slate-900">
+            <div className="rounded-lg bg-white p-4 shadow-xl shadow-primary-500/5 dark:border-slate-800 dark:bg-slate-900 sm:p-6 lg:p-8">
               <CourseSetup
                 productInfo={courseData}
                 isMasterTenant={tenantDetails?.tenantId === courseData?.tid}
