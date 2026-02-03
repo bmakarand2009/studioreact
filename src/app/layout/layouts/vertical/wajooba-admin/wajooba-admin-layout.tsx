@@ -8,6 +8,7 @@ import VerticalNavigation from '@/components/navigation/vertical-navigation';
 import Header from '@/components/layout/header';
 
 import { MediaSliderPanel } from '@/components/media-slider';
+import { AISidebarPanel } from '@/components/ai-sidebar';
 import { SidebarPayload } from '@/services/sidebarControllerService';
 import { cn } from '@/utils/cn';
 
@@ -21,6 +22,7 @@ export default function WajoobaAdminLayout({ children }: WajoobaAdminLayoutProps
   const [sidebarPinned, setSidebarPinned] = useState(true);
   const [isHovering, setIsHovering] = useState(false);
   const [mediaSliderOpen, setMediaSliderOpen] = useState(false);
+  const [aiSidebarOpen, setAISidebarOpen] = useState(false);
   const isScreenSmall = useMediaQuery('(max-width: 768px)');
   const { navigation } = useNavigation();
   const { user, logout } = useAuth();
@@ -47,6 +49,7 @@ export default function WajoobaAdminLayout({ children }: WajoobaAdminLayoutProps
   // Close sidebar on screen size change
   useEffect(() => {
     if (!isScreenSmall) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSidebarOpen(false);
     }
   }, [isScreenSmall]);
@@ -67,6 +70,7 @@ export default function WajoobaAdminLayout({ children }: WajoobaAdminLayoutProps
   // Auto-collapse logic
   useEffect(() => {
     if (!sidebarPinned && !isHovering && !isScreenSmall) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSidebarCollapsed(true);
     } else if (!sidebarPinned && isHovering && !isScreenSmall) {
       setSidebarCollapsed(false);
@@ -78,30 +82,65 @@ export default function WajoobaAdminLayout({ children }: WajoobaAdminLayoutProps
   useEffect(() => {
     const handleSidebarLayout = (event: Event) => {
       const detail = (event as CustomEvent<SidebarPayload>).detail;
-      if (!detail || detail.name !== 'mediaSlider') {
+      if (!detail) {
         return;
       }
-      setMediaSliderOpen(detail.open);
-      if (detail.open) {
-        previousSidebarStateRef.current = {
-          pinned: sidebarPinnedRef.current,
-          collapsed: sidebarCollapsedRef.current,
-        };
-        forcedFoldRef.current = true;
-        if (sidebarPinnedRef.current) {
-          setSidebarPinned(false);
+
+      // Handle media slider
+      if (detail.name === 'mediaSlider') {
+        setMediaSliderOpen(detail.open);
+        if (detail.open) {
+          previousSidebarStateRef.current = {
+            pinned: sidebarPinnedRef.current,
+            collapsed: sidebarCollapsedRef.current,
+          };
+          forcedFoldRef.current = true;
+          if (sidebarPinnedRef.current) {
+            setSidebarPinned(false);
+          }
+          setSidebarCollapsed(true);
+        } else {
+          setAISidebarOpen((currentAIOpen) => {
+            if (forcedFoldRef.current && !currentAIOpen) {
+              setSidebarPinned(previousSidebarStateRef.current.pinned);
+              setSidebarCollapsed(previousSidebarStateRef.current.collapsed);
+              forcedFoldRef.current = false;
+            }
+            return currentAIOpen;
+          });
         }
-        setSidebarCollapsed(true);
-      } else if (forcedFoldRef.current) {
-        setSidebarPinned(previousSidebarStateRef.current.pinned);
-        setSidebarCollapsed(previousSidebarStateRef.current.collapsed);
-        forcedFoldRef.current = false;
+      }
+
+      // Handle AI sidebar — one sidebar at a time (controller already closes others)
+      if (detail.name === 'aiSidebar') {
+        setAISidebarOpen(detail.open);
+
+        if (detail.open) {
+          previousSidebarStateRef.current = {
+            pinned: sidebarPinnedRef.current,
+            collapsed: sidebarCollapsedRef.current,
+          };
+          forcedFoldRef.current = true;
+          if (sidebarPinnedRef.current) {
+            setSidebarPinned(false);
+          }
+          setSidebarCollapsed(true);
+        } else {
+          setMediaSliderOpen((currentMediaOpen) => {
+            if (forcedFoldRef.current && !currentMediaOpen) {
+              setSidebarPinned(previousSidebarStateRef.current.pinned);
+              setSidebarCollapsed(previousSidebarStateRef.current.collapsed);
+              forcedFoldRef.current = false;
+            }
+            return currentMediaOpen;
+          });
+        }
       }
     };
 
-    window.addEventListener('sidebar:layout-change', handleSidebarLayout as EventListener);
+    window.addEventListener('sidebar:layout-change', handleSidebarLayout);
     return () => {
-      window.removeEventListener('sidebar:layout-change', handleSidebarLayout as EventListener);
+      window.removeEventListener('sidebar:layout-change', handleSidebarLayout);
     };
   }, []);
 
@@ -123,9 +162,9 @@ export default function WajoobaAdminLayout({ children }: WajoobaAdminLayoutProps
     <div
       className={cn(
         'flex h-screen bg-gray-100 dark:bg-gray-900 transition-[padding] duration-300',
-        mediaSliderOpen ? 'lg:pr-[420px]' : '',
+        (mediaSliderOpen || aiSidebarOpen) ? 'lg:pr-[420px]' : '',
       )}
-      data-sidebar-mode={mediaSliderOpen ? 'folded' : sidebarPinned ? 'pinned' : 'hover'}
+      data-sidebar-mode={(mediaSliderOpen || aiSidebarOpen) ? 'folded' : sidebarPinned ? 'pinned' : 'hover'}
     >
       {/* Sidebar */}
       <div
@@ -186,6 +225,7 @@ export default function WajoobaAdminLayout({ children }: WajoobaAdminLayoutProps
         </footer>
       </div>
       <MediaSliderPanel />
+      <AISidebarPanel />
     </div>
   );
 }

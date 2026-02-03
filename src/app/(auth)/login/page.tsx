@@ -5,15 +5,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Button, Input, Checkbox, Alert, AlertTitle, AlertDescription } from '@/components/ui';
+import { Button, Input, Checkbox, Alert, AlertDescription } from '@/components/ui';
 import { 
   Eye, 
   EyeOff, 
   Lock,
-  Mail,
-  Chrome,
-  Facebook,
-  Github
+  Mail
 } from 'lucide-react';
 import { authService } from '@/services/authService';
 import { useUserContext } from '@/contexts/UserContext';
@@ -77,7 +74,7 @@ export default function LoginPage() {
                 } else {
                   console.log('Auto-login: Invalid return URL, using default dashboard');
                 }
-              } catch (e) {
+              } catch {
                 console.log('Auto-login: Invalid return URL format, using default dashboard');
               }
             } else {
@@ -180,15 +177,16 @@ export default function LoginPage() {
   const handleGoogleLogin = async () => {
     try {
       await authService.googleLogin();
-    } catch (error) {
+    } catch {
       setError('Google login failed. Please try again.');
     }
   };
 
-  const handleFacebookLogin = async () => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _handleFacebookLogin = async () => {
     try {
       await authService.facebookLogin();
-    } catch (error) {
+    } catch {
       setError('Facebook login failed. Please try again.');
     }
   };
@@ -349,7 +347,7 @@ export default function LoginPage() {
           {/* Sign Up Link */}
           <div className="text-center mt-6">
             <p className="text-gray-600 dark:text-gray-400">
-              Don't have an account?{' '}
+              Don&apos;t have an account?{' '}
               <Link
                 to="/sign-up"
                 className="font-medium text-deep-600 hover:text-deep-700 dark:text-deep-400 dark:hover:text-deep-300 transition-colors"

@@ -34,7 +34,7 @@ export default function ConnectionErrorPage() {
         </h1>
         
         <p className="text-lg text-gray-600 dark:text-gray-400 mb-2">
-          Can't connect to Wajooba servers
+          Can&apos;t connect to Wajooba servers
         </p>
         
         <p className="text-sm text-gray-500 dark:text-gray-500 mb-8">

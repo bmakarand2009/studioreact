@@ -1,9 +1,7 @@
 
 
 import { withRole } from '@/components/guards/withRole';
-import { useAuth } from '@/hooks/useAuth';
 import { ContactsSection } from '@/components/admin/ContactsSection';
-import { useState } from 'react';
 import { 
   Users, 
   BookOpen, 
@@ -16,7 +14,6 @@ import {
 } from 'lucide-react';
 
 function AdminDashboard() {
-  const { user } = useAuth();
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">

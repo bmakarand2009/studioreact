@@ -23,7 +23,7 @@ interface SettingCard {
   title: string;
   description: string;
   url: string;
-  icon: React.ComponentType<any>;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   color: string;
 }
 

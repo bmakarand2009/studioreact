@@ -25,7 +25,7 @@ export default function AboutPage() {
               </span>
             </h1>
             <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto">
-              We're on a mission to democratize education and make quality learning accessible to everyone, everywhere.
+              We&apos;re on a mission to democratize education and make quality learning accessible to everyone, everywhere.
             </p>
           </div>
         </div>
@@ -45,7 +45,7 @@ export default function AboutPage() {
                 students, educators, and organizations worldwide.
               </p>
               <p className="text-lg text-gray-600 dark:text-gray-300 mb-8">
-                We're committed to providing cutting-edge technology that enhances the learning experience, 
+                We&apos;re committed to providing cutting-edge technology that enhances the learning experience, 
                 fosters collaboration, and empowers individuals to achieve their educational goals.
               </p>
               <Link to="/courses">
@@ -78,7 +78,7 @@ export default function AboutPage() {
               Our Core Values
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-              These principles guide everything we do and shape our platform's development
+              These principles guide everything we do and shape our platform&apos;s development
             </p>
           </div>
 

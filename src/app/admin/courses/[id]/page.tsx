@@ -43,22 +43,23 @@ interface CourseFormState {
 const PLACEHOLDER_IMAGE =
   'https://res.cloudinary.com/wajooba/image/upload/v1744785332/master/fbyufuhlihaqumx1yegb.svg';
 
+// Duration options matching Angular format - stored as human-readable strings
 const DURATION_OPTIONS = [
-  { value: '5', label: '5 minutes' },
-  { value: '30', label: '30 minutes' },
-  { value: '60', label: '1 hour' },
-  { value: '120', label: '2 hours' },
-  { value: '360', label: '6 hours' },
-  { value: '720', label: '12 hours' },
-  { value: '1440', label: '1 day' },
-  { value: '2880', label: '2 days' },
-  { value: '8640', label: '6 days' },
-  { value: '10080', label: '1 week' },
-  { value: '20160', label: '2 weeks' },
-  { value: '43200', label: '1 month' },
-  { value: '129600', label: '3 months' },
-  { value: '259200', label: '6 months' },
-  { value: '525600', label: '1 year' },
+  { value: '5 minutes', label: '5 minutes' },
+  { value: '30 minutes', label: '30 minutes' },
+  { value: '1 hour ', label: '1 hour' },
+  { value: '2 hours', label: '2 hours' },
+  { value: '6 hours', label: '6 hours' },
+  { value: '12 hours', label: '12 hours' },
+  { value: '1 day', label: '1 day' },
+  { value: '2 days', label: '2 days' },
+  { value: '6 days', label: '6 days' },
+  { value: '1 week', label: '1 week' },
+  { value: '2 weeks', label: '2 weeks' },
+  { value: '1 month', label: '1 month' },
+  { value: '3 months', label: '3 months' },
+  { value: '6 months', label: '6 months' },
+  { value: '1 year', label: '1 year' },
 ];
 
 const DEFAULT_TEMPLATE_HTML = `<section style="font-family: 'Inter', system-ui; max-width: 720px; margin: 0 auto; padding: 48px;">
@@ -79,7 +80,7 @@ const initialFormState: CourseFormState = {
   longDescription: '',
   authorType: 'organization',
   authorId: '',
-  durationStr: '30',
+  durationStr: '30 minutes',
   image1: '',
   productTagList: [],
   productCategoryId: [],
@@ -168,8 +169,47 @@ const AddEditCoursePage = () => {
   }, []);
 
   const durationLabel = useCallback((value: string) => {
-    const match = DURATION_OPTIONS.find((option) => option.value === value);
-    return match ? match.label : `${value} minutes`;
+    if (!value) return '30 minutes';
+    
+    // Trim whitespace for comparison
+    const trimmedValue = value.trim();
+    
+    // Check if it's already in the correct format (human-readable string)
+    const exactMatch = DURATION_OPTIONS.find((option) => option.value.trim() === trimmedValue);
+    if (exactMatch) {
+      return exactMatch.label;
+    }
+    
+    // If it's a numeric value, try to convert it (for backward compatibility)
+    const numericValue = parseInt(trimmedValue, 10);
+    if (!isNaN(numericValue)) {
+      const numericMap: Record<number, string> = {
+        5: '5 minutes',
+        30: '30 minutes',
+        60: '1 hour',
+        120: '2 hours',
+        360: '6 hours',
+        720: '12 hours',
+        1440: '1 day',
+        2880: '2 days',
+        8640: '6 days',
+        10080: '1 week',
+        20160: '2 weeks',
+        43200: '1 month',
+        129600: '3 months',
+        259200: '6 months',
+        525600: '1 year',
+      };
+      
+      if (numericMap[numericValue]) {
+        return numericMap[numericValue];
+      }
+      
+      return `${numericValue} minutes`;
+    }
+    
+    // If it's already a readable string, return as-is
+    return trimmedValue;
   }, []);
 
   const handleImageSelect = useCallback(
@@ -210,7 +250,7 @@ const AddEditCoursePage = () => {
   }, [durationLabel, formState, staffList, tenantDetails]);
 
   useEffect(() => {
-    setFilteredCategories((prev) => {
+    setFilteredCategories(() => {
       if (!categorySearchQuery) {
         return [...existingCategories];
       }
@@ -241,13 +281,39 @@ const AddEditCoursePage = () => {
         ? course.productCategory.map((category: any) => category?.id || category?.guId || category)
         : [];
 
+      // Handle duration - convert numeric values to human-readable strings if needed
+      let durationStr = wemail?.durationStr || course?.durationStr || '30 minutes';
+      
+      // If it's a numeric string, convert it to human-readable format
+      const numericDuration = parseInt(durationStr, 10);
+      if (!isNaN(numericDuration)) {
+        const numericMap: Record<number, string> = {
+          5: '5 minutes',
+          30: '30 minutes',
+          60: '1 hour ',
+          120: '2 hours',
+          360: '6 hours',
+          720: '12 hours',
+          1440: '1 day',
+          2880: '2 days',
+          8640: '6 days',
+          10080: '1 week',
+          20160: '2 weeks',
+          43200: '1 month',
+          129600: '3 months',
+          259200: '6 months',
+          525600: '1 year',
+        };
+        durationStr = numericMap[numericDuration] || '30 minutes';
+      }
+
       setFormState({
         name: course?.name || '',
         shortDescription: course?.shortDescription || '',
         longDescription: wemail?.longDescription || course?.longDescription || '',
         authorType: wemail?.authorType || course?.authorType || 'organization',
         authorId: wemail?.authorId || course?.authorId || '',
-        durationStr: wemail?.durationStr || course?.durationStr || '30',
+        durationStr: durationStr,
         image1: course?.image1 || '',
         productTagList: existingTags,
         productCategoryId: existingCategoriesIds,
@@ -661,7 +727,7 @@ const AddEditCoursePage = () => {
             </button>
             <div>
               <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-                Course Details
+                {isExistingCourse ? 'Edit Course' : 'Add Course'}
               </h1>
             </div>
           </div>
@@ -1092,7 +1158,7 @@ const AddEditCoursePage = () => {
                         const parsed = JSON.parse(event.target.value);
                         setTemplateState((prev) => ({ ...prev, json: parsed }));
                         toast.success('Template structure updated.');
-                      } catch (error) {
+                      } catch {
                         toast.error('Invalid JSON structure.');
                       }
                     }}

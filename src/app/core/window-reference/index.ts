@@ -31,7 +31,7 @@ export interface MessageData {
 
 class WindowReferenceService {
   private windowReferences: Map<string, WindowReference> = new Map();
-  private messageListeners: Map<string, (data: MessageData) => void> = new Map();
+  private messageListeners: Map<string, (_data: MessageData) => void> = new Map();
   private isInitialized = false;
 
   constructor() {
@@ -128,7 +128,7 @@ class WindowReferenceService {
       const {
         name = `window_${Date.now()}`,
         features = 'width=800,height=600,scrollbars=yes,resizable=yes',
-        replace = false,
+        replace: _replace = false,
         noopener = true,
         noreferrer = true,
       } = options;
@@ -326,7 +326,7 @@ class WindowReferenceService {
   /**
    * Add message listener
    */
-  addMessageListener(id: string, listener: (data: MessageData) => void): void {
+  addMessageListener(id: string, listener: (_data: MessageData) => void): void {
     this.messageListeners.set(id, listener);
   }
 
@@ -431,7 +431,7 @@ class WindowReferenceService {
   /**
    * Scroll to position
    */
-  scrollTo(x: number, y: number, behavior: ScrollBehavior = 'auto'): void {
+  scrollTo(x: number, y: number, behavior: 'auto' | 'smooth' = 'auto'): void {
     if (typeof window === 'undefined') return;
 
     window.scrollTo({
@@ -444,7 +444,7 @@ class WindowReferenceService {
   /**
    * Scroll to top
    */
-  scrollToTop(behavior: ScrollBehavior = 'smooth'): void {
+  scrollToTop(behavior: 'auto' | 'smooth' = 'smooth'): void {
     this.scrollTo(0, 0, behavior);
   }
 

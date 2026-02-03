@@ -22,6 +22,15 @@ export default defineConfig({
     strictPort: false,
     allowedHosts: true,
     hmr: false,
+    // Proxy API in dev to avoid CORS when backend does not allow localhost origin
+    proxy: {
+      '/api': {
+        target: 'https://api.wajooba.me',
+        changeOrigin: true,
+        secure: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+    },
   },
   preview: {
     host: '0.0.0.0',

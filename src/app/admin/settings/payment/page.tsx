@@ -9,11 +9,9 @@ import {
   Settings, 
   TestTube,
   CheckCircle,
-  XCircle,
-  AlertCircle,
   Loader2
 } from 'lucide-react';
-import { Button, Input, Switch, Alert, AlertTitle, AlertDescription } from '@/components/ui';
+import { Button, Switch, Alert, AlertTitle, AlertDescription } from '@/components/ui';
 import Link from '@/shims/next-link';
 import { settingsService, PaymentSettings } from '@/services/settingsService';
 
@@ -125,7 +123,7 @@ function PaymentSettingsPage() {
         ...prev,
         [providerId]: result
       }));
-    } catch (error) {
+    } catch {
       setTestResults(prev => ({
         ...prev,
         [providerId]: {

@@ -50,11 +50,17 @@ export interface Event {
     fullName: string;
   };
   
-  // Category & Tags
+  // Category & Tags (API may send category.paymentType: 'FREE' | 'PAID' | 'DONATION' | 'EXTERNAL' | 'PRODUCT')
   category: {
     guId: string;
     name: string;
+    paymentType?: string;
   };
+  // v5 event detail uses isPaid for free check; list API may send isPaid or isPaidClass
+  isPaid?: boolean;
+  /** Public list API returns top-level paymentType (or payment_type): 'paidevent' | 'freeevent' | 'donationevent' | 'externalevent' */
+  paymentType?: string;
+  payment_type?: string;
   tagList?: string[];
   
   // Schedule Details
@@ -70,12 +76,37 @@ export interface Event {
   registrationFormId?: string;
   maxAttendees?: number;
   
-  // Template
+  // Template (detail API may return HTML for GrapeJS template)
   templateId?: string;
-  
+  template?: string;
+
+  // Detail API / public event by URL – optional fields
+  scheduleId?: string;
+  eventUrl?: string;
+  isPastEvent?: boolean;
+  isDisableRegistration?: boolean;
+  zoomMeetingUrl?: string;
+  memberships?: EventMembership[];
+  donationCategory?: { guId: string; name?: string };
+  classScheduleDates?: { startTime: number; endTime: number; agenda?: string }[];
+  wemail?: {
+    authorType?: string;
+    displayTitle?: string;
+    designation?: string;
+    description?: string;
+  };
+
   // Status Flags
   isDisabled: boolean;
   isDeleted: boolean;
+}
+
+export interface EventMembership {
+  guId: string;
+  price: number;
+  currency?: string;
+  membershipType?: string;
+  billingFrequency?: string;
 }
 
 export interface EventSchedule {

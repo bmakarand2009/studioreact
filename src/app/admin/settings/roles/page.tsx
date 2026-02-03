@@ -10,11 +10,9 @@ import {
   Trash2,
   Users,
   CheckCircle,
-  XCircle,
   AlertCircle,
   Loader2,
   Lock,
-  Unlock,
   Crown,
   BookOpen,
   BarChart3,
@@ -24,13 +22,14 @@ import {
   Filter,
   Search
 } from 'lucide-react';
-import { Button, Input, Switch, Alert, AlertTitle, AlertDescription } from '@/components/ui';
+import { Button, Input } from '@/components/ui';
 import Link from '@/shims/next-link';
 import { settingsService, RoleSettings } from '@/services/settingsService';
 
 function RolesSettingsPage() {
   const [isLoading, setIsLoading] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_isSaving, setIsSaving] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [roles, setRoles] = useState<RoleSettings[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -95,7 +94,8 @@ function RolesSettingsPage() {
     }
   };
 
-  const handleToggleRole = async (roleId: string, isActive: boolean) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _handleToggleRole = async (roleId: string, isActive: boolean) => {
     setIsSaving(true);
     try {
       // This would be a different API call to activate/deactivate a role
@@ -353,7 +353,7 @@ function RolesSettingsPage() {
                       </span>
                     </div>
                     <p className="text-sm text-red-700 dark:text-red-300 mb-3">
-                      Are you sure you want to delete the "{role.name}" role? This action cannot be undone.
+                      Are you sure you want to delete the &quot;{role.name}&quot; role? This action cannot be undone.
                       {role.userCount > 0 && (
                         <span className="block mt-1 font-medium">
                           ⚠️ This role has {role.userCount} user(s) assigned to it.

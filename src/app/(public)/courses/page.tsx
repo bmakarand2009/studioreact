@@ -3,17 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
 import { 
   Search, 
-  Filter, 
   BookOpen, 
-  Clock, 
-  Users, 
-  Star,
-  ArrowRight,
-  Play,
-  Loader2
+  Loader2,
+  Clock,
 } from 'lucide-react';
-import { appLoadService, TenantDetails } from '@/app/core/app-load';
-import { APP_CONFIG } from '@/constants';
+import { appLoadService } from '@/app/core/app-load';
 import { ImageUtils } from '@/utils/imageUtils';
 
 interface Course {
@@ -31,6 +25,7 @@ interface Course {
   slides?: Array<{ image: string; active?: boolean }>;
   productTagList?: string[];
   paymentType?: string;
+  durationStr?: string;
 }
 
 export default function CourseCatalogPage() {
@@ -40,7 +35,6 @@ export default function CourseCatalogPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const [tenantDetails, setTenantDetails] = useState<TenantDetails | null>(null);
 
   // Fetch tenant details and courses
   useEffect(() => {
@@ -60,10 +54,8 @@ export default function CourseCatalogPage() {
           return;
         }
 
-        setTenantDetails(tenant);
-
         // Fetch courses from API
-        const apiUrl = `${APP_CONFIG.apiBaseUrl}/snode/icategory/public/?tid=${tenant.tenantId}`;
+        const apiUrl = `${import.meta.env.VITE_API_URL || 'https://api.wajooba.me'}/snode/icategory/public/?tid=${tenant.tenantId}`;
         const response = await fetch(apiUrl, {
           method: 'GET',
           headers: {
@@ -89,7 +81,7 @@ export default function CourseCatalogPage() {
                 course.isMediaExists = true;
               }
               
-              // Create slides from images using ImageUtils with 3:2 aspect ratio
+              // Create slides from images using ImageUtils with 3:2 aspect ratio (landscape)
               const slides: Array<{ image: string; active?: boolean }> = [];
               if (course.image1) {
                 slides.push({ 
@@ -109,7 +101,7 @@ export default function CourseCatalogPage() {
               }
               course.slides = slides;
               
-              // Add Cloudinary URL to image1 using ImageUtils with 3:2 aspect ratio
+              // Add Cloudinary URL to image1 using ImageUtils with 3:2 aspect ratio (landscape)
               if (course.image1) {
                 course.image1 = ImageUtils.buildCloudinaryUrl(tenant.cloudName, course.image1, 480, 320, 'fill', '3:2');
               }
@@ -181,7 +173,7 @@ export default function CourseCatalogPage() {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-primary-600 mx-auto mb-4" />
+          <Loader2 className="h-12 w-12 animate-spin text-primary-600 dark:text-primary-400 mx-auto mb-4" />
           <p className="text-gray-600 dark:text-gray-400">Loading courses...</p>
         </div>
       </div>
@@ -210,13 +202,13 @@ export default function CourseCatalogPage() {
           <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
             {/* Search */}
             <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-500" />
               <input
                 type="text"
                 placeholder="Search courses..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
               />
             </div>
 
@@ -242,7 +234,7 @@ export default function CourseCatalogPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {filteredCourses.length === 0 ? (
           <div className="text-center py-12">
-            <BookOpen className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+            <BookOpen className="h-16 w-16 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
               No courses found
             </h3>
@@ -261,7 +253,7 @@ export default function CourseCatalogPage() {
                   className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer flex flex-col h-full"
                   onClick={() => handleCourseClick(course)}
                 >
-                  {/* Course Image - Maintain 3:2 aspect ratio */}
+                  {/* Course Image - 3:2 aspect ratio (landscape) */}
                   <div className="relative bg-gradient-to-br from-primary-100 to-brand-100 dark:from-primary-900/30 dark:to-brand-900/30 overflow-hidden" style={{ aspectRatio: '3/2' }}>
                     {course.image1 ? (
                       <img 
@@ -289,44 +281,45 @@ export default function CourseCatalogPage() {
                     )}
                   </div>
 
-                  {/* Course Content */}
-                  <div className="p-6 flex flex-col flex-grow">
-                    {course.productTagList && course.productTagList.length > 0 && (
-                      <div className="flex items-center gap-2 mb-3 flex-wrap">
-                        {course.productTagList.slice(0, 2).map((tag, index) => (
-                          <span 
-                            key={index}
-                            className="inline-flex items-center justify-center min-w-[80px] h-6 px-2 bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 text-xs font-medium rounded-full"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    )}
+                  {/* Course Content – duration and category chips at bottom */}
+                  <div className="px-6 py-4 flex flex-col flex-grow min-h-0">
+                    <div className="flex-1 min-h-0 flex flex-col">
+                      <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">
+                        {course.name}
+                      </h3>
 
-                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">
-                      {course.name}
-                    </h3>
-
-                    {(course.shortDescription || course.longDescription) && (
-                      <p className="text-gray-600 dark:text-gray-300 mb-4 line-clamp-2 overflow-hidden">
-                        {course.shortDescription || course.longDescription}
-                      </p>
-                    )}
-
-                    <div className="flex items-center justify-between mt-auto pt-4">
-                      <Button 
-                        size="sm" 
-                        variant="secondary"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleCourseClick(course);
-                        }}
-                      >
-                        <Play className="h-4 w-4 mr-1" />
-                        Learn More
-                      </Button>
+                      {(course.shortDescription || course.longDescription) && (
+                        <p className="text-gray-600 dark:text-gray-300 line-clamp-2 overflow-hidden">
+                          {course.shortDescription || course.longDescription}
+                        </p>
+                      )}
                     </div>
+
+                    {/* Bottom row: duration chip and category chips in one row (chips scrollable); only show border when there are chips */}
+                    {(course.durationStr || (course.productTagList && course.productTagList.length > 0)) && (
+                    <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700 flex flex-col gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      {course.durationStr && (
+                        <span className="shrink-0 inline-flex h-6 items-center justify-center gap-1.5 rounded-full bg-gray-100 dark:bg-gray-700 px-3 text-xs font-medium text-gray-700 dark:text-gray-300">
+                          <Clock className="h-3.5 w-3.5 shrink-0" />
+                          {course.durationStr}
+                        </span>
+                      )}
+                      {course.productTagList && course.productTagList.length > 0 && (
+                        <div className="flex items-center gap-2 overflow-x-auto overflow-y-hidden py-0.5 -mx-1 min-w-0 flex-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                          {course.productTagList.map((tag, index) => (
+                            <span
+                              key={index}
+                              className="inline-flex shrink-0 items-center justify-center min-w-[80px] h-6 px-2 bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 text-xs font-medium rounded-full"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    </div>
+                    )}
                   </div>
                 </div>
               ))}
@@ -336,12 +329,12 @@ export default function CourseCatalogPage() {
       </div>
 
       {/* CTA Section */}
-      <div className="bg-gradient-to-r from-primary-600 to-brand-600 py-12">
+      <div className="bg-gradient-to-r from-primary-600 to-brand-600 dark:from-primary-700 dark:to-brand-700 py-12">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-2xl font-bold text-white mb-4">
-            Can't Find What You're Looking For?
+            Can&apos;t Find What You&apos;re Looking For?
           </h2>
-          <p className="text-lg text-primary-100 mb-6">
+          <p className="text-lg text-primary-100 dark:text-primary-200 mb-6">
             Contact our team to discuss custom course development or specific learning needs.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -355,7 +348,7 @@ export default function CourseCatalogPage() {
             </Button>
             <Button 
               size="sm" 
-              className="px-6 py-2 bg-white text-primary-600 hover:bg-gray-100"
+              className="px-6 py-2 bg-white dark:bg-gray-100 text-primary-600 dark:text-primary-700 hover:bg-gray-100 dark:hover:bg-gray-200"
               onClick={() => navigate('/login')}
             >
               Sign Up for Updates

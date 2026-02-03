@@ -1,7 +1,7 @@
 
 
 import { withRole } from '@/components/guards/withRole';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -15,7 +15,6 @@ import {
   Building,
   MapPin,
   Globe,
-  Calendar,
   CheckCircle
 } from 'lucide-react';
 import { Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui';
@@ -42,11 +41,11 @@ type AccountFormData = z.infer<typeof accountSchema>;
 function AccountSettingsPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
-  const [accountDetails, setAccountDetails] = useState({
+  const [accountDetails] = useState({
     orgId: 'marksampletest',
     isMasterFranchise: false
   });
-  const [adminList, setAdminList] = useState([
+  const [adminList] = useState([
     { id: '1', fullName: 'Admin User' }
   ]);
 
@@ -82,7 +81,7 @@ function AccountSettingsPage() {
     // You could add a toast notification here
   };
 
-  const onSubmit = async (data: AccountFormData) => {
+  const onSubmit = async () => {
     setIsLoading(true);
     try {
       // Simulate API call

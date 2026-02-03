@@ -5,7 +5,6 @@ import {
   Search, 
   BookOpen, 
   Clock,
-  Loader2,
   AlertCircle
 } from 'lucide-react';
 import { Button, Pagination } from '@/components/ui';
@@ -101,7 +100,7 @@ export default function CoursesListPage() {
    * Navigate to course details
    */
   const handleCourseClick = (courseId: string) => {
-    navigate(`/admin/courses/edit/${courseId}`);
+    navigate(`/admin/courses/${courseId}`);
   };
 
   /**
@@ -271,7 +270,7 @@ export default function CoursesListPage() {
                 </div>
 
                 {/* Course Content */}
-                <div className="p-4 pt-2 flex flex-col flex-grow">
+                <div className="p-4 pt-2 flex flex-col flex-grow min-h-0">
                   {/* Payment Type Badge */}
                   <div className="flex items-center gap-1.5 mb-1 flex-wrap">
                     {course.paymentType === 'FREE' ? (
@@ -300,7 +299,7 @@ export default function CoursesListPage() {
 
                   {/* Description */}
                   {course.shortDescription && (
-                    <p className="text-gray-600 dark:text-gray-300 mb-3 line-clamp-2 text-xs flex-grow">
+                    <p className="text-gray-600 dark:text-gray-300 mb-3 line-clamp-2 text-xs overflow-hidden min-h-0">
                       {course.shortDescription}
                     </p>
                   )}

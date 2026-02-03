@@ -7,7 +7,6 @@ import {
   Clock,
   MapPin,
   Video,
-  Loader2,
   AlertCircle,
   Heart,
 } from 'lucide-react';

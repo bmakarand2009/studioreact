@@ -1,4 +1,5 @@
 import { apiService } from './api';
+import { authService } from './authService';
 import { Event, EventsResponse, EventFilters, EventCategory } from '@/types/event';
 
 export const eventService = {
@@ -101,6 +102,40 @@ export const eventService = {
   },
 
   /**
+   * Get public event detail by event URL slug (e.g. one-start-21600807).
+   * API expects URL slug after tenant id, not guId.
+   * Endpoint: GET /snode/pevent/{orgId}/{eventUrl}
+   */
+  async getPublicEventByUrl(orgId: string, eventUrl: string): Promise<Event | null> {
+    try {
+      const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://api.wajooba.me';
+      const headers: Record<string, string> = {
+        'Accept': 'application/json, text/plain, */*',
+        'Content-Type': 'application/json',
+      };
+      const token = authService.accessToken;
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      const response = await fetch(`${apiBaseUrl}/snode/pevent/${orgId}/${eventUrl}`, {
+        method: 'GET',
+        headers,
+      });
+
+      if (!response.ok) {
+        if (response.status === 404) return null;
+        throw new Error(`Failed to fetch event: ${response.status}`);
+      }
+
+      const result = await response.json();
+      return (result?.data ?? result) as Event;
+    } catch (error) {
+      console.error('Error fetching public event:', error);
+      throw error;
+    }
+  },
+
+  /**
    * Get public events list (no auth required)
    * Endpoint: GET /snode/pevent/{orgId}
    * Returns: { data: Event[] } or Event[]
@@ -181,7 +216,9 @@ export const eventService = {
   },
 
   /**
-   * Get payment type display info
+   * Get payment type display info.
+   * Single source of truth – matches v5 event detail logic (donation → external → paid → free).
+   * List API may send category.paymentType or isPaid; detail API has memberships.
    */
   getPaymentTypeInfo(event: Event): {
     type: 'paid' | 'free' | 'donation' | 'external';
@@ -189,14 +226,9 @@ export const eventService = {
     icon?: string;
     colorClass: string;
   } {
-    if (event.isPaidClass) {
-      return {
-        type: 'paid',
-        label: 'Paid',
-        colorClass: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400',
-      };
-    }
-    if (event.isDonation) {
+    // Public list API returns top-level paymentType (or payment_type): 'paidevent' | 'freeevent' | 'donationevent' | 'externalevent'
+    const listPaymentType = (event.paymentType || event.payment_type || '').toLowerCase();
+    if (listPaymentType === 'donationevent') {
       return {
         type: 'donation',
         label: 'Donation',
@@ -204,14 +236,65 @@ export const eventService = {
         colorClass: 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400',
       };
     }
-    if (event.externalSaleUrl) {
+    if (listPaymentType === 'externalevent') {
       return {
         type: 'external',
         label: 'External',
         colorClass: 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400',
       };
     }
-    // Default to Free if none of the above
+    if (listPaymentType === 'paidevent') {
+      return {
+        type: 'paid',
+        label: 'Paid',
+        colorClass: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400',
+      };
+    }
+    if (listPaymentType === 'freeevent') {
+      return {
+        type: 'free',
+        label: 'Free',
+        colorClass: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400',
+      };
+    }
+
+    const paymentType = event.category?.paymentType?.toUpperCase?.();
+
+    // 1. Donation (v5: donationCategory)
+    if (event.donationCategory || event.isDonation || paymentType === 'DONATION') {
+      return {
+        type: 'donation',
+        label: 'Donation',
+        icon: 'heart',
+        colorClass: 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400',
+      };
+    }
+
+    // 2. External (v5: externalSaleUrl)
+    if (event.externalSaleUrl || paymentType === 'EXTERNAL') {
+      return {
+        type: 'external',
+        label: 'External',
+        colorClass: 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400',
+      };
+    }
+
+    // 3. Paid (v5: memberships.length > 0; list API may use isPaidClass, isPaid, or category.paymentType)
+    const isPaid =
+      (event.memberships && event.memberships.length > 0) ||
+      event.isPaidClass === true ||
+      event.isPaid === true ||
+      paymentType === 'PAID' ||
+      paymentType === 'PRODUCT';
+    if (isPaid) {
+      return {
+        type: 'paid',
+        label: 'Paid',
+        colorClass: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400',
+      };
+    }
+
+    // 4. Free (v5: !isPaid && !donationCategory)
     return {
       type: 'free',
       label: 'Free',
