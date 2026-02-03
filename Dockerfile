@@ -58,6 +58,12 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/index.html ./index.html
 
+# Copy preview config (main vite.config.ts not in image - this sets allowedHosts for Render/cloud)
+COPY vite.preview.config.cjs ./
+
+# Install vite for preview server (devDep, not in production install)
+RUN npm install vite
+
 # Expose port 5173
 EXPOSE 5173
 
@@ -65,5 +71,6 @@ EXPOSE 5173
 ENV NODE_ENV=production
 ENV PORT=5173
 
-# Start the preview server
-CMD ["npm", "run", "preview"]
+# Start the preview server with config that allows cloud hosts (e.g. studioreact.onrender.com)
+# Use shell form so PORT env (set by Render) is expanded
+CMD ["sh", "-c", "npx vite preview --config vite.preview.config.cjs --host 0.0.0.0 --port ${PORT:-5173}"]
