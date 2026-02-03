@@ -36,6 +36,6 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 5173,
     strictPort: false,
-    allowedHosts: true,
+    allowedHosts: ['.onrender.com', 'studioreact.onrender.com','.trywajooba.com'],
   },
 });
