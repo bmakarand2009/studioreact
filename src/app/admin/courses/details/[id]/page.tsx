@@ -672,7 +672,7 @@ const CourseDetailsPage = () => {
         {/* Tabs - scrollable on small screens */}
         <div className="bg-white dark:bg-slate-900 rounded-lg">
           <nav
-            className="flex flex-nowrap gap-1 overflow-x-auto overflow-y-hidden p-2 sm:p-3 -mx-3 px-3 sm:mx-0 sm:px-0"
+            className="flex flex-nowrap gap-1 overflow-x-auto overflow-y-hidden p-3 -mx-3 sm:mx-0 sm:px-3"
             style={{ WebkitOverflowScrolling: 'touch' }}
             aria-label="Tabs"
           >
