@@ -206,6 +206,8 @@ export function getItemList(
     newItem.productId = item.eventGuId;
     newItem.productName = item.eventName;
     newItem.productType = getProductType((item.paymentType as string) || '');
+    newItem.courseGuId = item.eventGuId;
+    newItem.courseType = newItem.productType;
   } else if (item.itemType === 'plan') {
     newItem.productId = (item.membershipDetails as Record<string, unknown>)?.subscriptionPlanId || item.planId || item.guId;
     newItem.productName = item.name;

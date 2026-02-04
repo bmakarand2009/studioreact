@@ -105,9 +105,10 @@ export function PaymentForm({
           const paymentMethodId = await stripeCard.getPaymentMethodId();
           if (!paymentMethodId) return;
           await onTransactionReady({
-            nonce: paymentMethodId,
+            methodId: paymentMethodId,
+            nonce: '',
             paymentType: PROVIDER_STRIPE,
-            methodType: 'card',
+            methodType: '',
           });
           return;
         }
@@ -155,16 +156,33 @@ export function PaymentForm({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             {hasCard && amount > 0 && (
-              <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-gray-200 p-3 dark:border-gray-700">
-                <input
-                  type="radio"
-                  name="paymentMethod"
-                  checked={paymentMethod === 'card'}
-                  onChange={() => setPaymentMethod('card')}
-                  className="h-4 w-4"
-                />
-                <span className="font-medium">Card</span>
-              </label>
+              <div>
+                <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-gray-200 p-3 dark:border-gray-700">
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    checked={paymentMethod === 'card'}
+                    onChange={() => setPaymentMethod('card')}
+                    className="h-4 w-4"
+                  />
+                  <span className="font-medium">Card</span>
+                </label>
+                {paymentMethod === 'card' && isStripeIntegrated && (
+                  <div className="mt-2 rounded-lg border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-800">
+                    <div
+                      ref={stripeCard.cardRef}
+                      id="payment-form-stripe-card"
+                      className="min-h-[40px]"
+                    />
+                    {!isStripeReady && (
+                      <p className="mt-2 text-sm text-gray-500">Loading secure payment form…</p>
+                    )}
+                    {stripeError && (
+                      <p className="mt-2 text-sm text-red-600 dark:text-red-400">{stripeError}</p>
+                    )}
+                  </div>
+                )}
+              </div>
             )}
             {showZero && (
               <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-gray-200 p-3 dark:border-gray-700">
@@ -227,22 +245,6 @@ export function PaymentForm({
               </label>
             )}
           </div>
-
-          {paymentMethod === 'card' && isStripeIntegrated && (
-            <div className="rounded-lg border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-800">
-              <div
-                ref={stripeCard.cardRef}
-                id="payment-form-stripe-card"
-                className="min-h-[40px]"
-              />
-              {!isStripeReady && (
-                <p className="mt-2 text-sm text-gray-500">Loading secure payment form…</p>
-              )}
-              {stripeError && (
-                <p className="mt-2 text-sm text-red-600 dark:text-red-400">{stripeError}</p>
-              )}
-            </div>
-          )}
 
           {(termsUrl || privacyUrl || termsLabel) && (
             <div className="flex items-start gap-2">

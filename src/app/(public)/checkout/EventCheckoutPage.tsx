@@ -40,7 +40,7 @@ export default function EventCheckoutPage() {
   });
 
   useEffect(() => {
-    if (!eventId || !itemId || !orgGuId) {
+    if (!eventId || !itemId) {
       setError('Missing event or membership.');
       setIsPageLoading(false);
       return;
@@ -49,7 +49,7 @@ export default function EventCheckoutPage() {
     setError(null);
     (async () => {
       try {
-        const tenantRes = tenant || (await appLoadService.initAppConfig());
+        const tenantRes = tenant ?? (await appLoadService.initAppConfig());
         if (!tenantRes?.orgGuId || cancelled) return;
         const eventData = await eventService.getPublicEventByUrl(tenantRes.orgGuId, eventId);
         if (cancelled) return;
@@ -124,7 +124,15 @@ export default function EventCheckoutPage() {
       if (!tenantId || !orgId || !event || !item) return;
       setIsSubmitting(true);
       try {
-        const itemList = getItemList(item, {});
+        const enrichedItem = {
+          ...item,
+          eventGuId: event.guId,
+          eventName: event.name,
+          orgId,
+          tenantId,
+          paymentType: (event.paymentType as string) || 'paid',
+        };
+        const itemList = getItemList(enrichedItem, {});
         const totalVal = typeof cartSummary.totalPrice === 'number'
           ? cartSummary.totalPrice.toFixed(2)
           : String(cartSummary.totalPrice);
