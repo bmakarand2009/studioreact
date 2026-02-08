@@ -21,6 +21,9 @@ import AdminSettingsPaymentPage from '@/app/admin/settings/payment/page';
 import AdminSettingsIntegrationsPage from '@/app/admin/settings/integrations/page';
 import AdminSettingsUsersPage from '@/app/admin/settings/users/page';
 import AdminSettingsRolesPage from '@/app/admin/settings/roles/page';
+import AdminMembershipPlansPage from '@/app/admin/membership-plans/page';
+import AddMembershipPlanGroupPage from '@/app/admin/membership-plans/add/page';
+import AdminMembershipPlanDetailsPage from '@/app/admin/membership-plans/[id]/page';
 import DashboardPage from '@/app/dashboard/page';
 import StudentDashboardPage from '@/app/student/dashboard/page';
 import StudentAssessmentsPage from '@/app/student/assessments/page';
@@ -72,6 +75,9 @@ const router = createBrowserRouter(
         { path: '/admin/events', element: <AdminEventsPage /> },
         { path: '/admin/events/add', element: <AddEditEventPage /> },
         { path: '/admin/events/edit/:id', element: <AddEditEventPage /> },
+        { path: '/admin/membership-plans', element: <AdminMembershipPlansPage /> },
+        { path: '/admin/membership-plans/add', element: <AddMembershipPlanGroupPage /> },
+        { path: '/admin/membership-plans/:id', element: <AdminMembershipPlanDetailsPage /> },
 
         // Admin Settings
         { path: '/admin/settings', element: <AdminSettingsPage /> },

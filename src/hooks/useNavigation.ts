@@ -106,7 +106,13 @@ function getDefaultAdminNavigation(): NavigationItem[] {
       icon: 'bar-chart',
       url: '/admin/reports',
     },
-
+    {
+      id: 'membership-plans',
+      title: 'Membership Plans',
+      type: 'item',
+      icon: 'credit-card',
+      url: '/admin/membership-plans',
+    },
     {
       id: 'settings',
       title: 'Settings',

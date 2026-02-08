@@ -19,7 +19,8 @@ import {
   Calendar,
   ShoppingCart,
   ClipboardCheck,
-  Pin
+  Pin,
+  CreditCard
 } from 'lucide-react';
 
 interface NavigationItem {
@@ -48,6 +49,7 @@ const iconMap: Record<string, React.ComponentType<any>> = {
   calendar: Calendar,
   'shopping-cart': ShoppingCart,
   'clipboard-check': ClipboardCheck,
+  'credit-card': CreditCard,
 };
 
 export default function VerticalNavigation({ navigation, user, onLogout, onClose, collapsed = false, onTogglePin, sidebarPinned = false }: VerticalNavigationProps) {
