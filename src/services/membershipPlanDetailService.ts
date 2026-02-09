@@ -58,7 +58,7 @@ class MembershipPlanDetailService {
    * @param isPublished - New publish status
    */
   async togglePublishStatus(id: string, isPublished: boolean): Promise<void> {
-    await apiService.patch(`/splan/planGroup/${id}`, { isPublished });
+    await apiService.put(`/splan/planGroup/${id}`, { isPublished });
   }
 
   /**
@@ -67,7 +67,7 @@ class MembershipPlanDetailService {
    * @param isPublished - New publish status
    */
   async togglePlanStatus(id: string, isPublished: boolean): Promise<void> {
-    await apiService.patch(`/splan/splan/${id}`, { isPublished });
+    await apiService.put(`/splan/splan/${id}`, { isPublished });
   }
 
   /**
@@ -76,7 +76,7 @@ class MembershipPlanDetailService {
    * @param isActive - New active status
    */
   async togglePricingStatus(id: string, isActive: boolean): Promise<void> {
-    await apiService.patch(`/splan/pricing/${id}`, { isActive });
+    await apiService.put(`/splan/pricing/${id}`, { isActive });
   }
 
   /**
@@ -104,7 +104,7 @@ class MembershipPlanDetailService {
    * @param planData - The plan data to update
    */
   async updatePlan(planId: string, planData: Partial<Plan>): Promise<Plan> {
-    const response = await apiService.patch<any>(`/splan/splan/${planId}`, planData);
+    const response = await apiService.put<any>(`/splan/splan/${planId}`, planData);
     return response as unknown as Plan;
   }
 
@@ -132,7 +132,7 @@ class MembershipPlanDetailService {
    * @param pricingData - The pricing data to update
    */
   async updatePricing(pricingId: string, pricingData: Partial<Pricing>): Promise<Pricing> {
-    const response = await apiService.patch<any>(`/splan/pricing/${pricingId}`, pricingData);
+    const response = await apiService.put<any>(`/splan/pricing/${pricingId}`, pricingData);
     return response as unknown as Pricing;
   }
 

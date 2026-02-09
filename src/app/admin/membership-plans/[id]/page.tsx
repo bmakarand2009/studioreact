@@ -40,6 +40,8 @@ const getTabFromSearch = (search: string | undefined | null): TabKey => {
 const formatDate = (date: string | number | undefined | null) => {
   if (!date) return '-';
   const num = Number(date);
+  if (num === 0) return '-';
+  
   let d: Date;
   
   if (!isNaN(num)) {
@@ -65,6 +67,9 @@ const formatExpiryDate = (expiry: string | number | undefined | null, start: str
   if (!expiry) return '-';
   const expiryNum = Number(expiry);
   
+  // Handle 0 explicitly
+  if (expiryNum === 0) return '-';
+  
   // If expiry is a small number (interpreted as seconds), e.g. < 10 years (315 million seconds)
   // It is likely a duration relative to the start date.
   if (!isNaN(expiryNum) && expiryNum > 0 && expiryNum < 315360000) {
@@ -74,7 +79,7 @@ const formatExpiryDate = (expiry: string | number | undefined | null, start: str
       if (!isNaN(startNum) && startNum > 0) {
           // If start is a number, normalize to milliseconds
           startMs = startNum < 100000000000 ? startNum * 1000 : startNum;
-      } else if (typeof start === 'string') {
+      } else if (typeof start === 'string' && start) {
           // If start is a string, parse it
           const startDate = new Date(start);
           if (!isNaN(startDate.getTime())) {
@@ -92,6 +97,10 @@ const formatExpiryDate = (expiry: string | number | undefined | null, start: str
             year: 'numeric'
           });
       }
+      
+      // If we have a duration but no start date, show the duration instead of 1970
+      const days = Math.round(expiryNum / 86400);
+      return `${days} Days`;
   }
   return formatDate(expiry);
 };
@@ -319,6 +328,9 @@ export default function AdminMembershipPlanDetailsPage() {
   const [isPricingDialogOpen, setIsPricingDialogOpen] = useState(false);
   const [editingPricing, setEditingPricing] = useState<Pricing | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [arePlansLoading, setArePlansLoading] = useState(false);
+  const [arePricingsLoading, setArePricingsLoading] = useState(false);
+  const [areMembersLoading, setAreMembersLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showArchivedPlans, setShowArchivedPlans] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState<{
@@ -338,6 +350,13 @@ export default function AdminMembershipPlanDetailsPage() {
 
   const handleTabChange = useCallback(
     (tab: TabKey) => {
+      if (tab === activeTab) return;
+
+      // Set loading state immediately to prevent flash of empty content
+      if (tab === 'plans') setArePlansLoading(true);
+      else if (tab === 'pricing') setArePricingsLoading(true);
+      else if (tab === 'members') setAreMembersLoading(true);
+
       setActiveTab(tab);
       const params = new URLSearchParams(location.search);
       params.set("tab", tab);
@@ -349,7 +368,7 @@ export default function AdminMembershipPlanDetailsPage() {
         { replace: true },
       );
     },
-    [location.pathname, location.search, navigate],
+    [location.pathname, location.search, navigate, activeTab],
   );
 
   // Fetch Group Details
@@ -371,12 +390,15 @@ export default function AdminMembershipPlanDetailsPage() {
   const fetchPlans = useCallback(async () => {
     if (!id) return;
     try {
+      setArePlansLoading(true);
       const plansData = await membershipPlanDetailService.getPlansByGroupId(id);
       const rawPlansData: any = plansData;
       const plansList = rawPlansData?.studioplans || rawPlansData?.data?.studioplans || [];
       setPlans(Array.isArray(plansList) ? plansList : []);
     } catch (err) {
       console.error('Failed to load plans:', err);
+    } finally {
+      setArePlansLoading(false);
     }
   }, [id]);
 
@@ -384,10 +406,13 @@ export default function AdminMembershipPlanDetailsPage() {
   const fetchPricings = useCallback(async () => {
     if (!id) return;
     try {
+      setArePricingsLoading(true);
       const pricingsData = await membershipPlanDetailService.getPricingsByGroupId(id);
       setPricings(pricingsData);
     } catch (err) {
       console.error('Failed to load pricings:', err);
+    } finally {
+      setArePricingsLoading(false);
     }
   }, [id]);
 
@@ -395,10 +420,13 @@ export default function AdminMembershipPlanDetailsPage() {
   const fetchMembers = useCallback(async () => {
     if (!id) return;
     try {
+      setAreMembersLoading(true);
       const membersData = await membershipPlanDetailService.getMembersByGroupId(id);
       setMembers(membersData);
     } catch (err) {
       console.error('Failed to load members:', err);
+    } finally {
+      setAreMembersLoading(false);
     }
   }, [id]);
 
@@ -490,16 +518,24 @@ export default function AdminMembershipPlanDetailsPage() {
       setPlans(prev => prev.map(p => 
         p._id === planId ? { ...p, isPublished: currentStatus } : p
       ));
+      throw err;
     }
   };
 
   const handleToggleGroupStatus = async (newStatus: boolean) => {
     if (!planGroup) return;
+    
+    // Optimistic update
+    const previousStatus = planGroup.isPublished;
+    setPlanGroup(prev => prev ? { ...prev, isPublished: newStatus } : null);
+
     try {
       await membershipPlanDetailService.togglePublishStatus(planGroup._id, newStatus);
-      setPlanGroup({ ...planGroup, isPublished: newStatus });
     } catch (err) {
       console.error('Failed to update group status', err);
+      // Revert
+      setPlanGroup(prev => prev ? { ...prev, isPublished: previousStatus } : null);
+      throw err;
     }
   };
 
@@ -517,6 +553,7 @@ export default function AdminMembershipPlanDetailsPage() {
       setPricings(prev => prev.map(p => 
         p._id === pricingId ? { ...p, isActive: currentStatus } : p
       ));
+      throw err;
     }
   };
 
@@ -721,6 +758,11 @@ export default function AdminMembershipPlanDetailsPage() {
 
         {/* Tab Content */}
         {activeTab === 'plans' && (
+          arePlansLoading ? (
+            <div className="flex justify-center py-12">
+              <div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          ) : (
           <div className="rounded-lg bg-white p-4 shadow-xl shadow-primary-500/5 dark:border-slate-800 dark:bg-slate-900 sm:p-6 lg:p-8">
             <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
@@ -779,9 +821,15 @@ export default function AdminMembershipPlanDetailsPage() {
               </DndContext>
             )}
           </div>
+          )
         )}
 
         {activeTab === 'pricing' && (
+          arePricingsLoading ? (
+            <div className="flex justify-center py-12">
+              <div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          ) : (
           <div className="rounded-lg bg-white p-4 shadow-xl shadow-primary-500/5 dark:border-slate-800 dark:bg-slate-900 sm:p-6 lg:p-8">
             <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
@@ -916,9 +964,15 @@ export default function AdminMembershipPlanDetailsPage() {
               </div>
             </div>
           </div>
+          )
         )}
 
         {activeTab === 'members' && (
+          areMembersLoading ? (
+            <div className="flex justify-center py-12">
+              <div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          ) : (
           <div className="rounded-lg bg-white p-4 shadow-xl shadow-primary-500/5 dark:border-slate-800 dark:bg-slate-900 sm:p-6 lg:p-8">
             <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
@@ -1005,6 +1059,7 @@ export default function AdminMembershipPlanDetailsPage() {
               </div>
             </div>
           </div>
+          )
         )}
       </div>
 

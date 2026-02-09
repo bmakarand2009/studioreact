@@ -56,7 +56,7 @@ class MembershipPlanService {
    * @param isPublished - New publish status
    */
   async togglePublishStatus(id: string, isPublished: boolean): Promise<void> {
-    await apiService.patch(`/splan/planGroup/${id}`, { isPublished });
+    await apiService.put(`/splan/planGroup/${id}`, { isPublished });
   }
 
   /**

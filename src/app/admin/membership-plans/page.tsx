@@ -104,16 +104,19 @@ export default function AdminMembershipPlansPage() {
   };
 
   const handleToggleStatus = async (id: string, newStatus: boolean) => {
+    // Optimistic update
+    setPlanGroups(prev => prev.map(p => 
+      p._id === id ? { ...p, isPublished: newStatus } : p
+    ));
+
     try {
       await membershipPlanService.togglePublishStatus(id, newStatus);
-      
-      // Update local state
-      setPlanGroups(prev => prev.map(p => 
-        p._id === id ? { ...p, isPublished: newStatus } : p
-      ));
     } catch (err) {
       console.error('Failed to toggle status:', err);
-      // Re-throw to let ToggleSlider handle the error state if needed
+      // Revert on error
+      setPlanGroups(prev => prev.map(p => 
+        p._id === id ? { ...p, isPublished: !newStatus } : p
+      ));
       throw err;
     }
   };

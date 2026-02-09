@@ -155,7 +155,7 @@ class SettingsService {
 
   async updateModuleSettings(moduleId: string, enabled: boolean): Promise<ModuleSettings> {
     return this.makeRequest<ModuleSettings>(`/rest/modules/settings/${moduleId}`, {
-      method: 'PATCH',
+      method: 'PUT',
       body: JSON.stringify({ enabled }),
     });
   }
