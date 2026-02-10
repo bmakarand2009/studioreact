@@ -163,9 +163,10 @@ export default function CourseCatalogPage() {
   }, [courses]);
 
   const handleCourseClick = (course: Course) => {
-    // Navigate to course detail page using course.url
-    if (course.url) {
-      navigate(course.url);
+    // Navigate using course URL handle (API expects url, not guId)
+    const urlHandle = course.url?.replace(/^\//, '') || course.guId;
+    if (urlHandle) {
+      navigate(`/courses/${encodeURIComponent(urlHandle)}`);
     }
   };
 

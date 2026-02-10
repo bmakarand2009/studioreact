@@ -217,6 +217,10 @@ export function getItemList(
     newItem.productId = cat?.guId;
     newItem.productName = cat?.name;
     newItem.productType = item.donationCategory ? 'donationevent' : 'paidevent';
+    if (!item.donationCategory && cat?.guId) {
+      newItem.courseGuId = cat.guId;
+      newItem.courseType = 'course';
+    }
   }
 
   const membershipDetails = (item.membershipDetails || {}) as Record<string, unknown>;

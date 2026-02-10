@@ -111,9 +111,10 @@ class CourseService {
   /**
    * Get public courses (no auth required)
    * @param tenantId - Tenant identifier
+   * @param signal - Optional AbortSignal to cancel the request (e.g. on effect cleanup)
    * @returns Promise with public courses
    */
-  async getPublicCourses(tenantId: string): Promise<Course[]> {
+  async getPublicCourses(tenantId: string, signal?: AbortSignal): Promise<Course[]> {
     const response = await fetch(
       `${this.baseUrl}/snode/icategory/public?tid=${tenantId}&type=service`,
       {
@@ -121,6 +122,7 @@ class CourseService {
         headers: {
           'Content-Type': 'application/json',
         },
+        signal,
       }
     );
 
@@ -130,6 +132,47 @@ class CourseService {
 
     const data = await response.json();
     return data;
+  }
+
+  /**
+   * Get public course detail with memberships (no auth required).
+   * API expects course URL handle (slug), not guId: snode/pcourse/{tenantId}/{courseUrlHandle}
+   * @param tenantId - Tenant identifier
+   * @param courseUrlHandle - Course URL handle (e.g. "my-course"), not guId
+   * @returns Promise with { data: course with memberships, template?, ... }
+   */
+  async getPublicCourseDetail(tenantId: string, courseUrlHandle: string, signal?: AbortSignal): Promise<{
+    data: Course & {
+      memberships?: Array<{
+        guId: string;
+        price?: number;
+        currency?: string;
+        membershipType?: string;
+        billingFrequency?: string;
+        [key: string]: unknown;
+      }>;
+      products?: unknown[];
+      teacher?: { fullName?: string };
+      template?: { unhtml?: string };
+      wemail?: {
+        author?: { displayTitle?: string; designation?: string; description?: string };
+      };
+    };
+  }> {
+    const response = await fetch(
+      `${this.baseUrl}/snode/pcourse/${tenantId}/${encodeURIComponent(courseUrlHandle)}`,
+      {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        signal,
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch course detail: ${response.status}`);
+    }
+
+    return response.json();
   }
 
   /**
