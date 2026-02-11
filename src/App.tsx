@@ -34,6 +34,7 @@ import StudentCoursesPage from '@/app/student/courses/page';
 import PublicAboutPage from '@/app/(public)/about/page';
 import PublicContactPage from '@/app/(public)/contact/page';
 import PublicCoursesPage from '@/app/(public)/courses/page';
+import PublicCourseDetailPage from '@/app/(public)/courses/[id]/page';
 import PublicEventsPage from '@/app/(public)/events/page';
 import PublicEventDetailPage from '@/app/(public)/events/[id]/page';
 import PublicMembershipsPage from '@/app/public/memberships/page';
@@ -105,6 +106,7 @@ const router = createBrowserRouter(
         { path: '/about', element: <PublicAboutPage /> },
         { path: '/contact', element: <PublicContactPage /> },
         { path: '/courses', element: <PublicCoursesPage /> },
+        { path: '/courses/:id', element: <PublicCourseDetailPage /> },
         { path: '/events', element: <PublicEventsPage /> },
         { path: '/events/:id', element: <PublicEventDetailPage /> },
         { path: '/memberships', element: <PublicMembershipsPage /> },

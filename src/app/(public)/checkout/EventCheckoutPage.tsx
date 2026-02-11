@@ -341,7 +341,7 @@ export default function EventCheckoutPage() {
               paymentKeys={paymentKeys}
               userContact={user}
               allowZero={true}
-              allowCash={true}
+              allowCash={false}
               submitLabel={total === 0 ? 'Complete registration' : 'Pay now'}
               onTransactionReady={handleTransactionReady}
               onError={setError}

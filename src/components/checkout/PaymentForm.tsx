@@ -170,6 +170,12 @@ export function PaymentForm({
                 </label>
                 {paymentMethod === 'card' && isStripeIntegrated && (
                   <div className="mt-2 rounded-lg border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-800">
+                    <div className="mb-3 flex flex-wrap items-center gap-2">
+                      <img src="https://passets.wajooba.ai/img/visa.png" alt="Visa" className="h-6 object-contain" />
+                      <img src="https://passets.wajooba.ai/img/mastercard.png" alt="Mastercard" className="h-6 object-contain" />
+                      <img src="https://passets.wajooba.ai/img/discover.png" alt="Discover" className="h-6 object-contain" />
+                      <img src="https://passets.wajooba.ai/img/american.png" alt="American Express" className="h-6 object-contain" />
+                    </div>
                     <div
                       ref={stripeCard.cardRef}
                       id="payment-form-stripe-card"
