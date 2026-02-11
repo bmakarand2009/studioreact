@@ -34,7 +34,19 @@ export const AddEditPricingDialog: React.FC<AddEditPricingDialogProps> = ({
       membershipEndsWithSubscription: true,
       expiryPeriod: 1,
       expiryPeriodType: 'months'
-    }
+    },
+    // Default values for new fields
+    discountPercent: 0,
+    isIntroMembership: false,
+    limitedSessionsCount: 0,
+    offerApplicableOnSubscriptionAmount: true,
+    productType: 'plan',
+    subscriptionBillingEndsAfter: 'manualRequest',
+    // Sync flat fields
+    expiryPeriod: 1,
+    expiryPeriodType: 'months',
+    membershipEndsWithSubscription: true,
+    isPlanRenew: false,
   });
 
   useEffect(() => {
@@ -64,7 +76,17 @@ export const AddEditPricingDialog: React.FC<AddEditPricingDialogProps> = ({
               membershipEndsWithSubscription: true,
               expiryPeriod: 1,
               expiryPeriodType: 'months'
-            }
+            },
+            discountPercent: 0,
+            isIntroMembership: false,
+            limitedSessionsCount: 0,
+            offerApplicableOnSubscriptionAmount: true,
+            productType: 'plan',
+            subscriptionBillingEndsAfter: 'manualRequest',
+            expiryPeriod: 1,
+            expiryPeriodType: 'months',
+            membershipEndsWithSubscription: true,
+            isPlanRenew: false,
         });
       }
       setStep(1);
@@ -109,6 +131,8 @@ export const AddEditPricingDialog: React.FC<AddEditPricingDialogProps> = ({
   const updateExpiry = (period: number, type: string) => {
     setFormData(prev => ({
       ...prev,
+      expiryPeriod: period,
+      expiryPeriodType: type,
       membershipEndDate: {
         ...prev.membershipEndDate!,
         expiryPeriod: period,
@@ -345,6 +369,7 @@ export const AddEditPricingDialog: React.FC<AddEditPricingDialogProps> = ({
                                     checked={!formData.membershipEndDate?.membershipEndsWithSubscription}
                                     onChange={() => setFormData(prev => ({
                                         ...prev,
+                                        membershipEndsWithSubscription: false,
                                         membershipEndDate: { ...prev.membershipEndDate!, membershipEndsWithSubscription: false }
                                     }))}
                                 />
@@ -394,6 +419,7 @@ export const AddEditPricingDialog: React.FC<AddEditPricingDialogProps> = ({
                                     checked={!!formData.membershipEndDate?.membershipEndsWithSubscription}
                                     onChange={() => setFormData(prev => ({
                                         ...prev,
+                                        membershipEndsWithSubscription: true,
                                         membershipEndDate: { ...prev.membershipEndDate!, membershipEndsWithSubscription: true }
                                     }))}
                                 />

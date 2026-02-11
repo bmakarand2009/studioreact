@@ -179,6 +179,7 @@ export const AddEditPlanDialog: React.FC<AddEditPlanDialogProps> = ({
         const newProduct: PlanProduct = {
           productCategory: category.name,
           productCategoryId: category.id,
+          productType: 'course',
         };
         return {
           ...prev,

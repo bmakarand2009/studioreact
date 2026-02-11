@@ -105,9 +105,15 @@ export function useStripeCard({ publishableKey, stripeAccount, enabled }: UseStr
     if (!Stripe || !mountEl) return;
 
     try {
+      let finalKey = publishableKey;
+      if (publishableKey?.startsWith('pk_live_') && window.location.protocol === 'http:') {
+        console.warn('Stripe Live keys require HTTPS. Using test key to prevent crash in development.');
+        finalKey = 'pk_test_TYooMQauvdEDq54NiTphI7jx';
+      }
+
       const stripe = stripeAccount
-        ? Stripe(publishableKey, { stripeAccount })
-        : Stripe(publishableKey);
+        ? Stripe(finalKey, { stripeAccount })
+        : Stripe(finalKey);
       stripeRef.current = stripe;
       const elements = stripe.elements();
       const card = elements.create('card', STRIPE_CARD_STYLE);
@@ -141,5 +147,24 @@ export function useStripeCard({ publishableKey, stripeAccount, enabled }: UseStr
     return result.paymentMethod?.id ?? null;
   }, []);
 
-  return { cardRef: setCardRef, isReady, error, getPaymentMethodId };
+  const confirmCardSetup = useCallback(async (clientSecret: string, data?: { billing_details?: Record<string, unknown> }) => {
+    const stripe = stripeRef.current;
+    const card = cardElementRef.current;
+    if (!stripe || !card) return { error: { message: 'Stripe not initialized' } };
+
+    // @ts-ignore - Stripe types are loose here
+    const result = await stripe.confirmCardSetup(clientSecret, {
+      payment_method: {
+        card,
+        billing_details: data?.billing_details,
+      },
+    });
+
+    if (result.error) {
+      setError(result.error.message ?? 'Card setup error');
+    }
+    return result;
+  }, []);
+
+  return { cardRef: setCardRef, isReady, error, getPaymentMethodId, confirmCardSetup };
 }

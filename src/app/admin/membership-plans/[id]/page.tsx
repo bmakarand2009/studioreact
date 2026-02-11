@@ -989,11 +989,10 @@ export default function AdminMembershipPlanDetailsPage() {
               <div className="overflow-x-auto">
                 <div className="min-w-[800px]">
                   <div className="grid grid-cols-12 gap-4 px-6 py-3 bg-gray-50 dark:bg-gray-800/50 text-xs font-semibold text-gray-400 uppercase tracking-wider border-y border-gray-100 dark:border-gray-700">
-                    <div className="col-span-3">Member</div>
-                    <div className="col-span-3">Plan Details</div>
+                    <div className="col-span-4">Member</div>
+                    <div className="col-span-4">Plan Details</div>
                     <div className="col-span-2">Status</div>
                     <div className="col-span-2">Start Date</div>
-                    <div className="col-span-2">Expiry Date</div>
                   </div>
 
                   <div className="divide-y divide-gray-100 dark:divide-gray-700">
@@ -1005,7 +1004,7 @@ export default function AdminMembershipPlanDetailsPage() {
                       members.map((member) => (
                         <div key={member._id} className="grid grid-cols-12 gap-4 px-6 py-4 items-center hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                           {/* Member Info */}
-                          <div className="col-span-3">
+                          <div className="col-span-4">
                             <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
                               {member.firstName} {member.lastName}
                             </h3>
@@ -1015,7 +1014,7 @@ export default function AdminMembershipPlanDetailsPage() {
                           </div>
 
                           {/* Plan Info */}
-                          <div className="col-span-3">
+                          <div className="col-span-4">
                             <p className="text-sm text-gray-900 dark:text-white font-medium">
                               {member.planId?.planName || member.pricingId?.planName || 'Unknown Plan'}
                             </p>
@@ -1042,13 +1041,6 @@ export default function AdminMembershipPlanDetailsPage() {
                           <div className="col-span-2">
                             <span className="text-sm text-gray-600 dark:text-gray-300">
                               {formatDate(member.purchaseDate)}
-                            </span>
-                          </div>
-
-                          {/* Expiry Date */}
-                          <div className="col-span-2">
-                            <span className="text-sm text-gray-600 dark:text-gray-300">
-                              {formatExpiryDate(member.expiryDate, member.purchaseDate)}
                             </span>
                           </div>
                         </div>

@@ -79,6 +79,12 @@ export interface Pricing {
     expiryPeriodType: string;
     membershipEndsWithSubscription: boolean;
   };
+  // Flat fields for API compatibility
+  expiryPeriod?: number;
+  expiryPeriodType?: string;
+  membershipEndsWithSubscription?: boolean;
+  isPlanRenew?: boolean;
+  limitedSessionsCount?: number;
 }
 
 export interface Member {

@@ -29,12 +29,15 @@ import StudentDashboardPage from '@/app/student/dashboard/page';
 import StudentAssessmentsPage from '@/app/student/assessments/page';
 import StudentCalendarPage from '@/app/student/calendar/page';
 import StudentStorePage from '@/app/student/store/page';
+import StudentMyPlanPage from '@/app/student/my-plan/page';
 import StudentCoursesPage from '@/app/student/courses/page';
 import PublicAboutPage from '@/app/(public)/about/page';
 import PublicContactPage from '@/app/(public)/contact/page';
 import PublicCoursesPage from '@/app/(public)/courses/page';
 import PublicEventsPage from '@/app/(public)/events/page';
 import PublicEventDetailPage from '@/app/(public)/events/[id]/page';
+import PublicMembershipsPage from '@/app/public/memberships/page';
+import MembershipCheckoutPage from '@/app/(public)/checkout/MembershipCheckoutPage';
 import DynamicPublicPage from '@/app/(public)/[slug]/page';
 import EventCheckoutPage from '@/app/(public)/checkout/EventCheckoutPage';
 import CourseCheckoutPage from '@/app/(public)/checkout/CourseCheckoutPage';
@@ -95,6 +98,7 @@ const router = createBrowserRouter(
         { path: '/student/assessments', element: <StudentAssessmentsPage /> },
         { path: '/student/calendar', element: <StudentCalendarPage /> },
         { path: '/student/store', element: <StudentStorePage /> },
+        { path: '/student/my-plan', element: <StudentMyPlanPage /> },
 
         // Public (specific routes first)
         { path: '/', element: <HomePage /> },
@@ -103,8 +107,10 @@ const router = createBrowserRouter(
         { path: '/courses', element: <PublicCoursesPage /> },
         { path: '/events', element: <PublicEventsPage /> },
         { path: '/events/:id', element: <PublicEventDetailPage /> },
+        { path: '/memberships', element: <PublicMembershipsPage /> },
 
         // Public checkout
+        { path: '/checkout/membership/:itemId', element: <MembershipCheckoutPage /> },
         { path: '/checkout/event/:eventId/:itemId/:schedule', element: <EventCheckoutPage /> },
         { path: '/checkout/course/:categoryId/:itemId', element: <CourseCheckoutPage /> },
 

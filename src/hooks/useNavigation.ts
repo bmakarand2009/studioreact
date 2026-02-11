@@ -154,6 +154,13 @@ function getDefaultStudentNavigation(): NavigationItem[] {
       url: '/student/store',
     },
     {
+      id: 'my-plan',
+      title: 'My Plan',
+      type: 'item',
+      icon: 'credit-card',
+      url: '/student/my-plan',
+    },
+    {
       id: 'assessments',
       title: 'Assessments',
       type: 'item',

@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { Card, CardHeader, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Checkbox } from '@/components/ui/Checkbox';
+import { Input } from '@/components/ui/Input';
 import { useStripeCard } from '@/hooks/useStripeCard';
 import type { PaymentKey, PaymentTransactionInfo, CheckoutUserForm } from '@/types/checkout';
 import { PAYMENT_PROVIDERS } from '@/types/checkout';
@@ -289,7 +290,7 @@ export function PaymentForm({
 
           <Button
             type="submit"
-            className="w-full"
+            className="w-full text-lg py-4 rounded-xl"
             disabled={
               disabled ||
               isSubmitting ||
