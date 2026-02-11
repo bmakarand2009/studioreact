@@ -90,7 +90,7 @@ export const eventService = {
    * Update event published status
    */
   async updateEventStatus(guId: string, isPublished: boolean): Promise<void> {
-    await apiService.patch<void>(`/snode/erule/${guId}/status`, { isPublished });
+    await apiService.put<void>(`/snode/erule/${guId}/status`, { isPublished });
   },
 
   /**

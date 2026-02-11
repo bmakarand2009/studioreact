@@ -23,9 +23,7 @@ try {
   console.log('main.tsx: React root created, rendering App...');
   
   root.render(
-    <React.StrictMode>
-      <App />
-    </React.StrictMode>
+    <App />
   );
   
   console.log('main.tsx: App rendered successfully');

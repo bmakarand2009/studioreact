@@ -106,7 +106,13 @@ function getDefaultAdminNavigation(): NavigationItem[] {
       icon: 'bar-chart',
       url: '/admin/reports',
     },
-
+    {
+      id: 'membership-plans',
+      title: 'Membership Plans',
+      type: 'item',
+      icon: 'credit-card',
+      url: '/admin/membership-plans',
+    },
     {
       id: 'settings',
       title: 'Settings',
@@ -146,6 +152,13 @@ function getDefaultStudentNavigation(): NavigationItem[] {
       type: 'item',
       icon: 'shopping-cart',
       url: '/student/store',
+    },
+    {
+      id: 'my-plan',
+      title: 'My Plan',
+      type: 'item',
+      icon: 'credit-card',
+      url: '/student/my-plan',
     },
     {
       id: 'assessments',
