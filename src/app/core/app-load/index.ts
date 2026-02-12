@@ -323,6 +323,26 @@ export class AppLoadService {
   }
 
   /**
+   * Ping the tenant endpoint to check if the server is reachable.
+   * Does not mutate hasError or tenant details. Use for connection check on error-connection page.
+   * @returns true if ping succeeds, false otherwise
+   */
+  public async checkConnection(): Promise<boolean> {
+    try {
+      const devModeValue = Number(import.meta.env.VITE_IS_DEV_MODE);
+      const isDevMode = devModeValue === 0;
+      const tenantName = isDevMode
+        ? (import.meta.env.VITE_DEV_TENANT_NAME as string | undefined) || 'marksampletest'
+        : this._hostId;
+      const url = `${environment.api.baseUrl}/snode/tenant/ping?name=${tenantName}`;
+      const response = await fetch(url);
+      return response.ok;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
    * Get current tenant ID
    */
   public get tenantId(): string | null {

@@ -1,19 +1,48 @@
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
-import { RefreshCw, ServerOff } from 'lucide-react';
+import { RefreshCw, ServerOff, Loader2 } from 'lucide-react';
 import { appLoadService } from '@/app/core/app-load';
 
 /**
- * Error page shown when connection to Wajooba servers fails
+ * Error page shown when connection to Wajooba servers fails.
+ * On mount, runs one ping check: if the server is reachable, redirects to home;
+ * otherwise shows this page. No retry loop.
  */
 export default function ConnectionErrorPage() {
   const navigate = useNavigate();
+  const [isChecking, setIsChecking] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    appLoadService.checkConnection().then((ok) => {
+      if (cancelled) return;
+      setIsChecking(false);
+      if (ok) {
+        appLoadService.clearError();
+        navigate('/', { replace: true });
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [navigate]);
 
   const handleRetry = () => {
-    // Clear error state and navigate to homepage which will trigger re-initialization
     appLoadService.clearError();
     window.location.href = '/';
   };
+
+  if (isChecking) {
+    return (
+      <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center px-4">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" aria-hidden />
+          <p className="text-gray-600 dark:text-gray-400">Checking connection…</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center px-4 relative pb-32">
