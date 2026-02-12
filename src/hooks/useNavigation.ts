@@ -86,6 +86,13 @@ function getDefaultAdminNavigation(): NavigationItem[] {
       url: '/admin/users',
     },
     {
+      id: 'classes',
+      title: 'Classes',
+      type: 'item',
+      icon: 'presentation',
+      url: '/admin/classes',
+    },
+    {
       id: 'courses',
       title: 'Courses',
       type: 'item',

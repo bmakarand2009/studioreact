@@ -21,6 +21,7 @@ import AdminSettingsPaymentPage from '@/app/admin/settings/payment/page';
 import AdminSettingsIntegrationsPage from '@/app/admin/settings/integrations/page';
 import AdminSettingsUsersPage from '@/app/admin/settings/users/page';
 import AdminSettingsRolesPage from '@/app/admin/settings/roles/page';
+import AdminClassesPage from '@/app/admin/classes/page';
 import AdminMembershipPlansPage from '@/app/admin/membership-plans/page';
 import AddMembershipPlanGroupPage from '@/app/admin/membership-plans/add/page';
 import AdminMembershipPlanDetailsPage from '@/app/admin/membership-plans/[id]/page';
@@ -37,6 +38,7 @@ import PublicCoursesPage from '@/app/(public)/courses/page';
 import PublicCourseDetailPage from '@/app/(public)/courses/[id]/page';
 import PublicEventsPage from '@/app/(public)/events/page';
 import PublicEventDetailPage from '@/app/(public)/events/[id]/page';
+import PublicCalendarPage from '@/app/(public)/calendar/page';
 import PublicMembershipsPage from '@/app/public/memberships/page';
 import MembershipCheckoutPage from '@/app/(public)/checkout/MembershipCheckoutPage';
 import DynamicPublicPage from '@/app/(public)/[slug]/page';
@@ -76,6 +78,7 @@ const router = createBrowserRouter(
         { path: '/admin/courses/add', element: <AddEditCoursePage /> },
         { path: '/admin/courses/:id', element: <CourseDetailsPage /> },
         { path: '/admin/courses/edit/:id', element: <AddEditCoursePage /> },
+        { path: '/admin/classes', element: <AdminClassesPage /> },
         { path: '/admin/events', element: <AdminEventsPage /> },
         { path: '/admin/events/add', element: <AddEditEventPage /> },
         { path: '/admin/events/edit/:id', element: <AddEditEventPage /> },
@@ -109,6 +112,7 @@ const router = createBrowserRouter(
         { path: '/courses/:id', element: <PublicCourseDetailPage /> },
         { path: '/events', element: <PublicEventsPage /> },
         { path: '/events/:id', element: <PublicEventDetailPage /> },
+        { path: '/calendar', element: <PublicCalendarPage /> },
         { path: '/memberships', element: <PublicMembershipsPage /> },
 
         // Public checkout

@@ -22,3 +22,7 @@ export { ConfirmationDialog, type ConfirmationDialogProps, type ConfirmationDial
 // Image Lightbox
 export { ImageLightbox, type ImageLightboxProps } from './ImageLightbox';
 
+// Calendar & Layout
+export { Separator } from './separator';
+export { FullScreenCalendar } from './fullscreen-calendar';
+

@@ -161,7 +161,7 @@ export default function WajoobaAdminLayout({ children }: WajoobaAdminLayoutProps
   return (
     <div
       className={cn(
-        'flex h-screen bg-gray-100 dark:bg-gray-900 transition-[padding] duration-300',
+        'flex min-h-screen bg-gray-100 dark:bg-gray-900 transition-[padding] duration-300',
         (mediaSliderOpen || aiSidebarOpen) ? 'lg:pr-[420px]' : '',
       )}
       data-sidebar-mode={(mediaSliderOpen || aiSidebarOpen) ? 'folded' : sidebarPinned ? 'pinned' : 'hover'}
@@ -208,14 +208,16 @@ export default function WajoobaAdminLayout({ children }: WajoobaAdminLayoutProps
           navigation={memoizedNavigation}
         />
 
-        {/* Page Content */}
+        {/* Page Content - only as tall as content when short; scrolls when long. Spacer keeps footer at bottom. */}
         <main
           className={cn(
-            'flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900 transition-[padding] duration-300',
+            'min-h-0 max-h-[calc(100vh-7rem)] overflow-y-auto bg-gray-50 dark:bg-gray-900 transition-[padding] duration-300',
           )}
         >
           {children}
         </main>
+
+        <div className="flex-1 min-h-0" aria-hidden />
 
         {/* Footer */}
         <footer className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-3">

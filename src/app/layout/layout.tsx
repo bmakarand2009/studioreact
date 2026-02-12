@@ -132,6 +132,7 @@ const getRouteLayout = (path: string): string | null => {
     '/admin': 'wajooba-admin',
     '/admin/dashboard': 'wajooba-admin',
     '/admin/users': 'wajooba-admin',
+    '/admin/classes': 'wajooba-admin',
     '/admin/courses': 'wajooba-admin',
     '/admin/settings': 'wajooba-admin',
     
