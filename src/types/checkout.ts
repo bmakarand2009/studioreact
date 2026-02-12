@@ -5,7 +5,6 @@ export const PAYMENT_PROVIDERS = {
   PSPRING: 'pspring',
   RAZORPAY: 'razorpay',
   PHONEPE: 'phonepe',
-  SWIREPAY: 'swirepay',
   NONE: 'none',
 } as const;
 
@@ -15,11 +14,14 @@ export interface PaymentKey {
   provider: string;
   apiKey?: string;
   clientId?: string;
+  clientIdTest?: string;
   isTestMode?: boolean;
   testApiKey?: string;
 }
 
 export interface ItemTenantDto {
+  tid?: string;
+  orgId?: string;
   tax?: number;
   taxPercent?: number;
   cardFees?: number;
@@ -55,6 +57,10 @@ export interface CheckoutUserForm {
   phone: string;
   note?: string;
   address?: string | { line1: string };
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  country?: string;
   otherPrice?: number;
   guardians?: unknown[];
   customFields?: CustomFieldValue[];
@@ -160,6 +166,7 @@ export interface PlanCheckoutPayload {
   firstName: string;
   lastName: string;
   email: string;
+  phone?: string;
   planId: string;
   pricingId: string;
   productId: string;

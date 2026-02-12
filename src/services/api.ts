@@ -128,10 +128,13 @@ class ApiService {
     return response.data;
   }
 
+  /* 
+  // PATCH method is disabled as per project requirements (use PUT instead)
   async patch<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
     const response = await this.api.patch<ApiResponse<T>>(url, data, config);
     return response.data;
   }
+  */
 
   async delete<T>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
     const response = await this.api.delete<ApiResponse<T>>(url, config);

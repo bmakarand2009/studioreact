@@ -12,6 +12,7 @@ export interface CheckoutUserFormProps {
   onCustomFieldChange?: (guId: string, value: string) => void;
   disabled?: boolean;
   showTitle?: boolean;
+  showAddress?: boolean;
   className?: string;
 }
 
@@ -23,6 +24,7 @@ export function CheckoutUserForm({
   onCustomFieldChange,
   disabled = false,
   showTitle = true,
+  showAddress = false,
   className,
 }: CheckoutUserFormProps) {
   const update = (field: keyof CheckoutUserFormType, val: string | undefined) => {
@@ -76,6 +78,49 @@ export function CheckoutUserForm({
         disabled={disabled}
         placeholder="Phone"
       />
+      {showAddress && (
+        <div className="space-y-4">
+          <Input
+            label="Address"
+            value={typeof value.address === 'string' ? value.address : value.address?.line1 ?? ''}
+            onChange={(e) => update('address', e.target.value)}
+            disabled={disabled}
+            placeholder="Street address"
+          />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Input
+              label="City"
+              value={value.city ?? ''}
+              onChange={(e) => update('city', e.target.value)}
+              disabled={disabled}
+              placeholder="City"
+            />
+            <Input
+              label="State / Province"
+              value={value.state ?? ''}
+              onChange={(e) => update('state', e.target.value)}
+              disabled={disabled}
+              placeholder="State"
+            />
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Input
+              label="ZIP / Postal Code"
+              value={value.zipCode ?? ''}
+              onChange={(e) => update('zipCode', e.target.value)}
+              disabled={disabled}
+              placeholder="ZIP code"
+            />
+            <Input
+              label="Country"
+              value={value.country ?? ''}
+              onChange={(e) => update('country', e.target.value)}
+              disabled={disabled}
+              placeholder="Country"
+            />
+          </div>
+        </div>
+      )}
       <Textarea
         label="Notes (optional)"
         value={value.note ?? ''}

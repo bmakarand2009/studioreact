@@ -190,7 +190,7 @@ class CourseService {
     const response = await fetch(
       `${this.baseUrl}/snode/icategory/${courseId}`,
       {
-        method: 'PATCH',
+        method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
