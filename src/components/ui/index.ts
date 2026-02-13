@@ -24,5 +24,6 @@ export { ImageLightbox, type ImageLightboxProps } from './ImageLightbox';
 
 // Calendar & Layout
 export { Separator } from './separator';
-export { FullScreenCalendar } from './fullscreen-calendar';
+export { FullScreenCalendar, type CalendarViewMode } from './fullscreen-calendar';
+export { WeekViewCalendar } from './week-view-calendar';
 
