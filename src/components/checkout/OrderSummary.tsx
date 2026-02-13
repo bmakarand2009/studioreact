@@ -109,7 +109,7 @@ export function OrderSummary({
             <button
               type="button"
               onClick={onResetOffer}
-              className="text-primary-600 hover:underline dark:text-primary-400"
+              className="text-primary-500 hover:underline dark:text-primary-400"
             >
               Remove
             </button>

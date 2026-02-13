@@ -1080,7 +1080,7 @@ const AddEditEventPage = () => {
             <Button
               variant="secondary"
               size="sm"
-              className="flex items-center gap-2 rounded-lg border border-primary-200 bg-primary-50 text-primary-600 hover:bg-primary-100 dark:border-primary-800 dark:bg-primary-900/20 dark:text-primary-300"
+              className="flex items-center gap-2 rounded-lg border border-primary-200 bg-primary-50 text-primary-500 hover:bg-primary-100 dark:border-primary-800 dark:bg-primary-900/20 dark:text-primary-300"
               onClick={addScheduleRow}
             >
               <PlusCircle className="h-4 w-4" /> Add slot
@@ -1128,7 +1128,7 @@ const AddEditEventPage = () => {
             <span
               className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold ${
                 activeStep === 0
-                  ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300'
+                  ? 'bg-primary-100 text-primary-500 dark:bg-primary-900/30 dark:text-primary-300'
                   : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
               }`}
             >
@@ -1304,7 +1304,7 @@ const AddEditEventPage = () => {
                         type="checkbox"
                         checked={formState.isMultiDayEvent}
                         onChange={(event) => updateFormState({ isMultiDayEvent: event.target.checked })}
-                        className="h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
+                        className="h-4 w-4 rounded border-slate-300 text-primary-500 focus:ring-primary-500"
                       />
                       <label htmlFor="multi-day-toggle" className="text-xs font-medium text-slate-600 dark:text-slate-300">
                         Multi Slot Event
@@ -1325,8 +1325,8 @@ const AddEditEventPage = () => {
                       type="button"
                       className={`flex items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-semibold transition ${
                         formState.isInPersonMeeting && !formState.isOnlineMeeting
-                          ? 'border-primary-300 bg-primary-50 text-primary-600 shadow-sm dark:border-primary-700 dark:bg-primary-900/30 dark:text-primary-300'
-                          : 'border-slate-200 text-slate-600 hover:border-primary-200 hover:text-primary-600 dark:border-slate-700 dark:text-slate-300 dark:hover:border-primary-700 dark:hover:text-primary-300'
+                          ? 'border-primary-300 bg-primary-50 text-primary-500 shadow-sm dark:border-primary-500 dark:bg-primary-900/30 dark:text-primary-300'
+                          : 'border-slate-200 text-slate-600 hover:border-primary-200 hover:text-primary-500 dark:border-slate-700 dark:text-slate-300 dark:hover:border-primary-500 dark:hover:text-primary-300'
                       }`}
                       onClick={() => handleMeetingMode('inperson')}
                     >
@@ -1336,8 +1336,8 @@ const AddEditEventPage = () => {
                       type="button"
                       className={`flex items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-semibold transition ${
                         !formState.isInPersonMeeting && formState.isOnlineMeeting
-                          ? 'border-primary-300 bg-primary-50 text-primary-600 shadow-sm dark:border-primary-700 dark:bg-primary-900/30 dark:text-primary-300'
-                          : 'border-slate-200 text-slate-600 hover:border-primary-200 hover:text-primary-600 dark:border-slate-700 dark:text-slate-300 dark:hover:border-primary-700 dark:hover:text-primary-300'
+                          ? 'border-primary-300 bg-primary-50 text-primary-500 shadow-sm dark:border-primary-500 dark:bg-primary-900/30 dark:text-primary-300'
+                          : 'border-slate-200 text-slate-600 hover:border-primary-200 hover:text-primary-500 dark:border-slate-700 dark:text-slate-300 dark:hover:border-primary-500 dark:hover:text-primary-300'
                       }`}
                       onClick={() => handleMeetingMode('online')}
                     >
@@ -1347,8 +1347,8 @@ const AddEditEventPage = () => {
                       type="button"
                       className={`flex items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-semibold transition ${
                         formState.isInPersonMeeting && formState.isOnlineMeeting
-                          ? 'border-primary-300 bg-primary-50 text-primary-600 shadow-sm dark:border-primary-700 dark:bg-primary-900/30 dark:text-primary-300'
-                          : 'border-slate-200 text-slate-600 hover:border-primary-200 hover:text-primary-600 dark:border-slate-700 dark:text-slate-300 dark:hover:border-primary-700 dark:hover:text-primary-300'
+                          ? 'border-primary-300 bg-primary-50 text-primary-500 shadow-sm dark:border-primary-500 dark:bg-primary-900/30 dark:text-primary-300'
+                          : 'border-slate-200 text-slate-600 hover:border-primary-200 hover:text-primary-500 dark:border-slate-700 dark:text-slate-300 dark:hover:border-primary-500 dark:hover:text-primary-300'
                       }`}
                       onClick={() => handleMeetingMode('both')}
                     >
@@ -1482,7 +1482,7 @@ const AddEditEventPage = () => {
                             href={eventData.onlineMeetJoinUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-sm text-primary-600 underline dark:text-primary-400"
+                            className="text-sm text-primary-500 underline dark:text-primary-400"
                           >
                             {eventData.onlineMeetJoinUrl}
                           </a>
@@ -1490,7 +1490,7 @@ const AddEditEventPage = () => {
                         <Button
                           variant="secondary"
                           size="sm"
-                          className="rounded-lg border border-primary-200 bg-primary-50 px-3 py-1.5 text-xs font-semibold text-primary-600 hover:bg-primary-100 dark:border-primary-800 dark:bg-primary-900/20 dark:text-primary-300"
+                          className="rounded-lg border border-primary-200 bg-primary-50 px-3 py-1.5 text-xs font-semibold text-primary-500 hover:bg-primary-100 dark:border-primary-800 dark:bg-primary-900/20 dark:text-primary-300"
                           onClick={handleRegenerateMeetingUrl}
                           disabled={isSaving}
                         >
@@ -1510,7 +1510,7 @@ const AddEditEventPage = () => {
                               type="radio"
                               checked={formState.isAutoGenerateMeetingLink}
                               onChange={() => updateFormState({ isAutoGenerateMeetingLink: true })}
-                              className="h-4 w-4 text-primary-600 focus:ring-primary-500"
+                              className="h-4 w-4 text-primary-500 focus:ring-primary-500"
                             />
                             Auto-generate link
                           </label>
@@ -1519,7 +1519,7 @@ const AddEditEventPage = () => {
                               type="radio"
                               checked={!formState.isAutoGenerateMeetingLink}
                               onChange={() => updateFormState({ isAutoGenerateMeetingLink: false })}
-                              className="h-4 w-4 text-primary-600 focus:ring-primary-500"
+                              className="h-4 w-4 text-primary-500 focus:ring-primary-500"
                             />
                             Enter link manually
                           </label>
@@ -1601,7 +1601,7 @@ const AddEditEventPage = () => {
                       type="button"
                       className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
                         formState.authorType === 'host'
-                          ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/30'
+                          ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30'
                           : 'text-slate-600 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-100'
                       }`}
                       onClick={() => updateFormState({ authorType: 'host', isTeacher: false })}
@@ -1612,7 +1612,7 @@ const AddEditEventPage = () => {
                       type="button"
                       className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
                         formState.authorType === 'organizer'
-                          ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/30'
+                          ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30'
                           : 'text-slate-600 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-100'
                       }`}
                       onClick={() => updateFormState({ authorType: 'organizer', isTeacher: true })}
@@ -1708,7 +1708,7 @@ const AddEditEventPage = () => {
                         onChange={(event) => updateFormState({ isFeaturedClass: event.target.checked })}
                         className="peer sr-only"
                       />
-                      <div className="peer h-6 w-11 rounded-full bg-slate-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-slate-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:bg-slate-700 dark:peer-focus:ring-primary-800"></div>
+                      <div className="peer h-6 w-11 rounded-full bg-slate-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-slate-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary-500 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:bg-slate-700 dark:peer-focus:ring-primary-800"></div>
                     </label>
                   </div>
                 </div>
@@ -1721,12 +1721,12 @@ const AddEditEventPage = () => {
                       {formState.eventTags.map((tag) => (
                         <span
                           key={tag}
-                          className="inline-flex items-center gap-2 rounded-full bg-primary-100 px-3 py-1 text-xs font-semibold text-primary-700 dark:bg-primary-900/30 dark:text-primary-300"
+                          className="inline-flex items-center gap-2 rounded-full bg-primary-100 px-3 py-1 text-xs font-semibold text-primary-500 dark:bg-primary-900/30 dark:text-primary-300"
                         >
                           <Tag className="h-3 w-3" /> {tag}
                           <button
                             type="button"
-                            className="text-primary-700 hover:text-primary-900 dark:text-primary-300 dark:hover:text-primary-100"
+                            className="text-primary-500 hover:text-primary-900 dark:text-primary-300 dark:hover:text-primary-100"
                             onClick={() => handleTagRemove(tag)}
                           >
                             ×
@@ -1791,7 +1791,7 @@ const AddEditEventPage = () => {
                 Cancel
               </Button>
               <Button
-                className="rounded-xl bg-primary-600 px-6 py-2 text-sm font-semibold text-white shadow-md shadow-primary-500/30 transition hover:bg-primary-700"
+                className="rounded-xl bg-primary-500 px-6 py-2 text-sm font-semibold text-white shadow-md shadow-primary-500/30 transition hover:bg-primary-500"
                 onClick={handleSaveStepOne}
                 disabled={isSaving || aiLoadingField !== null}
               >
@@ -1818,7 +1818,7 @@ const AddEditEventPage = () => {
                 </div>
                 <Button
                   variant="secondary"
-                  className="flex items-center gap-2 rounded-xl border border-primary-200 bg-primary-50 px-4 py-2 text-sm font-semibold text-primary-600 hover:bg-primary-100 dark:border-primary-800 dark:bg-primary-900/20 dark:text-primary-300 dark:hover:bg-primary-900/30"
+                  className="flex items-center gap-2 rounded-xl border border-primary-200 bg-primary-50 px-4 py-2 text-sm font-semibold text-primary-500 hover:bg-primary-100 dark:border-primary-800 dark:bg-primary-900/20 dark:text-primary-300 dark:hover:bg-primary-900/30"
                   onClick={handleRegenerateTemplate}
                   disabled={isTemplateSaving}
                 >
@@ -1860,7 +1860,7 @@ const AddEditEventPage = () => {
               </Button>
               <Button
                 variant="secondary"
-                className="rounded-xl border border-primary-200 bg-primary-50 px-6 py-2 text-sm font-semibold text-primary-600 hover:bg-primary-100 dark:border-primary-800 dark:bg-primary-900/20 dark:text-primary-300 dark:hover:bg-primary-900/30"
+                className="rounded-xl border border-primary-200 bg-primary-50 px-6 py-2 text-sm font-semibold text-primary-500 hover:bg-primary-100 dark:border-primary-800 dark:bg-primary-900/20 dark:text-primary-300 dark:hover:bg-primary-900/30"
                 onClick={() => handleTemplateSave(false)}
                 disabled={isTemplateSaving}
               >
@@ -1873,7 +1873,7 @@ const AddEditEventPage = () => {
                 )}
               </Button>
               <Button
-                className="rounded-xl bg-primary-600 px-6 py-2 text-sm font-semibold text-white shadow-md shadow-primary-500/30 transition hover:bg-primary-700"
+                className="rounded-xl bg-primary-500 px-6 py-2 text-sm font-semibold text-white shadow-md shadow-primary-500/30 transition hover:bg-primary-500"
                 onClick={() => handleTemplateSave(true)}
                 disabled={isTemplateSaving}
               >

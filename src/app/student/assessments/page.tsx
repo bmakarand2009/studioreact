@@ -21,7 +21,7 @@ function StudentAssessments() {
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 bg-primary-600 rounded-xl flex items-center justify-center">
+            <div className="w-12 h-12 bg-primary-500 rounded-xl flex items-center justify-center">
               <ClipboardCheck className="h-6 w-6 text-white" />
             </div>
             <div>
@@ -169,7 +169,7 @@ function StudentAssessments() {
                       
                       <div className="flex justify-end space-x-2">
                         {assessment.status === 'pending' && (
-                          <button className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
+                          <button className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-500 transition-colors">
                             Start Assessment
                           </button>
                         )}
@@ -230,7 +230,7 @@ function StudentAssessments() {
               </div>
               <div className="p-6">
                 <div className="space-y-3">
-                  <button className="w-full flex items-center justify-center px-4 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
+                  <button className="w-full flex items-center justify-center px-4 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-500 transition-colors">
                     <ClipboardCheck className="h-5 w-5 mr-2" />
                     Take Practice Test
                   </button>

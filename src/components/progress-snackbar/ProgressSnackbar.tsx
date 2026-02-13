@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { uploadService, FileUploadStatus } from '@/services/uploadService';
-import { X, CheckCircle2, AlertCircle, PauseCircle } from 'lucide-react';
+import { Check, CheckCircle2, AlertCircle, PauseCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 /**
@@ -45,7 +45,11 @@ export function ProgressSnackbar() {
     
     switch (status) {
       case 'completed':
-        return <CheckCircle2 className={`h-4 w-4 ${isDarkMode ? 'text-white' : 'text-green-600'}`} />;
+        return (
+          <div className="w-5 h-5 rounded-full flex items-center justify-center" style={{ backgroundColor: '#0055a6' }}>
+            <Check className="h-3 w-3 text-white stroke-[3]" strokeWidth={3} />
+          </div>
+        );
       case 'failed':
         return <AlertCircle className={`h-4 w-4 ${isDarkMode ? 'text-white' : 'text-red-600'}`} />;
       default:
@@ -92,12 +96,16 @@ export function ProgressSnackbar() {
 
   return (
     <div className="fixed top-4 right-4 z-[9999] w-full max-w-md">
-      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
-        <div className="p-4 space-y-2 max-h-96 overflow-y-auto">
+      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col min-h-[120px] max-h-[320px]">
+        {/* Scrollable content - stable height prevents scrollbar pop-in/out */}
+        <div
+          className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 pt-4 space-y-2"
+          style={{ scrollbarGutter: 'stable' }}
+        >
           {fileStatuses.map((file) => (
             <div
               key={file.uuid}
-              className="flex items-center justify-between p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20"
+              className="flex items-center justify-between p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 shrink-0"
             >
               <span
                 className="flex-1 text-sm font-medium text-slate-700 dark:text-slate-300 truncate mr-3"
@@ -105,7 +113,7 @@ export function ProgressSnackbar() {
               >
                 {file.filename}
               </span>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 shrink-0">
                 {/* Progress Circle with Tooltip */}
                 <div className="relative w-7 h-7 flex items-center justify-center group">
                   <div
@@ -131,13 +139,13 @@ export function ProgressSnackbar() {
           ))}
         </div>
 
-        {/* Close Button */}
-        <div className="flex justify-end p-3 border-t border-slate-200 dark:border-slate-700">
+        {/* Hide button at bottom - no footer styling */}
+        <div className="flex justify-end p-3 shrink-0">
           <button
             onClick={handleClose}
             className="px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-md transition-colors"
           >
-            Close
+            Hide
           </button>
         </div>
       </div>

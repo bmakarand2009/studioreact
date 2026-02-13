@@ -124,7 +124,7 @@ export default function ContactPage() {
               <div className="space-y-4">
                 <div className="flex items-start space-x-4">
                   <div className="flex-shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
-                    <Mail className="h-6 w-6 text-primary-600 dark:text-primary-400" />
+                    <Mail className="h-6 w-6 text-primary-500 dark:text-primary-400" />
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Email</h3>
@@ -176,15 +176,15 @@ export default function ContactPage() {
               </h3>
               <div className="space-y-3">
                 <div className="flex items-center space-x-3 text-sm text-gray-600 dark:text-gray-300">
-                  <MessageCircle className="h-4 w-4 text-primary-600" />
+                  <MessageCircle className="h-4 w-4 text-primary-500" />
                   <span>Live Chat available during business hours</span>
                 </div>
                 <div className="flex items-center space-x-3 text-sm text-gray-600 dark:text-gray-300">
-                  <Globe className="h-4 w-4 text-primary-600" />
+                  <Globe className="h-4 w-4 text-primary-500" />
                   <span>Check our Help Center for FAQs</span>
                 </div>
                 <div className="flex items-center space-x-3 text-sm text-gray-600 dark:text-gray-300">
-                  <Users className="h-4 w-4 text-primary-600" />
+                  <Users className="h-4 w-4 text-primary-500" />
                   <span>Join our community forum</span>
                 </div>
               </div>

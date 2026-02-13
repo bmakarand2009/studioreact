@@ -259,7 +259,7 @@ export const BatchManagementDialog = ({
                             setSelectedBatchId(batch.guId);
                             handleChangeCourseBatch(batch.guId);
                           }}
-                          className="h-4 w-4 text-primary-600 focus:ring-primary-500"
+                          className="h-4 w-4 text-primary-500 focus:ring-primary-500"
                         />
                         <label
                           htmlFor={`batch-${batch.guId}`}

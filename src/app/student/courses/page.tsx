@@ -138,7 +138,7 @@ function StudentCoursesPage() {
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-1.5">
                   <div
-                    className="bg-primary-600 h-1.5 rounded-full transition-all duration-300"
+                    className="bg-primary-500 h-1.5 rounded-full transition-all duration-300"
                     style={{ width: `${course.progress}%` }}
                   />
                 </div>

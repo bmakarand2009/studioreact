@@ -73,6 +73,8 @@ export interface UploadMediaFileProps {
   };
   allowedMedia?: MediaType[];
   onOutput?: (data: any) => void;
+  /** Cloudinary cloud name - required to build preview URLs for images stored in Cloudinary */
+  cloudName?: string;
 }
 
 export interface AvailableFileMimeTypes {

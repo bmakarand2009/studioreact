@@ -201,7 +201,7 @@ export default function EventsListPage() {
             </div>
             <Button
               onClick={handleAddEvent}
-              className="bg-gradient-to-r from-primary-600 to-brand-600 hover:from-primary-700 hover:to-brand-700 text-white shadow-lg hover:shadow-xl transition-all"
+              className="bg-gradient-to-r from-primary-500 to-brand-600 hover:from-primary-500 hover:to-brand-700 text-white shadow-lg hover:shadow-xl transition-all"
             >
               <Plus className="h-5 w-5 mr-2" />
               Add Event
@@ -234,7 +234,7 @@ export default function EventsListPage() {
                   onClick={() => setEventState('current')}
                   className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
                     eventState === 'current'
-                      ? 'bg-primary-600 text-white shadow-sm'
+                      ? 'bg-primary-500 text-white shadow-sm'
                       : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                   }`}
                   title="Current Events"
@@ -245,7 +245,7 @@ export default function EventsListPage() {
                   onClick={() => setEventState('past')}
                   className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
                     eventState === 'past'
-                      ? 'bg-primary-600 text-white shadow-sm'
+                      ? 'bg-primary-500 text-white shadow-sm'
                       : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                   }`}
                   title="Past Events"
@@ -256,7 +256,7 @@ export default function EventsListPage() {
                   onClick={() => setEventState('archived')}
                   className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
                     eventState === 'archived'
-                      ? 'bg-primary-600 text-white shadow-sm'
+                      ? 'bg-primary-500 text-white shadow-sm'
                       : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                   }`}
                   title="Archived Events"
@@ -292,7 +292,7 @@ export default function EventsListPage() {
           <div className="flex flex-col items-center justify-center py-20">
             <div className="relative">
               <div className="w-16 h-16 border-4 border-gray-200 dark:border-gray-700 rounded-full"></div>
-              <div className="w-16 h-16 border-4 border-primary-600 border-t-transparent rounded-full animate-spin absolute top-0 left-0"></div>
+              <div className="w-16 h-16 border-4 border-primary-500 border-t-transparent rounded-full animate-spin absolute top-0 left-0"></div>
             </div>
             <p className="mt-4 text-gray-600 dark:text-gray-300 font-medium">Loading events...</p>
           </div>
@@ -349,7 +349,7 @@ export default function EventsListPage() {
             ) : (
               <Button
                 onClick={handleAddEvent}
-                className="bg-gradient-to-r from-primary-600 to-brand-600"
+                className="bg-gradient-to-r from-primary-500 to-brand-600"
               >
                 <Plus className="h-5 w-5 mr-2" />
                 Add Your First Event
@@ -394,7 +394,7 @@ export default function EventsListPage() {
                   </div>
 
                   {/* Event Title with Meeting Icon */}
-                  <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-1.5 line-clamp-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors flex items-start">
+                  <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-1.5 line-clamp-2 group-hover:text-primary-500 dark:group-hover:text-primary-400 transition-colors flex items-start">
                     {renderMeetingProviderIcon(event.onlineMeetProviderName)}
                     <span className="flex-1">{event.name}</span>
                   </h3>

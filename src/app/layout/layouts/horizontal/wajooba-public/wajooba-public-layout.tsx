@@ -69,7 +69,7 @@ export default function WajoobaPublicLayout({ children }: WajoobaPublicLayoutPro
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
       {/* Header with Public Navigation */}
-      <header className="bg-gradient-to-r from-primary-600 to-brand-600 dark:from-primary-700 dark:to-brand-700 shadow-sm border-b border-primary-700/30 dark:border-primary-500/30 sticky top-0 z-40">
+      <header className="bg-gradient-to-r from-primary-500 to-brand-600 dark:from-primary-500 dark:to-brand-700 shadow-sm border-b border-primary-500/30 dark:border-primary-500/30 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
@@ -140,7 +140,7 @@ export default function WajoobaPublicLayout({ children }: WajoobaPublicLayoutPro
               {/* CTA Buttons */}
               <div className="hidden md:flex items-center space-x-3">
                 {user ? 
-                  <Button variant="primary" size="sm" onClick={handleDashboardClick} className="bg-white text-primary-600 hover:bg-white/90">
+                  <Button variant="primary" size="sm" onClick={handleDashboardClick} className="bg-white text-primary-500 hover:bg-white/90">
                     Dashboard
                   </Button>
                 :

@@ -174,7 +174,7 @@ export default function CourseCatalogPage() {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-primary-600 dark:text-primary-400 mx-auto mb-4" />
+          <Loader2 className="h-12 w-12 animate-spin text-primary-500 dark:text-primary-400 mx-auto mb-4" />
           <p className="text-gray-600 dark:text-gray-400">Loading courses...</p>
         </div>
       </div>
@@ -270,13 +270,13 @@ export default function CourseCatalogPage() {
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center" style={{ aspectRatio: '3/2' }}>
-                        <div className="w-16 h-16 bg-primary-600 rounded-full flex items-center justify-center">
+                        <div className="w-16 h-16 bg-primary-500 rounded-full flex items-center justify-center">
                           <BookOpen className="h-8 w-8 text-white" />
                         </div>
                       </div>
                     )}
                     {course.paymentType && (
-                      <div className="absolute top-4 right-4 bg-white dark:bg-gray-800 px-3 py-1 rounded-full text-sm font-semibold text-primary-600 dark:text-primary-400">
+                      <div className="absolute top-4 right-4 bg-white dark:bg-gray-800 px-3 py-1 rounded-full text-sm font-semibold text-primary-500 dark:text-primary-400">
                         {course.paymentType === 'FREE' ? 'Free' : course.paymentType === 'PAID' ? 'Paid' : course.paymentType}
                       </div>
                     )}
@@ -311,7 +311,7 @@ export default function CourseCatalogPage() {
                           {course.productTagList.map((tag, index) => (
                             <span
                               key={index}
-                              className="inline-flex shrink-0 items-center justify-center min-w-[80px] h-6 px-2 bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 text-xs font-medium rounded-full"
+                              className="inline-flex shrink-0 items-center justify-center min-w-[80px] h-6 px-2 bg-primary-100 dark:bg-primary-900/30 text-primary-500 dark:text-primary-400 text-xs font-medium rounded-full"
                             >
                               {tag}
                             </span>
@@ -330,7 +330,7 @@ export default function CourseCatalogPage() {
       </div>
 
       {/* CTA Section */}
-      <div className="bg-gradient-to-r from-primary-600 to-brand-600 dark:from-primary-700 dark:to-brand-700 py-12">
+      <div className="bg-gradient-to-r from-primary-500 to-brand-600 dark:from-primary-500 dark:to-brand-700 py-12">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-2xl font-bold text-white mb-4">
             Can&apos;t Find What You&apos;re Looking For?
@@ -349,7 +349,7 @@ export default function CourseCatalogPage() {
             </Button>
             <Button 
               size="sm" 
-              className="px-6 py-2 bg-white dark:bg-gray-100 text-primary-600 dark:text-primary-700 hover:bg-gray-100 dark:hover:bg-gray-200"
+              className="px-6 py-2 bg-white dark:bg-gray-100 text-primary-500 dark:text-primary-500 hover:bg-gray-100 dark:hover:bg-gray-200"
               onClick={() => navigate('/login')}
             >
               Sign Up for Updates

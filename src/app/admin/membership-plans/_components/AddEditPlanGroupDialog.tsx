@@ -121,7 +121,7 @@ export const AddEditPlanGroupDialog: React.FC<AddEditPlanGroupDialogProps> = ({
         <div className="flex-1 overflow-y-auto p-6 space-y-6 relative">
           {isLoading && (
             <div className="absolute inset-0 bg-white/50 dark:bg-slate-800/50 flex items-center justify-center z-10 backdrop-blur-sm">
-              <div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+              <div className="w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
             </div>
           )}
           
@@ -225,13 +225,13 @@ export const AddEditPlanGroupDialog: React.FC<AddEditPlanGroupDialogProps> = ({
                           className={`
                             flex items-center justify-between w-full px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 border
                             ${isSelected 
-                              ? 'bg-white border-primary-500 text-primary-700 shadow-sm dark:bg-slate-900 dark:text-primary-300' 
+                              ? 'bg-white border-primary-500 text-primary-500 shadow-sm dark:bg-slate-900 dark:text-primary-300' 
                               : 'bg-transparent border-transparent text-slate-600 hover:bg-white hover:shadow-sm dark:text-slate-400 dark:hover:bg-slate-900'
                             }
                           `}
                         >
                           <span>{freq}</span>
-                          {isSelected && <Check className="h-4 w-4 text-primary-600" />}
+                          {isSelected && <Check className="h-4 w-4 text-primary-500" />}
                         </button>
                       );
                     })}
@@ -251,7 +251,7 @@ export const AddEditPlanGroupDialog: React.FC<AddEditPlanGroupDialogProps> = ({
           <Button 
             onClick={handleSubmit} 
             disabled={isSaving}
-            className="bg-primary-600 hover:bg-primary-700 text-white"
+            className="bg-primary-500 hover:bg-primary-500 text-white"
           >
             {isSaving ? (
               <>

@@ -161,7 +161,7 @@ export default function AdminMembershipPlansPage() {
             </div>
             <Button
               onClick={handleAddPlanGroup}
-              className="bg-gradient-to-r from-primary-600 to-brand-600 hover:from-primary-700 hover:to-brand-700 text-white shadow-lg hover:shadow-xl transition-all"
+              className="bg-gradient-to-r from-primary-500 to-brand-600 hover:from-primary-500 hover:to-brand-700 text-white shadow-lg hover:shadow-xl transition-all"
             >
               <Plus className="h-5 w-5 mr-2" />
               Add Membership Group
@@ -193,7 +193,7 @@ export default function AdminMembershipPlansPage() {
                   type="checkbox"
                   checked={showArchived}
                   onChange={(e) => setShowArchived(e.target.checked)}
-                  className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                  className="w-4 h-4 text-primary-500 border-gray-300 rounded focus:ring-primary-500"
                 />
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
                   Show Archived
@@ -211,7 +211,7 @@ export default function AdminMembershipPlansPage() {
           <div className="flex flex-col items-center justify-center py-20">
             <div className="relative">
               <div className="w-16 h-16 border-4 border-gray-200 dark:border-gray-700 rounded-full"></div>
-              <div className="w-16 h-16 border-4 border-primary-600 border-t-transparent rounded-full animate-spin absolute top-0 left-0"></div>
+              <div className="w-16 h-16 border-4 border-primary-500 border-t-transparent rounded-full animate-spin absolute top-0 left-0"></div>
             </div>
             <p className="mt-4 text-gray-600 dark:text-gray-300 font-medium">Please Wait.</p>
           </div>
@@ -259,7 +259,7 @@ export default function AdminMembershipPlansPage() {
                 <Button
                   onClick={handleAddPlanGroup}
                   variant="ghost"
-                  className="text-primary-600 hover:text-primary-700 dark:text-primary-400"
+                  className="text-primary-500 hover:text-primary-500 dark:text-primary-400"
                 >
                   create membership group
                 </Button>
@@ -308,7 +308,7 @@ export default function AdminMembershipPlansPage() {
                               e.stopPropagation();
                               handleEditPlanGroup(plan);
                             }}
-                            className="rounded-lg bg-primary-600 px-3 py-2 text-sm font-semibold text-white shadow-md shadow-primary-500/30 transition hover:bg-primary-700"
+                            className="rounded-lg bg-primary-500 px-3 py-2 text-sm font-semibold text-white shadow-md shadow-primary-500/30 transition hover:bg-primary-500"
                             aria-label="Edit plan"
                             title="Edit plan"
                           >

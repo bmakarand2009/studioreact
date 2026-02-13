@@ -240,7 +240,7 @@ export default function StudentMyPlanPage() {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
-        <div className="w-12 h-12 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-12 h-12 border-4 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
         <p className="mt-4 text-gray-500">Loading plan details...</p>
       </div>
     );
@@ -369,7 +369,7 @@ export default function StudentMyPlanPage() {
 
                   <div className="flex gap-3">
                     <Button 
-                      className="flex-1 bg-primary-600 hover:bg-primary-700 text-white"
+                      className="flex-1 bg-primary-500 hover:bg-primary-500 text-white"
                       disabled={planDetails?.status === 'cancelled'}
                       onClick={() => setIsChangingPlan(true)}
                     >
@@ -470,7 +470,7 @@ export default function StudentMyPlanPage() {
                       {invoices.length > 0 ? (
                         invoices.map((invoice, idx) => (
                           <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-primary-600">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-primary-500">
                               #{invoice.id}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">

@@ -13,7 +13,7 @@ const cardVariants = cva(
         tertiary: 'border-secondary-200 shadow-secondary-100 dark:border-secondary-800 dark:shadow-secondary-900/50',
         accent: 'border-accent-200 shadow-accent-100 dark:border-accent-800 dark:shadow-accent-900/50',
         elevated: 'shadow-xl hover:shadow-2xl border-0',
-        outlined: 'border-2 border-primary-300 shadow-none hover:shadow-md dark:border-primary-600',
+        outlined: 'border-2 border-primary-300 shadow-none hover:shadow-md dark:border-primary-500',
       },
       padding: {
         none: 'p-0',

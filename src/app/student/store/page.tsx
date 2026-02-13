@@ -21,7 +21,7 @@ function StudentStore() {
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 bg-primary-600 rounded-xl flex items-center justify-center">
+            <div className="w-12 h-12 bg-primary-500 rounded-xl flex items-center justify-center">
               <ShoppingCart className="h-6 w-6 text-white" />
             </div>
             <div>
@@ -54,7 +54,7 @@ function StudentStore() {
                   <Filter className="h-5 w-5 mr-2 text-gray-600 dark:text-gray-400" />
                   Filter
                 </button>
-                <button className="flex items-center px-4 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
+                <button className="flex items-center px-4 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-500 transition-colors">
                   <Search className="h-5 w-5 mr-2" />
                   Search
                 </button>
@@ -168,7 +168,7 @@ function StudentStore() {
                       <button className="p-2 text-gray-400 hover:text-red-500 transition-colors">
                         <Heart className="h-5 w-5" />
                       </button>
-                      <button className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
+                      <button className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-500 transition-colors">
                         Add to Cart
                       </button>
                     </div>
@@ -207,12 +207,12 @@ function StudentStore() {
             <div className="border-t border-gray-200 dark:border-gray-600 pt-3">
               <div className="flex items-center justify-between">
                 <span className="text-lg font-semibold text-gray-900 dark:text-white">Total:</span>
-                <span className="text-2xl font-bold text-primary-600">
+                <span className="text-2xl font-bold text-primary-500">
                   <DollarSign className="inline h-6 w-6" />
                   269.97
                 </span>
               </div>
-              <button className="w-full mt-4 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
+              <button className="w-full mt-4 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-500 transition-colors">
                 Proceed to Checkout
               </button>
             </div>

@@ -165,7 +165,7 @@ export const AddEditPricingDialog: React.FC<AddEditPricingDialogProps> = ({
           <div className="flex items-center gap-4">
              <span className={`hidden sm:inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold ${
               step === 1
-                ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300'
+                ? 'bg-primary-100 text-primary-500 dark:bg-primary-900/30 dark:text-primary-300'
                 : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
             }`}>
               Step {step} of 2 · {step === 1 ? 'Payment Mode' : 'Pricing Details'}
@@ -213,13 +213,13 @@ export const AddEditPricingDialog: React.FC<AddEditPricingDialogProps> = ({
                         onClick={() => setFormData(prev => ({ ...prev, paymentType: 'recurring' }))}
                         className={`cursor-pointer p-6 rounded-xl border-2 transition-all relative ${
                             formData.paymentType === 'recurring'
-                            ? 'border-primary-600 bg-primary-50 dark:bg-primary-900/10'
+                            ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/10'
                             : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
                         }`}
                     >
                         {formData.paymentType === 'recurring' && (
-                            <div className="absolute top-4 right-4 text-primary-600">
-                                <div className="w-5 h-5 rounded-full border-[5px] border-primary-600"></div>
+                            <div className="absolute top-4 right-4 text-primary-500">
+                                <div className="w-5 h-5 rounded-full border-[5px] border-primary-500"></div>
                             </div>
                         )}
                         {formData.paymentType !== 'recurring' && (
@@ -229,7 +229,7 @@ export const AddEditPricingDialog: React.FC<AddEditPricingDialogProps> = ({
                         )}
                         
                         <div className={`w-10 h-10 rounded-lg flex items-center justify-center mb-4 ${
-                            formData.paymentType === 'recurring' ? 'bg-primary-600 text-white' : 'bg-slate-100 text-slate-500 dark:bg-slate-700'
+                            formData.paymentType === 'recurring' ? 'bg-primary-500 text-white' : 'bg-slate-100 text-slate-500 dark:bg-slate-700'
                         }`}>
                             <Calendar className="h-5 w-5" />
                         </div>
@@ -246,13 +246,13 @@ export const AddEditPricingDialog: React.FC<AddEditPricingDialogProps> = ({
                         onClick={() => setFormData(prev => ({ ...prev, paymentType: 'onetime' }))}
                         className={`cursor-pointer p-6 rounded-xl border-2 transition-all relative ${
                             formData.paymentType === 'onetime'
-                            ? 'border-primary-600 bg-primary-50 dark:bg-primary-900/10'
+                            ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/10'
                             : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
                         }`}
                     >
                         {formData.paymentType === 'onetime' && (
-                            <div className="absolute top-4 right-4 text-primary-600">
-                                <div className="w-5 h-5 rounded-full border-[5px] border-primary-600"></div>
+                            <div className="absolute top-4 right-4 text-primary-500">
+                                <div className="w-5 h-5 rounded-full border-[5px] border-primary-500"></div>
                             </div>
                         )}
                          {formData.paymentType !== 'onetime' && (
@@ -262,7 +262,7 @@ export const AddEditPricingDialog: React.FC<AddEditPricingDialogProps> = ({
                         )}
 
                         <div className={`w-10 h-10 rounded-lg flex items-center justify-center mb-4 ${
-                            formData.paymentType === 'onetime' ? 'bg-primary-600 text-white' : 'bg-slate-100 text-slate-500 dark:bg-slate-700'
+                            formData.paymentType === 'onetime' ? 'bg-primary-500 text-white' : 'bg-slate-100 text-slate-500 dark:bg-slate-700'
                         }`}>
                             <CreditCard className="h-5 w-5" />
                         </div>
@@ -365,7 +365,7 @@ export const AddEditPricingDialog: React.FC<AddEditPricingDialogProps> = ({
                                     type="radio" 
                                     name="duration" 
                                     id="fixed"
-                                    className="w-4 h-4 text-primary-600 border-gray-300 focus:ring-primary-500"
+                                    className="w-4 h-4 text-primary-500 border-gray-300 focus:ring-primary-500"
                                     checked={!formData.membershipEndDate?.membershipEndsWithSubscription}
                                     onChange={() => setFormData(prev => ({
                                         ...prev,
@@ -415,7 +415,7 @@ export const AddEditPricingDialog: React.FC<AddEditPricingDialogProps> = ({
                                     type="radio" 
                                     name="duration" 
                                     id="renews"
-                                    className="w-4 h-4 text-primary-600 border-gray-300 focus:ring-primary-500"
+                                    className="w-4 h-4 text-primary-500 border-gray-300 focus:ring-primary-500"
                                     checked={!!formData.membershipEndDate?.membershipEndsWithSubscription}
                                     onChange={() => setFormData(prev => ({
                                         ...prev,
@@ -452,11 +452,11 @@ export const AddEditPricingDialog: React.FC<AddEditPricingDialogProps> = ({
           )}
 
           {step === 1 ? (
-            <Button onClick={handleNext} disabled={!formData.productId} className="bg-primary-600 hover:bg-primary-700 text-white">
+            <Button onClick={handleNext} disabled={!formData.productId} className="bg-primary-500 hover:bg-primary-500 text-white">
               Next <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
           ) : (
-            <Button onClick={handleSave} disabled={isSaving} className="bg-primary-600 hover:bg-primary-700 text-white">
+            <Button onClick={handleSave} disabled={isSaving} className="bg-primary-500 hover:bg-primary-500 text-white">
               {isSaving ? 'Saving...' : 'Save Details'}
             </Button>
           )}

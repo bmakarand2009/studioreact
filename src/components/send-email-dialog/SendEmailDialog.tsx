@@ -245,7 +245,7 @@ export const SendEmailDialog = ({
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700 sticky top-0 bg-white dark:bg-slate-800 z-10">
           <div className="flex items-center gap-3">
-            <Mail className="h-5 w-5 text-primary-600 dark:text-primary-400" />
+            <Mail className="h-5 w-5 text-primary-500 dark:text-primary-400" />
             <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-50">
               Send Email
             </h3>
@@ -264,7 +264,7 @@ export const SendEmailDialog = ({
         <div className="p-6">
           {isLoading && emails.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
               <p className="mt-4 text-sm text-slate-500">Loading email providers...</p>
             </div>
           ) : emails.length === 0 ? (

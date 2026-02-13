@@ -86,7 +86,7 @@ export default function HorizontalNavigation({
           ? 'bg-white/20 text-white shadow-md'
           : 'text-white/90 hover:bg-white/15 hover:text-white')
       : (isActive(item.url)
-          ? 'bg-primary-600 text-white shadow-md'
+          ? 'bg-primary-500 text-white shadow-md'
           : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white');
 
     const className = `${baseClasses} ${activeClasses}`;

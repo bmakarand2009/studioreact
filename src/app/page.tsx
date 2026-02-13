@@ -19,11 +19,11 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
           <div className="text-center">
             <div className="inline-flex items-center justify-center w-20 h-20 bg-primary-100 dark:bg-primary-900/30 rounded-2xl mb-8">
-              <span className="text-4xl font-bold text-primary-600 dark:text-primary-400">W</span>
+              <span className="text-4xl font-bold text-primary-500 dark:text-primary-400">W</span>
             </div>
             <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
               Transform Your
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-brand-600">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-brand-600">
                 {' '}Learning Journey
               </span>
             </h1>
@@ -96,7 +96,7 @@ export default function HomePage() {
             ].map((feature, index) => (
               <div key={index} className="bg-gray-50 dark:bg-gray-800 rounded-xl p-8 text-center hover:shadow-lg transition-shadow">
                 <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 dark:bg-primary-900/30 rounded-xl mb-6">
-                  <feature.icon className="h-8 w-8 text-primary-600 dark:text-primary-400" />
+                  <feature.icon className="h-8 w-8 text-primary-500 dark:text-primary-400" />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
                   {feature.title}
@@ -111,7 +111,7 @@ export default function HomePage() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-24 bg-gradient-to-r from-primary-600 to-brand-600">
+      <section className="py-24 bg-gradient-to-r from-primary-500 to-brand-600">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
             {[

@@ -22,7 +22,7 @@ function StaffDashboard() {
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 bg-primary-600 rounded-xl flex items-center justify-center">
+            <div className="w-12 h-12 bg-primary-500 rounded-xl flex items-center justify-center">
               <span className="text-white text-xl font-bold">W</span>
             </div>
             <div>

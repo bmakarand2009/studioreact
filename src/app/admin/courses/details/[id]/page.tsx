@@ -7,12 +7,7 @@ import {
   BookOpen,
   Clock,
   User,
-  Tag,
   DollarSign,
-  Calendar,
-  Globe,
-  FileText,
-  Image as ImageIcon,
   Eye,
   Copy,
   ExternalLink,
@@ -26,14 +21,11 @@ import { Button, ConfirmationDialog, ToggleSlider } from "@/components/ui";
 import { useToast } from "@/components/ui/ToastProvider";
 import appLoadService, { TenantDetails } from "@/app/core/app-load";
 import { courseDetailService } from "@/services/courseDetailService";
-import { ImageUtils } from "@/utils/imageUtils";
 import { BatchManagementDialog } from "@/components/batch-management";
 import { batchService, Batch } from "@/services/batchService";
 import { AttendeesList } from "@/components/attendees";
 import { CourseSetup } from "@/components/setup";
-
-const PLACEHOLDER_IMAGE =
-  "https://res.cloudinary.com/wajooba/image/upload/v1744785332/master/fbyufuhlihaqumx1yegb.svg";
+import { CourseContentsSection } from "@/components/course-contents";
 
 // Duration options matching Angular format - stored as human-readable strings
 const DURATION_OPTIONS = [
@@ -123,7 +115,7 @@ const CourseDetailsPage = () => {
   );
   const [courseData, setCourseData] = useState<any>(null);
   const [staffList, setStaffList] = useState<any[]>([]);
-  const [existingCategories, setExistingCategories] = useState<any[]>([]);
+  const [, setExistingCategories] = useState<any[]>([]);
   const [isPageLoading, setIsPageLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [showPreviewMenu, setShowPreviewMenu] = useState<boolean>(false);
@@ -167,19 +159,6 @@ const CourseDetailsPage = () => {
     [location.pathname, location.search, navigate],
   );
 
-  const bannerImageUrl = useMemo(() => {
-    if (!courseData?.image1) {
-      return PLACEHOLDER_IMAGE;
-    }
-    if (courseData.image1.startsWith("http")) {
-      return courseData.image1;
-    }
-    if (tenantDetails?.cloudName) {
-      return `https://res.cloudinary.com/${tenantDetails.cloudName}/image/upload/c_fill,h_400,w_800/${courseData.image1}`;
-    }
-    return PLACEHOLDER_IMAGE;
-  }, [courseData?.image1, tenantDetails]);
-
   const authorName = useMemo(() => {
     if (!courseData) return "N/A";
     const wemail = courseData?.wemail || {};
@@ -193,37 +172,6 @@ const CourseDetailsPage = () => {
     }
     return tenantDetails?.name || "Organization";
   }, [courseData, staffList, tenantDetails]);
-
-  const categories = useMemo(() => {
-    if (!courseData) return [];
-    const categoryIds = Array.isArray(courseData?.productCategoryList)
-      ? courseData.productCategoryList.map(
-          (cat: any) => cat?.id || cat?.guId || cat,
-        )
-      : Array.isArray(courseData?.productCategory)
-        ? courseData.productCategory.map(
-            (cat: any) => cat?.id || cat?.guId || cat,
-          )
-        : [];
-
-    return existingCategories.filter((cat) => categoryIds.includes(cat.id));
-  }, [courseData, existingCategories]);
-
-  const tags = useMemo<string[]>(() => {
-    if (!courseData) return [];
-    const wemail = courseData?.wemail || {};
-    return Array.isArray(wemail?.productTagList) && wemail.productTagList.length
-      ? wemail.productTagList
-      : Array.isArray(courseData?.productTagList)
-        ? courseData.productTagList
-        : [];
-  }, [courseData]);
-
-  const longDescription = useMemo(() => {
-    if (!courseData) return "";
-    const wemail = courseData?.wemail || {};
-    return wemail?.longDescription || courseData?.longDescription || "";
-  }, [courseData]);
 
   const salesPageUrl = useMemo(() => {
     if (!courseData) return "";
@@ -286,7 +234,7 @@ const CourseDetailsPage = () => {
     try {
       await navigator.clipboard.writeText(salesPageUrl);
       toast.success("Link copied to clipboard!");
-    } catch (err) {
+    } catch {
       // Fallback for older browsers
       const textArea = document.createElement("textarea");
       textArea.value = salesPageUrl;
@@ -297,7 +245,7 @@ const CourseDetailsPage = () => {
       try {
         document.execCommand("copy");
         toast.success("Link copied to clipboard!");
-      } catch (fallbackErr) {
+      } catch {
         toast.error("Failed to copy link. Please copy manually.");
       }
       document.body.removeChild(textArea);
@@ -566,7 +514,7 @@ const CourseDetailsPage = () => {
               {!courseData?.isDisabled && (
                 <Button
                   onClick={handleEdit}
-                  className="rounded-lg bg-primary-600 px-6 py-2 text-sm font-semibold text-white shadow-md shadow-primary-500/30 transition hover:bg-primary-700"
+                  className="rounded-lg bg-primary-500 px-6 py-2 text-sm font-semibold text-white shadow-md shadow-primary-500/30 transition hover:bg-primary-500"
                 >
                   <Edit className="h-4 w-4 mr-2" />
                   Edit Course
@@ -575,7 +523,7 @@ const CourseDetailsPage = () => {
               {courseData?.isDisabled && (
                 <Button
                   onClick={handleRestoreCourse}
-                  className="rounded-lg bg-primary-600 px-6 py-2 text-sm font-semibold text-white shadow-md shadow-primary-500/30 transition hover:bg-primary-700"
+                  className="rounded-lg bg-primary-500 px-6 py-2 text-sm font-semibold text-white shadow-md shadow-primary-500/30 transition hover:bg-primary-500"
                   aria-label="Restore course"
                   title="Restore course"
                 >
@@ -627,7 +575,7 @@ const CourseDetailsPage = () => {
             {/* Author */}
             <div className="flex items-start gap-3">
               <div className="flex-shrink-0 w-10 h-10 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
-                <User className="h-5 w-5 text-primary-600 dark:text-primary-400" />
+                <User className="h-5 w-5 text-primary-500 dark:text-primary-400" />
               </div>
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
@@ -670,19 +618,32 @@ const CourseDetailsPage = () => {
       {/* Main Content - reduced padding on very small screens */}
       <main className="mx-auto mt-4 max-w-7xl px-3 sm:mt-8 sm:px-6 lg:px-8">
         {/* Tabs - scrollable on small screens */}
-        <div className="bg-white dark:bg-slate-900 rounded-lg">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg">
           <nav
             className="flex flex-nowrap gap-1 overflow-x-auto overflow-y-hidden p-3 -mx-3 sm:mx-0 sm:px-3"
-            style={{ WebkitOverflowScrolling: 'touch' }}
+            style={{ WebkitOverflowScrolling: "touch" }}
             aria-label="Tabs"
           >
+            <button
+              onClick={() => handleTabChange("content")}
+              className={`
+              shrink-0 whitespace-nowrap px-3 py-2 sm:px-4 sm:py-3 font-medium text-sm transition-colors rounded-lg
+                ${
+                  activeTab === "content"
+                    ? "bg-primary-500 text-white shadow-md dark:bg-primary-500 dark:text-white"
+                    : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white"
+                }
+              `}
+            >
+              Contents
+            </button>
             <button
               onClick={() => handleTabChange("attendees")}
               className={`
               shrink-0 whitespace-nowrap px-3 py-2 sm:px-4 sm:py-3 font-medium text-sm transition-colors rounded-lg
                 ${
                   activeTab === "attendees"
-                    ? "bg-primary-600 text-white shadow-md dark:bg-primary-500 dark:text-white"
+                    ? "bg-primary-500 text-white shadow-md dark:bg-primary-500 dark:text-white"
                     : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white"
                 }
               `}
@@ -690,25 +651,12 @@ const CourseDetailsPage = () => {
               Attendees
             </button>
             <button
-              onClick={() => handleTabChange("content")}
-              className={`
-              shrink-0 whitespace-nowrap px-3 py-2 sm:px-4 sm:py-3 font-medium text-sm transition-colors rounded-lg
-                ${
-                  activeTab === "content"
-                    ? "bg-primary-600 text-white shadow-md dark:bg-primary-500 dark:text-white"
-                    : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white"
-                }
-              `}
-            >
-              Content
-            </button>
-            <button
               onClick={() => handleTabChange("pricing")}
               className={`
               shrink-0 whitespace-nowrap px-3 py-2 sm:px-4 sm:py-3 font-medium text-sm transition-colors rounded-lg
                 ${
                   activeTab === "pricing"
-                    ? "bg-primary-600 text-white shadow-md dark:bg-primary-500 dark:text-white"
+                    ? "bg-primary-500 text-white shadow-md dark:bg-primary-500 dark:text-white"
                     : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white"
                 }
               `}
@@ -721,7 +669,7 @@ const CourseDetailsPage = () => {
               shrink-0 whitespace-nowrap px-3 py-2 sm:px-4 sm:py-3 font-medium text-sm transition-colors rounded-lg
                 ${
                   activeTab === "setup"
-                    ? "bg-primary-600 text-white shadow-md dark:bg-primary-500 dark:text-white"
+                    ? "bg-primary-500 text-white shadow-md dark:bg-primary-500 dark:text-white"
                     : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white"
                 }
               `}
@@ -747,115 +695,12 @@ const CourseDetailsPage = () => {
           )}
 
           {activeTab === "content" && (
-            <div className="space-y-8">
-              {/* Course Banner */}
-              <section className="rounded-3xl border border-slate-200 bg-white p-4 shadow-xl shadow-primary-500/5 dark:border-slate-800 dark:bg-slate-900 sm:p-6 lg:p-8">
-                <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 dark:border-slate-700 dark:bg-slate-800">
-                  <img
-                    src={bannerImageUrl}
-                    alt={courseData.name}
-                    className="h-64 w-full object-cover"
-                    onError={(event) => {
-                      event.currentTarget.src = PLACEHOLDER_IMAGE;
-                    }}
-                  />
-                </div>
-              </section>
-
-              {/* Course Information */}
-              <section className="rounded-3xl border border-slate-200 bg-white p-4 shadow-xl shadow-primary-500/5 dark:border-slate-800 dark:bg-slate-900 sm:p-6 lg:p-8">
-                <div className="space-y-6">
-                  {/* Title */}
-                  <div>
-                    <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
-                      {courseData.name}
-                    </h2>
-                    {courseData.shortDescription && (
-                      <p className="text-lg text-slate-600 dark:text-slate-300">
-                        {courseData.shortDescription}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Status */}
-                  <div className="pt-6 border-t border-slate-200 dark:border-slate-700">
-                    <div className="flex items-start gap-3">
-                      <div className="flex-shrink-0 w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
-                        <Globe className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-                      </div>
-                      <div>
-                        <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                          Status
-                        </p>
-                        <p className="text-sm font-medium text-slate-900 dark:text-white mt-1">
-                          {courseData.isShowOnWebsite ? "Published" : "Draft"}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Categories */}
-                  {categories.length > 0 && (
-                    <div className="pt-6 border-t border-slate-200 dark:border-slate-700">
-                      <div className="flex items-center gap-2 mb-3">
-                        <Tag className="h-4 w-4 text-slate-400" />
-                        <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                          Categories
-                        </p>
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        {categories.map((category) => (
-                          <span
-                            key={category.id}
-                            className="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300"
-                          >
-                            {category.name}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Tags */}
-                  {tags.length > 0 && (
-                    <div className="pt-6 border-t border-slate-200 dark:border-slate-700">
-                      <div className="flex items-center gap-2 mb-3">
-                        <Tag className="h-4 w-4 text-slate-400" />
-                        <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                          Tags
-                        </p>
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        {tags.map((tag: string, index: number) => (
-                          <span
-                            key={`tag-${index}-${tag}`}
-                            className="inline-flex items-center rounded-full bg-primary-100 px-3 py-1 text-xs font-semibold text-primary-700 dark:bg-primary-900/30 dark:text-primary-300"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Long Description */}
-                  {longDescription && (
-                    <div className="pt-6 border-t border-slate-200 dark:border-slate-700">
-                      <div className="flex items-center gap-2 mb-3">
-                        <FileText className="h-4 w-4 text-slate-400" />
-                        <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                          Description
-                        </p>
-                      </div>
-                      <div
-                        className="prose prose-slate dark:prose-invert max-w-none text-slate-700 dark:text-slate-300"
-                        dangerouslySetInnerHTML={{ __html: longDescription }}
-                      />
-                    </div>
-                  )}
-                </div>
-              </section>
-            </div>
+              <CourseContentsSection
+                courseId={id || ""}
+                courseObject={courseData}
+                isMasterTenant={tenantDetails?.tenantId === courseData?.tid}
+                onRefresh={loadCourseData}
+              />
           )}
 
           {activeTab === "pricing" && (
@@ -898,7 +743,7 @@ const CourseDetailsPage = () => {
       {confirmDialog && (
         <ConfirmationDialog
           isOpen={confirmDialog.isOpen}
-          onClose={(confirmed) => {
+          onClose={() => {
             setConfirmDialog(null);
           }}
           title={confirmDialog.title}

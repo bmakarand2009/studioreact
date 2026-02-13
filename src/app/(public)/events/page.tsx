@@ -179,7 +179,7 @@ export default function EventsListPage() {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-primary-600 dark:text-primary-400 mx-auto mb-4" />
+          <Loader2 className="h-12 w-12 animate-spin text-primary-500 dark:text-primary-400 mx-auto mb-4" />
           <p className="text-gray-600 dark:text-gray-400">Loading events...</p>
         </div>
       </div>
@@ -256,7 +256,7 @@ export default function EventsListPage() {
                     >
                       {/* Placeholder icon - shown when no image or image fails */}
                       <div className="w-full h-full flex items-center justify-center absolute inset-0">
-                        <div className="w-16 h-16 bg-primary-600 rounded-full flex items-center justify-center">
+                        <div className="w-16 h-16 bg-primary-500 rounded-full flex items-center justify-center">
                           <Calendar className="h-8 w-8 text-white" />
                         </div>
                       </div>
@@ -278,14 +278,14 @@ export default function EventsListPage() {
                       <div className="absolute top-4 right-4 flex items-center gap-2 z-20">
                         {event.isOnlineMeeting && (
                           <div
-                            className="size-6 rounded-full bg-primary-600 flex items-center justify-center shadow-md flex-shrink-0 ring-2 ring-white"
+                            className="size-6 rounded-full bg-primary-500 flex items-center justify-center shadow-md flex-shrink-0 ring-2 ring-white"
                             title="Online event"
                           >
                             <Video className="h-3.5 w-3.5 text-white" />
                           </div>
                         )}
                         {renderPaymentBadge(event) && (
-                          <div className="bg-white dark:bg-gray-800 px-3 py-1 rounded-full text-sm font-semibold text-primary-600 dark:text-primary-400">
+                          <div className="bg-white dark:bg-gray-800 px-3 py-1 rounded-full text-sm font-semibold text-primary-500 dark:text-primary-400">
                             {eventService.getPaymentTypeInfo(event)?.label ||
                               "Free"}
                           </div>
@@ -304,14 +304,14 @@ export default function EventsListPage() {
                               event.tagList.slice(0, 2).map((tag, index) => (
                                 <span
                                   key={index}
-                                  className="inline-flex items-center justify-center min-w-[80px] h-6 px-2 bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 text-xs font-medium rounded-full"
+                                  className="inline-flex items-center justify-center min-w-[80px] h-6 px-2 bg-primary-100 dark:bg-primary-900/30 text-primary-500 dark:text-primary-400 text-xs font-medium rounded-full"
                                 >
                                   {tag}
                                 </span>
                               ))}
                             {event.category?.name &&
                               (!event.tagList || event.tagList.length === 0) && (
-                                <span className="inline-flex items-center justify-center min-w-[80px] h-6 px-2 bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 text-xs font-medium rounded-full">
+                                <span className="inline-flex items-center justify-center min-w-[80px] h-6 px-2 bg-primary-100 dark:bg-primary-900/30 text-primary-500 dark:text-primary-400 text-xs font-medium rounded-full">
                                   {event.category.name}
                                 </span>
                               )}
@@ -366,7 +366,7 @@ export default function EventsListPage() {
       </div>
 
       {/* CTA Section */}
-      <div className="bg-gradient-to-r from-primary-600 to-brand-600 dark:from-primary-700 dark:to-brand-700 py-12">
+      <div className="bg-gradient-to-r from-primary-500 to-brand-600 dark:from-primary-500 dark:to-brand-700 py-12">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-2xl font-bold text-white mb-4">
             Can&apos;t Find What You&apos;re Looking For?
@@ -386,7 +386,7 @@ export default function EventsListPage() {
             </Button>
             <Button
               size="sm"
-              className="px-6 py-2 bg-white dark:bg-gray-100 text-primary-600 dark:text-primary-700 hover:bg-gray-100 dark:hover:bg-gray-200"
+              className="px-6 py-2 bg-white dark:bg-gray-100 text-primary-500 dark:text-primary-500 hover:bg-gray-100 dark:hover:bg-gray-200"
               onClick={() => navigate("/login")}
             >
               Sign Up for Updates
