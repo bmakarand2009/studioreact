@@ -661,12 +661,12 @@ const AddEditCoursePage = () => {
       {productTags.map((tag) => (
         <span
           key={tag}
-          className="inline-flex items-center gap-1 rounded-full bg-primary-100 px-3 py-1 text-xs font-semibold text-primary-700 dark:bg-primary-900/30 dark:text-primary-300"
+          className="inline-flex items-center gap-1 rounded-full bg-primary-100 px-3 py-1 text-xs font-semibold text-primary-500 dark:bg-primary-900/30 dark:text-primary-300"
         >
           {tag}
           <button
             type="button"
-            className="text-primary-700 hover:text-primary-900 dark:text-primary-300 dark:hover:text-primary-100"
+            className="text-primary-500 hover:text-primary-900 dark:text-primary-300 dark:hover:text-primary-100"
             onClick={() => removeTag(tag)}
             aria-label={`Remove ${tag}`}
           >
@@ -735,7 +735,7 @@ const AddEditCoursePage = () => {
             <span
               className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold ${
                 activeStep === 0
-                  ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300'
+                  ? 'bg-primary-100 text-primary-500 dark:bg-primary-900/30 dark:text-primary-300'
                   : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
               }`}
             >
@@ -1043,7 +1043,7 @@ const AddEditCoursePage = () => {
                           <div className="flex border-t border-slate-200 px-4 py-3 dark:border-slate-700">
                             <Button
                               variant="secondary"
-                              className="w-full justify-center rounded-xl border border-dashed border-primary-400 bg-primary-50 text-primary-600 hover:bg-primary-100 dark:border-primary-700 dark:bg-primary-900/20 dark:text-primary-300 dark:hover:bg-primary-900/30"
+                              className="w-full justify-center rounded-xl border border-dashed border-primary-400 bg-primary-50 text-primary-500 hover:bg-primary-100 dark:border-primary-500 dark:bg-primary-900/20 dark:text-primary-300 dark:hover:bg-primary-900/30"
                               onClick={() => setIsAddCategoryOpen(true)}
                             >
                               <PlusCircle className="mr-2 h-4 w-4" />
@@ -1074,7 +1074,7 @@ const AddEditCoursePage = () => {
                   Cancel
                 </Button>
                 <Button
-                  className="rounded-xl bg-primary-600 px-6 py-2 text-sm font-semibold text-white shadow-md shadow-primary-500/30 transition hover:bg-primary-700"
+                  className="rounded-xl bg-primary-500 px-6 py-2 text-sm font-semibold text-white shadow-md shadow-primary-500/30 transition hover:bg-primary-500"
                   onClick={handleNextStep}
                   disabled={isSaving || aiLoadingField === 'longDescription'}
                 >
@@ -1116,7 +1116,7 @@ const AddEditCoursePage = () => {
                     </Button>
                     <Button
                       variant="secondary"
-                      className="rounded-xl border border-primary-200 bg-primary-50 px-4 py-2 text-sm font-semibold text-primary-600 hover:bg-primary-100 dark:border-primary-800 dark:bg-primary-900/20 dark:text-primary-300 dark:hover:bg-primary-900/30"
+                      className="rounded-xl border border-primary-200 bg-primary-50 px-4 py-2 text-sm font-semibold text-primary-500 hover:bg-primary-100 dark:border-primary-800 dark:bg-primary-900/20 dark:text-primary-300 dark:hover:bg-primary-900/30"
                       onClick={async () => {
                         toast.info('Template regeneration is coming soon. Using placeholder template for now.');
                         setTemplateState({
@@ -1178,7 +1178,7 @@ const AddEditCoursePage = () => {
                   </Button>
                   <Button
                     variant="secondary"
-                    className="rounded-xl border border-primary-200 bg-primary-50 px-6 py-2 text-sm font-semibold text-primary-600 hover:bg-primary-100 dark:border-primary-800 dark:bg-primary-900/20 dark:text-primary-300 dark:hover:bg-primary-900/30"
+                    className="rounded-xl border border-primary-200 bg-primary-50 px-6 py-2 text-sm font-semibold text-primary-500 hover:bg-primary-100 dark:border-primary-800 dark:bg-primary-900/20 dark:text-primary-300 dark:hover:bg-primary-900/30"
                     onClick={() => handleTemplateSave(false)}
                     disabled={isTemplateSaving}
                   >
@@ -1192,7 +1192,7 @@ const AddEditCoursePage = () => {
                     )}
                   </Button>
                   <Button
-                    className="rounded-xl bg-primary-600 px-6 py-2 text-sm font-semibold text-white shadow-md shadow-primary-500/30 transition hover:bg-primary-700"
+                    className="rounded-xl bg-primary-500 px-6 py-2 text-sm font-semibold text-white shadow-md shadow-primary-500/30 transition hover:bg-primary-500"
                     onClick={() => handleTemplateSave(true)}
                     disabled={isTemplateSaving}
                   >
@@ -1273,7 +1273,7 @@ const AddEditCoursePage = () => {
                 Cancel
               </Button>
               <Button
-                className="rounded-xl bg-primary-600 px-6 py-2 text-sm font-semibold text-white shadow-md shadow-primary-500/30 transition hover:bg-primary-700"
+                className="rounded-xl bg-primary-500 px-6 py-2 text-sm font-semibold text-white shadow-md shadow-primary-500/30 transition hover:bg-primary-500"
                 onClick={handleAddCategory}
               >
                 Save Category

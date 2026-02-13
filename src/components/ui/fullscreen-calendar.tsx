@@ -438,7 +438,7 @@ export function FullScreenCalendar({ data, showAdminActions = false }: FullScree
                                   },
                                 });
                               }}
-                              className="text-[10px] font-medium text-primary-500 hover:text-primary-600 hover:underline dark:text-primary-400 dark:hover:text-primary-300"
+                              className="text-[10px] font-medium text-primary-500 hover:text-primary-500 hover:underline dark:text-primary-400 dark:hover:text-primary-300"
                             >
                               + {dayData.events.length - 4} more
                             </button>

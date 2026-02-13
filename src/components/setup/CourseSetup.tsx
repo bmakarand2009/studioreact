@@ -296,7 +296,7 @@ export function CourseSetup({
                   href={`/customforms/${registrationFormId}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="ml-2 text-primary-500 hover:text-primary-600 inline-flex items-center"
+                  className="ml-2 text-primary-500 hover:text-primary-500 inline-flex items-center"
                 >
                   <LinkIcon className="h-4 w-4 mr-1" />
                   Review Form

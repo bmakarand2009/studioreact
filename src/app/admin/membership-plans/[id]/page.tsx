@@ -23,7 +23,7 @@ const VALID_TABS = ["plans", "pricing", "members"] as const;
 type TabKey = (typeof VALID_TABS)[number];
 
 const CATEGORY_COLORS = [
-  "bg-primary-50 text-primary-700 ring-1 ring-inset ring-primary-700/10 dark:bg-primary-400/10 dark:text-primary-400 dark:ring-primary-400/20",
+  "bg-primary-50 text-primary-500 ring-1 ring-inset ring-primary-500/10 dark:bg-primary-400/10 dark:text-primary-400 dark:ring-primary-400/20",
 ];
 
 const getCategoryColor = (category: string) => {
@@ -196,7 +196,7 @@ const SortablePlanCard = ({ plan, onToggleStatus, onEdit, getCategoryColor }: So
                     e.stopPropagation();
                     onEdit(plan);
                   }}
-                  className="rounded-lg bg-primary-600 px-3 py-2 text-sm font-semibold text-white shadow-md shadow-primary-500/30 transition hover:bg-primary-700"
+                  className="rounded-lg bg-primary-500 px-3 py-2 text-sm font-semibold text-white shadow-md shadow-primary-500/30 transition hover:bg-primary-500"
                   aria-label="Edit plan"
                   title="Edit Plan"
                 >
@@ -235,7 +235,7 @@ const SortablePlanCard = ({ plan, onToggleStatus, onEdit, getCategoryColor }: So
                           )}
                         </div>
                         <div>
-                          <p className="font-semibold text-sm text-gray-900 dark:text-white group-hover:text-primary-600 transition-colors">
+                          <p className="font-semibold text-sm text-gray-900 dark:text-white group-hover:text-primary-500 transition-colors">
                             {feature.feature}
                           </p>
                           <p className="text-xs text-gray-500 mt-0.5">
@@ -648,7 +648,7 @@ export default function AdminMembershipPlanDetailsPage() {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">
-        <div className="w-16 h-16 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-16 h-16 border-4 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
         <p className="mt-4 text-gray-600">Loading details...</p>
       </div>
     );
@@ -673,7 +673,7 @@ export default function AdminMembershipPlanDetailsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <Button 
             variant="ghost" 
-            className="mb-4 pl-0 hover:bg-transparent hover:text-primary-600"
+            className="mb-4 pl-0 hover:bg-transparent hover:text-primary-500"
             onClick={() => navigate('/admin/membership-plans')}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -714,7 +714,7 @@ export default function AdminMembershipPlanDetailsPage() {
         {/* Trial Offer Card */}
         <Card className="border-l-4 border-l-primary-500">
           <CardContent className="p-6">
-            <h3 className="text-sm font-semibold text-primary-600 uppercase tracking-wide mb-2">
+            <h3 className="text-sm font-semibold text-primary-500 uppercase tracking-wide mb-2">
               Trial Offer
             </h3>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -745,7 +745,7 @@ export default function AdminMembershipPlanDetailsPage() {
                 shrink-0 whitespace-nowrap px-3 py-2 sm:px-4 sm:py-3 font-medium text-sm transition-colors rounded-lg capitalize
                   ${
                     activeTab === tab
-                      ? "bg-primary-600 text-white shadow-md dark:bg-primary-500 dark:text-white"
+                      ? "bg-primary-500 text-white shadow-md dark:bg-primary-500 dark:text-white"
                       : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white"
                   }
                 `}
@@ -760,7 +760,7 @@ export default function AdminMembershipPlanDetailsPage() {
         {activeTab === 'plans' && (
           arePlansLoading ? (
             <div className="flex justify-center py-12">
-              <div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+              <div className="w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
             </div>
           ) : (
           <div className="rounded-lg bg-white p-4 shadow-xl shadow-primary-500/5 dark:border-slate-800 dark:bg-slate-900 sm:p-6 lg:p-8">
@@ -779,13 +779,13 @@ export default function AdminMembershipPlanDetailsPage() {
                     type="checkbox"
                     checked={showArchivedPlans}
                     onChange={(e) => setShowArchivedPlans(e.target.checked)}
-                    className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                    className="w-4 h-4 text-primary-500 border-gray-300 rounded focus:ring-primary-500"
                   />
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
                     Show Archived
                   </span>
                 </label>
-                <Button size="sm" onClick={handleAddPlan} className="bg-gradient-to-r from-primary-600 to-brand-600 hover:from-primary-700 hover:to-brand-700 text-white shadow-lg hover:shadow-xl transition-all rounded-xl">
+                <Button size="sm" onClick={handleAddPlan} className="bg-gradient-to-r from-primary-500 to-brand-600 hover:from-primary-500 hover:to-brand-700 text-white shadow-lg hover:shadow-xl transition-all rounded-xl">
                   <Plus className="h-4 w-4 mr-2" />
                   Add Plan
                 </Button>
@@ -827,7 +827,7 @@ export default function AdminMembershipPlanDetailsPage() {
         {activeTab === 'pricing' && (
           arePricingsLoading ? (
             <div className="flex justify-center py-12">
-              <div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+              <div className="w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
             </div>
           ) : (
           <div className="rounded-lg bg-white p-4 shadow-xl shadow-primary-500/5 dark:border-slate-800 dark:bg-slate-900 sm:p-6 lg:p-8">
@@ -853,7 +853,7 @@ export default function AdminMembershipPlanDetailsPage() {
                     className="w-full pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
                   />
                 </div>
-                <Button size="sm" onClick={handleAddPricing} className="bg-gradient-to-r from-primary-600 to-brand-600 hover:from-primary-700 hover:to-brand-700 text-white shadow-lg hover:shadow-xl transition-all rounded-xl">
+                <Button size="sm" onClick={handleAddPricing} className="bg-gradient-to-r from-primary-500 to-brand-600 hover:from-primary-500 hover:to-brand-700 text-white shadow-lg hover:shadow-xl transition-all rounded-xl">
                   <Plus className="h-4 w-4 mr-2" />
                   Add Pricing
                 </Button>
@@ -947,7 +947,7 @@ export default function AdminMembershipPlanDetailsPage() {
                                   e.stopPropagation();
                                   handleEditPricing(pricing);
                                 }}
-                                className="rounded-lg bg-primary-600 px-3 py-2 text-sm font-semibold text-white shadow-md shadow-primary-500/30 transition hover:bg-primary-700"
+                                className="rounded-lg bg-primary-500 px-3 py-2 text-sm font-semibold text-white shadow-md shadow-primary-500/30 transition hover:bg-primary-500"
                                 aria-label="Edit pricing"
                                 title="Edit Pricing"
                               >
@@ -970,7 +970,7 @@ export default function AdminMembershipPlanDetailsPage() {
         {activeTab === 'members' && (
           areMembersLoading ? (
             <div className="flex justify-center py-12">
-              <div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+              <div className="w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
             </div>
           ) : (
           <div className="rounded-lg bg-white p-4 shadow-xl shadow-primary-500/5 dark:border-slate-800 dark:bg-slate-900 sm:p-6 lg:p-8">

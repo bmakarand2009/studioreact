@@ -132,7 +132,7 @@ export default function CoursesListPage() {
             </div>
             <Button
               onClick={handleAddCourse}
-              className="bg-gradient-to-r from-primary-600 to-brand-600 hover:from-primary-700 hover:to-brand-700 text-white shadow-lg hover:shadow-xl transition-all"
+              className="bg-gradient-to-r from-primary-500 to-brand-600 hover:from-primary-500 hover:to-brand-700 text-white shadow-lg hover:shadow-xl transition-all"
             >
               <Plus className="h-5 w-5 mr-2" />
               Add Course
@@ -164,7 +164,7 @@ export default function CoursesListPage() {
                   type="checkbox"
                   checked={showArchived}
                   onChange={(e) => setShowArchived(e.target.checked)}
-                  className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                  className="w-4 h-4 text-primary-500 border-gray-300 rounded focus:ring-primary-500"
                 />
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
                   Show Archived
@@ -182,7 +182,7 @@ export default function CoursesListPage() {
           <div className="flex flex-col items-center justify-center py-20">
             <div className="relative">
               <div className="w-16 h-16 border-4 border-gray-200 dark:border-gray-700 rounded-full"></div>
-              <div className="w-16 h-16 border-4 border-primary-600 border-t-transparent rounded-full animate-spin absolute top-0 left-0"></div>
+              <div className="w-16 h-16 border-4 border-primary-500 border-t-transparent rounded-full animate-spin absolute top-0 left-0"></div>
             </div>
             <p className="mt-4 text-gray-600 dark:text-gray-300 font-medium">Loading courses...</p>
           </div>
@@ -239,7 +239,7 @@ export default function CoursesListPage() {
             ) : (
               <Button
                 onClick={handleAddCourse}
-                className="bg-gradient-to-r from-primary-600 to-brand-600"
+                className="bg-gradient-to-r from-primary-500 to-brand-600"
               >
                 <Plus className="h-5 w-5 mr-2" />
                 Add Your First Course
@@ -293,7 +293,7 @@ export default function CoursesListPage() {
                   </div>
 
                   {/* Course Title */}
-                  <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-1.5 line-clamp-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                  <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-1.5 line-clamp-2 group-hover:text-primary-500 dark:group-hover:text-primary-400 transition-colors">
                     {course.name}
                   </h3>
 

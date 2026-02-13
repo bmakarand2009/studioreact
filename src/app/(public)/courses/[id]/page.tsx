@@ -150,7 +150,7 @@ export default function CourseDetailPage() {
     return (
       <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-primary-600 dark:text-primary-400 mx-auto mb-4" />
+          <Loader2 className="h-12 w-12 animate-spin text-primary-500 dark:text-primary-400 mx-auto mb-4" />
           <p className="text-lg text-gray-600 dark:text-gray-300">Loading course...</p>
         </div>
       </div>
@@ -224,7 +224,7 @@ export default function CourseDetailPage() {
                   </div>
                 )}
                 {course.productTagList?.[0] && (
-                  <div className="flex h-7 sm:h-8 items-center justify-center gap-x-1.5 sm:gap-x-2 rounded-lg bg-primary-600 px-2.5 sm:px-3 shadow-lg ring-1 ring-white/20">
+                  <div className="flex h-7 sm:h-8 items-center justify-center gap-x-1.5 sm:gap-x-2 rounded-lg bg-primary-500 px-2.5 sm:px-3 shadow-lg ring-1 ring-white/20">
                     <span className="text-white text-[10px] sm:text-xs font-bold uppercase tracking-wider">
                       {course.productTagList[0]}
                     </span>
@@ -280,7 +280,7 @@ export default function CourseDetailPage() {
             {isCourseContentsShown && (
               <section className="min-w-0">
                 <div className="flex items-center gap-2 text-gray-900 dark:text-white font-bold">
-                  <ChevronRight className="size-5 text-primary-600 dark:text-primary-400" />
+                  <ChevronRight className="size-5 text-primary-500 dark:text-primary-400" />
                   Course Contents
                 </div>
               </section>
@@ -304,7 +304,7 @@ export default function CourseDetailPage() {
                         {authorDisplay}
                       </h3>
                       {authorBlock?.designation && (
-                        <p className="text-primary-600 dark:text-primary-400 text-sm font-medium mt-0.5">
+                        <p className="text-primary-500 dark:text-primary-400 text-sm font-medium mt-0.5">
                           {authorBlock.designation}
                         </p>
                       )}
@@ -321,7 +321,7 @@ export default function CourseDetailPage() {
                     <div className="flex flex-wrap gap-4">
                       <a
                         href="#"
-                        className="text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors inline-flex items-center gap-1"
+                        className="text-gray-500 dark:text-gray-400 hover:text-primary-500 dark:hover:text-primary-400 transition-colors inline-flex items-center gap-1"
                         aria-label="Website"
                       >
                         <Globe className="size-5" />
@@ -329,7 +329,7 @@ export default function CourseDetailPage() {
                       </a>
                       <a
                         href="#"
-                        className="text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors inline-flex items-center gap-1"
+                        className="text-gray-500 dark:text-gray-400 hover:text-primary-500 dark:hover:text-primary-400 transition-colors inline-flex items-center gap-1"
                         aria-label="Twitter"
                       >
                         <LinkIcon className="size-5" />
@@ -337,7 +337,7 @@ export default function CourseDetailPage() {
                       </a>
                       <a
                         href="#"
-                        className="text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors inline-flex items-center gap-1"
+                        className="text-gray-500 dark:text-gray-400 hover:text-primary-500 dark:hover:text-primary-400 transition-colors inline-flex items-center gap-1"
                         aria-label="LinkedIn"
                       >
                         <Linkedin className="size-5" />
@@ -377,7 +377,7 @@ export default function CourseDetailPage() {
                     )}
                   </div>
                   {itemList.length > 1 && (
-                    <span className="text-primary-600 dark:text-primary-400 text-sm font-bold mt-1 block">
+                    <span className="text-primary-500 dark:text-primary-400 text-sm font-bold mt-1 block">
                       +{itemList.length - 1} Plans
                     </span>
                   )}
@@ -385,7 +385,7 @@ export default function CourseDetailPage() {
                 <div className="space-y-5 mb-8">
                   {course.durationStr && (
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="size-10 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-primary-600 dark:text-primary-400 shrink-0">
+                      <div className="size-10 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-primary-500 dark:text-primary-400 shrink-0">
                         <BookOpen className="size-5" />
                       </div>
                       <div className="min-w-0 flex-1">
@@ -412,7 +412,7 @@ export default function CourseDetailPage() {
                   <button
                     type="button"
                     onClick={handleTryIntroductory}
-                    className="mt-4 w-full text-center text-primary-600 dark:text-primary-400 font-bold hover:underline text-sm"
+                    className="mt-4 w-full text-center text-primary-500 dark:text-primary-400 font-bold hover:underline text-sm"
                   >
                     Try Introductory Session
                   </button>

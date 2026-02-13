@@ -9,7 +9,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         // Primary - Deep Blue (Main Action Color)
-        primary: 'bg-primary-500 text-white hover:bg-primary-600 focus:ring-primary-500 shadow-primary hover:shadow-primary-lg active:bg-primary-700 border-0',
+        primary: 'bg-primary-500 text-white hover:bg-primary-500 focus:ring-primary-500 shadow-primary hover:shadow-primary-lg active:bg-primary-500 border-0',
         
         // Secondary - Brand Cyan (Secondary Actions)
         secondary: 'bg-brand-500 text-white hover:bg-brand-600 focus:ring-brand-500 shadow-brand hover:shadow-brand-lg active:bg-brand-700 border-0',
@@ -21,7 +21,7 @@ const buttonVariants = cva(
         accent: 'bg-accent-500 text-white hover:bg-accent-600 focus:ring-accent-500 shadow-lg hover:shadow-xl active:bg-accent-700 border-0',
         
         // Outline variants with brand colors
-        outline: 'border-2 border-primary-500 text-primary-600 hover:bg-primary-50 hover:text-primary-700 focus:ring-primary-500 dark:border-primary-400 dark:text-primary-400 dark:hover:bg-primary-900/20 dark:hover:text-primary-300 bg-transparent',
+        outline: 'border-2 border-primary-500 text-primary-500 hover:bg-primary-50 hover:text-primary-500 focus:ring-primary-500 dark:border-primary-400 dark:text-primary-400 dark:hover:bg-primary-900/20 dark:hover:text-primary-300 bg-transparent',
         
         outlineSecondary: 'border-2 border-brand-500 text-brand-600 hover:bg-brand-50 hover:text-brand-700 focus:ring-brand-500 dark:border-brand-400 dark:text-brand-400 dark:hover:bg-brand-900/20 dark:hover:text-brand-300 bg-transparent',
         
@@ -30,7 +30,7 @@ const buttonVariants = cva(
         outlineAccent: 'border-2 border-accent-500 text-accent-600 hover:bg-accent-50 hover:text-accent-700 focus:ring-accent-500 dark:border-accent-400 dark:text-accent-400 dark:hover:bg-accent-900/20 dark:hover:text-accent-300 bg-transparent',
         
         // Ghost variants
-        ghost: 'text-primary-600 hover:bg-primary-50 hover:text-primary-700 focus:ring-primary-500 dark:text-primary-400 dark:hover:bg-primary-900/20 dark:hover:text-primary-300 bg-transparent',
+        ghost: 'text-primary-500 hover:bg-primary-50 hover:text-primary-500 focus:ring-primary-500 dark:text-primary-400 dark:hover:bg-primary-900/20 dark:hover:text-primary-300 bg-transparent',
         
         ghostSecondary: 'text-brand-600 hover:bg-brand-50 hover:text-brand-700 focus:ring-brand-500 dark:text-brand-400 dark:hover:bg-brand-900/20 dark:hover:text-brand-300 bg-transparent',
         

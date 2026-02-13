@@ -267,7 +267,7 @@ export default function CourseCheckoutPage() {
                       key={guId}
                       className={`flex cursor-pointer items-center gap-2 rounded-lg border-2 px-4 py-3 transition-colors ${
                         isSelected
-                          ? 'border-primary-500 bg-primary-50 text-primary-700 dark:border-primary-400 dark:bg-primary-900/30 dark:text-primary-300'
+                          ? 'border-primary-500 bg-primary-50 text-primary-500 dark:border-primary-400 dark:bg-primary-900/30 dark:text-primary-300'
                           : 'border-gray-200 bg-gray-50 text-gray-700 hover:border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-500'
                       }`}
                     >

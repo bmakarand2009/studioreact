@@ -201,7 +201,7 @@ export default function EventDetailPage() {
     return (
       <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-primary-600 dark:text-primary-400 mx-auto mb-4" />
+          <Loader2 className="h-12 w-12 animate-spin text-primary-500 dark:text-primary-400 mx-auto mb-4" />
           <p className="text-lg text-gray-600 dark:text-gray-300">
             Loading event...
           </p>
@@ -286,7 +286,7 @@ export default function EventDetailPage() {
                   )}
                   {(event.category?.name ||
                     (event.tagList && event.tagList[0])) && (
-                    <div className="flex h-7 sm:h-8 items-center justify-center gap-x-1.5 sm:gap-x-2 rounded-lg bg-primary-600 px-2.5 sm:px-3 shadow-lg ring-1 ring-white/20">
+                    <div className="flex h-7 sm:h-8 items-center justify-center gap-x-1.5 sm:gap-x-2 rounded-lg bg-primary-500 px-2.5 sm:px-3 shadow-lg ring-1 ring-white/20">
                       <Zap className="text-white size-4 shrink-0" />
                       <span className="text-white text-[10px] sm:text-xs font-bold uppercase tracking-wider">
                         {event.category?.name || event.tagList?.[0] || "Event"}
@@ -363,7 +363,7 @@ export default function EventDetailPage() {
                             className="p-4 sm:p-6 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
                           >
                             <div className="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-4">
-                              <div className="bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 px-3 py-1.5 rounded-lg font-bold text-sm shrink-0 uppercase w-fit">
+                              <div className="bg-primary-100 dark:bg-primary-900/30 text-primary-500 dark:text-primary-400 px-3 py-1.5 rounded-lg font-bold text-sm shrink-0 uppercase w-fit">
                                 {formatScheduleDate(item.startTime)}
                               </div>
                               <div className="flex-1 min-w-0">
@@ -413,7 +413,7 @@ export default function EventDetailPage() {
                           {event.wemail?.displayTitle || getHostDisplay(event)}
                         </h3>
                         {event.wemail?.designation && (
-                          <p className="text-primary-600 dark:text-primary-400 text-sm font-medium mt-0.5">
+                          <p className="text-primary-500 dark:text-primary-400 text-sm font-medium mt-0.5">
                             {event.wemail.designation}
                           </p>
                         )}
@@ -431,7 +431,7 @@ export default function EventDetailPage() {
                       <div className="flex flex-wrap gap-4">
                         <a
                           href="#"
-                          className="text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors inline-flex items-center gap-1"
+                          className="text-gray-500 dark:text-gray-400 hover:text-primary-500 dark:hover:text-primary-400 transition-colors inline-flex items-center gap-1"
                           aria-label="Website"
                         >
                           <Globe className="size-5" />
@@ -439,7 +439,7 @@ export default function EventDetailPage() {
                         </a>
                         <a
                           href="#"
-                          className="text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors inline-flex items-center gap-1"
+                          className="text-gray-500 dark:text-gray-400 hover:text-primary-500 dark:hover:text-primary-400 transition-colors inline-flex items-center gap-1"
                           aria-label="Twitter"
                         >
                           <LinkIcon className="size-5" />
@@ -447,7 +447,7 @@ export default function EventDetailPage() {
                         </a>
                         <a
                           href="#"
-                          className="text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors inline-flex items-center gap-1"
+                          className="text-gray-500 dark:text-gray-400 hover:text-primary-500 dark:hover:text-primary-400 transition-colors inline-flex items-center gap-1"
                           aria-label="LinkedIn"
                         >
                           <Linkedin className="size-5" />
@@ -490,7 +490,7 @@ export default function EventDetailPage() {
                   <div className="space-y-5 mb-8">
                     {dateRangeStr && (
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className="size-10 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-primary-600 dark:text-primary-400 shrink-0">
+                        <div className="size-10 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-primary-500 dark:text-primary-400 shrink-0">
                           <Calendar className="size-5" />
                         </div>
                         <div className="min-w-0 flex-1">
@@ -505,7 +505,7 @@ export default function EventDetailPage() {
                     )}
                     {(locationDisplay || event.isOnlineMeeting) && (
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className="size-10 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-primary-600 dark:text-primary-400 shrink-0">
+                        <div className="size-10 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-primary-500 dark:text-primary-400 shrink-0">
                           <MapPin className="size-5" />
                         </div>
                         <div className="min-w-0 flex-1">
@@ -521,7 +521,7 @@ export default function EventDetailPage() {
                                 href={mapsUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-sm text-primary-600 dark:text-primary-400 font-semibold hover:underline"
+                                className="text-sm text-primary-500 dark:text-primary-400 font-semibold hover:underline"
                               >
                                 View Map
                               </a>
@@ -532,7 +532,7 @@ export default function EventDetailPage() {
                     )}
                     {(event.zoomMeetingUrl || event.onlineMeetJoinUrl) && (
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className="size-10 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-primary-600 dark:text-primary-400 shrink-0">
+                        <div className="size-10 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-primary-500 dark:text-primary-400 shrink-0">
                           <Video className="size-5" />
                         </div>
                         <div className="min-w-0 flex-1">
@@ -592,7 +592,7 @@ export default function EventDetailPage() {
                     />
                     <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex items-center justify-center">
                       <span className="inline-flex items-center gap-2 bg-white dark:bg-gray-900 py-2 px-4 rounded-full text-sm font-bold text-gray-900 dark:text-white shadow-lg border border-gray-200 dark:border-gray-700">
-                        <MapPin className="size-5 text-primary-600 dark:text-primary-400" />
+                        <MapPin className="size-5 text-primary-500 dark:text-primary-400" />
                         Get Directions
                       </span>
                     </div>

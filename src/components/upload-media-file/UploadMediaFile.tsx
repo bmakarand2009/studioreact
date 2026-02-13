@@ -1,17 +1,18 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef, useCallback, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui/Button';
 import { uploadService } from '@/services/uploadService';
 import { useUploadProgress } from '@/hooks/useUploadProgress';
 import { UploadMediaFileProps, MediaType, AssetData, UploadPayload } from '@/types/upload';
 import {
-  CirclePlus,
+  ImagePlus,
   Image as ImageIcon,
   Video,
   Music,
   FileText,
   Link as LinkIcon,
   FileText as DescriptionIcon,
-  Delete,
+  Trash2,
   Download,
   Copy,
   PlayCircle,
@@ -19,6 +20,8 @@ import {
   Loader2 as Loader2Icon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ImageUtils } from '@/utils/imageUtils';
+import { useToast } from '@/components/ui/ToastProvider';
 
 /**
  * Available file MIME types for different media types
@@ -97,7 +100,13 @@ export function UploadMediaFile({
   productData = {},
   allowedMedia = ['video', 'audio', 'image', 'pdf', 'link', 'description'],
   onOutput,
+  cloudName = '',
 }: UploadMediaFileProps) {
+  const toast = useToast();
+  const buildImagePreviewUrl = useCallback(
+    (url: string | undefined) => ImageUtils.getPreviewImageUrl(url, cloudName || undefined, 480, 320),
+    [cloudName]
+  );
   const [enableDescription, setEnableDescription] = useState(!!description);
   const [descriptionValue, setDescriptionValue] = useState(description || '');
   const [linkValue, setLinkValue] = useState('');
@@ -107,6 +116,7 @@ export function UploadMediaFile({
   const [isDescriptionLoading, setIsDescriptionLoading] = useState(false);
   const [dynamicPreviewUpdates, setDynamicPreviewUpdates] = useState<Record<string, string>>({});
   const [playVideoStates, setPlayVideoStates] = useState<Record<string, boolean>>({});
+  const [isDragging, setIsDragging] = useState(false);
   const assetDataRef = useRef<string>('');
 
   const { statuses } = useUploadProgress();
@@ -118,11 +128,33 @@ export function UploadMediaFile({
   const pdfInputRef = useRef<HTMLInputElement>(null);
   const otherInputRef = useRef<HTMLInputElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuContentRef = useRef<HTMLDivElement>(null);
+  const [menuPosition, setMenuPosition] = useState<{ top: number; left: number; openAbove: boolean } | null>(null);
+
+  // Compute menu position when it opens (viewport-aware)
+  useLayoutEffect(() => {
+    if (!showUploadMenu || !triggerRef.current) {
+      setMenuPosition(null);
+      return;
+    }
+    const rect = triggerRef.current.getBoundingClientRect();
+    const menuHeight = 280;
+    const gap = 8;
+    const viewportH = window.innerHeight;
+    const openAbove = rect.bottom + menuHeight + gap > viewportH;
+    const top = openAbove ? rect.top - menuHeight - gap : rect.bottom + gap;
+    const left = horizontalPosition === 'end' ? rect.right - 200 : rect.left;
+    setMenuPosition({ top, left, openAbove });
+  }, [showUploadMenu, horizontalPosition]);
 
   // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      const inTrigger = triggerRef.current?.contains(target);
+      const inMenu = menuContentRef.current?.contains(target);
+      if (!inTrigger && !inMenu) {
         setShowUploadMenu(false);
       }
     };
@@ -249,16 +281,20 @@ export function UploadMediaFile({
   }, []);
 
   /**
-   * Handle file upload
+   * Process and upload an array of files (used by both file input and drop)
    */
-  const handleFileUpload = useCallback(
-    async (event: React.ChangeEvent<HTMLInputElement>) => {
-      if (!event.target.files || event.target.files.length === 0) return;
+  const processFiles = useCallback(
+    async (files: File[]) => {
+      if (!files.length) return;
 
-      const files = Array.from(event.target.files);
-      
       for (const file of files) {
         const mediaType = getMediaType(file);
+        // Skip if media type not in allowedMedia (except 'link' and 'description' which aren't files)
+        const fileTypes = ['video', 'audio', 'image', 'pdf', 'other'];
+        if (fileTypes.includes(mediaType) && !allowedMedia.includes(mediaType)) {
+          continue;
+        }
+
         const payload = generatePayload(file.name, mediaType);
 
         try {
@@ -290,15 +326,62 @@ export function UploadMediaFile({
                 onOutput?.(data);
               });
           }
-        } catch (error) {
+        } catch (error: any) {
           console.error(`Error uploading ${file.name}:`, error);
+          toast.error(error?.message || `Failed to upload ${file.name}`);
         }
       }
+    },
+    [getMediaType, generatePayload, isDownloadable, moduleName, onOutput, allowedMedia, toast]
+  );
 
-      // Reset input
+  /**
+   * Handle file upload from input
+   */
+  const handleFileUpload = useCallback(
+    async (event: React.ChangeEvent<HTMLInputElement>) => {
+      if (!event.target.files || event.target.files.length === 0) return;
+      await processFiles(Array.from(event.target.files));
       event.target.value = '';
     },
-    [getMediaType, generatePayload, isDownloadable, moduleName, onOutput]
+    [processFiles]
+  );
+
+  /**
+   * Handle drag and drop
+   */
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isUploadDisabled) e.dataTransfer.dropEffect = 'copy';
+  }, [isUploadDisabled]);
+
+  const handleDragEnter = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isUploadDisabled && e.dataTransfer.types.includes('Files')) {
+      setIsDragging(true);
+    }
+  }, [isUploadDisabled]);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+      setIsDragging(false);
+    }
+  }, []);
+
+  const handleDrop = useCallback(
+    async (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsDragging(false);
+      if (isUploadDisabled) return;
+      const files = e.dataTransfer.files ? Array.from(e.dataTransfer.files) : [];
+      if (files.length) await processFiles(files);
+    },
+    [isUploadDisabled, processFiles]
   );
 
   /**
@@ -454,7 +537,16 @@ export function UploadMediaFile({
     
     return (
       <div className="flex flex-col gap-4" style={{ width }}>
-        <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50/70 p-6 text-center dark:border-slate-700 dark:bg-slate-800/50">
+        <div
+          className={cn(
+            'rounded-2xl border border-dashed border-slate-300 bg-slate-50/70 p-6 text-center dark:border-slate-700 dark:bg-slate-800/50 transition-colors',
+            isDragging && 'border-primary-500 bg-primary-50/50 dark:border-primary-500 dark:bg-primary-900/20'
+          )}
+          onDragOver={handleDragOver}
+          onDragEnter={handleDragEnter}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+        >
           <UploadCloudIcon className="mx-auto h-10 w-10 text-slate-400" />
           <h3 className="mt-3 text-base font-medium text-slate-900 dark:text-slate-100">
             {title || 'Upload new media'}
@@ -498,25 +590,103 @@ export function UploadMediaFile({
 
   return (
     <div className="flex flex-col gap-4" style={{ width }}>
-      {/* Upload Button */}
-      <div className="flex flex-col">
-        <div className="relative" ref={menuRef}>
-          <Button
-            variant="ghostSecondary"
-            disabled={isUploadDisabled}
-            className="flex items-center gap-2 p-0"
-            onClick={() => setShowUploadMenu(!showUploadMenu)}
+      {/* Upload Trigger */}
+      <div className="relative" ref={menuRef}>
+        {/* Hidden file inputs - must stay mounted when menu closes (user selects file after picker opens) */}
+        {showControl('image') && (
+          <input
+            ref={imageInputRef}
+            type="file"
+            hidden
+            multiple={allowMultipleUploads}
+            accept="image/*"
+            onChange={handleFileUpload}
+          />
+        )}
+        {showControl('video') && (
+          <input
+            ref={videoInputRef}
+            type="file"
+            hidden
+            multiple={allowMultipleUploads}
+            accept="video/*"
+            onChange={handleFileUpload}
+          />
+        )}
+        {showControl('audio') && (
+          <input
+            ref={audioInputRef}
+            type="file"
+            hidden
+            multiple={allowMultipleUploads}
+            accept="audio/*"
+            onChange={handleFileUpload}
+          />
+        )}
+        {showControl('pdf') && (
+          <input
+            ref={pdfInputRef}
+            type="file"
+            hidden
+            multiple={allowMultipleUploads}
+            accept="application/pdf"
+            onChange={handleFileUpload}
+          />
+        )}
+        {showControl('other') && (
+          <input
+            ref={otherInputRef}
+            type="file"
+            hidden
+            multiple={allowMultipleUploads}
+            onChange={handleFileUpload}
+          />
+        )}
+        <button
+          ref={triggerRef}
+          type="button"
+          disabled={isUploadDisabled}
+          onClick={() => setShowUploadMenu(!showUploadMenu)}
+          onDragOver={handleDragOver}
+          onDragEnter={handleDragEnter}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          className={cn(
+            'w-full rounded-lg border border-dashed border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900/50 py-6 px-4 text-center transition-colors hover:border-primary-400 hover:bg-slate-50/50 dark:hover:border-primary-500 dark:hover:bg-slate-800/50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-slate-300 disabled:hover:bg-transparent dark:disabled:hover:border-slate-600 dark:disabled:hover:bg-transparent',
+            isDragging && 'border-primary-500 bg-primary-50/50 dark:border-primary-500 dark:bg-primary-900/20'
+          )}
+        >
+          <div className="flex flex-col items-center gap-2">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">
+              <ImagePlus className="h-6 w-6 text-slate-600 dark:text-slate-400" />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                {title || 'Add Media'}
+              </h3>
+              {helpText && (
+                <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                  {helpText}
+                </p>
+              )}
+            </div>
+          </div>
+        </button>
+        
+        {/* Upload Menu - portal with viewport-aware positioning */}
+        {showUploadMenu && menuPosition && (
+          createPortal(
+            <div
+            ref={menuContentRef}
+            className="fixed bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg shadow-lg z-[9999] min-w-[200px]"
+            style={{
+              top: menuPosition.top,
+              left: Math.min(menuPosition.left, window.innerWidth - 220),
+            }}
           >
-            <CirclePlus className="h-5 w-5 text-brand-500" />
-            <span>{title}</span>
-          </Button>
-          
-          {/* Upload Menu */}
-          {showUploadMenu && (
-            <div className="absolute left-0 top-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-[200px]">
             {showControl('description') && (
               <button
-                className="w-full px-4 py-2 text-left hover:bg-gray-100 flex items-center gap-2 disabled:opacity-50"
+                className="w-full px-4 py-2 text-left hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-2 disabled:opacity-50 text-slate-700 dark:text-slate-300"
                 disabled={isUploadDisabled}
                 onClick={() => {
                   setEnableDescription(true);
@@ -529,17 +699,8 @@ export function UploadMediaFile({
             )}
 
             {showControl('image') && (
-              <>
-                <input
-                  ref={imageInputRef}
-                  type="file"
-                  hidden
-                  multiple={allowMultipleUploads}
-                  accept="image/*"
-                  onChange={handleFileUpload}
-                />
-                <button
-                  className="w-full px-4 py-2 text-left hover:bg-gray-100 flex items-center gap-2 disabled:opacity-50"
+              <button
+                  className="w-full px-4 py-2 text-left hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-2 disabled:opacity-50 text-slate-700 dark:text-slate-300"
                   disabled={isUploadDisabled}
                   onClick={() => {
                     imageInputRef.current?.click();
@@ -549,21 +710,11 @@ export function UploadMediaFile({
                   <ImageIcon className="h-4 w-4" />
                   <span>Upload Image</span>
                 </button>
-              </>
             )}
 
             {showControl('video') && (
-              <>
-                <input
-                  ref={videoInputRef}
-                  type="file"
-                  hidden
-                  multiple={allowMultipleUploads}
-                  accept="video/*"
-                  onChange={handleFileUpload}
-                />
-                <button
-                  className="w-full px-4 py-2 text-left hover:bg-gray-100 flex items-center gap-2 disabled:opacity-50"
+              <button
+                  className="w-full px-4 py-2 text-left hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-2 disabled:opacity-50 text-slate-700 dark:text-slate-300"
                   disabled={isUploadDisabled}
                   onClick={() => {
                     videoInputRef.current?.click();
@@ -573,21 +724,11 @@ export function UploadMediaFile({
                   <Video className="h-4 w-4" />
                   <span>Upload Video</span>
                 </button>
-              </>
             )}
 
             {showControl('audio') && (
-              <>
-                <input
-                  ref={audioInputRef}
-                  type="file"
-                  hidden
-                  multiple={allowMultipleUploads}
-                  accept="audio/*"
-                  onChange={handleFileUpload}
-                />
-                <button
-                  className="w-full px-4 py-2 text-left hover:bg-gray-100 flex items-center gap-2 disabled:opacity-50"
+              <button
+                  className="w-full px-4 py-2 text-left hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-2 disabled:opacity-50 text-slate-700 dark:text-slate-300"
                   disabled={isUploadDisabled}
                   onClick={() => {
                     audioInputRef.current?.click();
@@ -597,21 +738,11 @@ export function UploadMediaFile({
                   <Music className="h-4 w-4" />
                   <span>Upload Audio</span>
                 </button>
-              </>
             )}
 
             {showControl('pdf') && (
-              <>
-                <input
-                  ref={pdfInputRef}
-                  type="file"
-                  hidden
-                  multiple={allowMultipleUploads}
-                  accept="application/pdf"
-                  onChange={handleFileUpload}
-                />
-                <button
-                  className="w-full px-4 py-2 text-left hover:bg-gray-100 flex items-center gap-2 disabled:opacity-50"
+              <button
+                  className="w-full px-4 py-2 text-left hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-2 disabled:opacity-50 text-slate-700 dark:text-slate-300"
                   disabled={isUploadDisabled}
                   onClick={() => {
                     pdfInputRef.current?.click();
@@ -621,12 +752,11 @@ export function UploadMediaFile({
                   <FileText className="h-4 w-4" />
                   <span>Upload PDF</span>
                 </button>
-              </>
             )}
 
             {showControl('link') && (
               <button
-                className="w-full px-4 py-2 text-left hover:bg-gray-100 flex items-center gap-2 disabled:opacity-50"
+                className="w-full px-4 py-2 text-left hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-2 disabled:opacity-50 text-slate-700 dark:text-slate-300"
                 disabled={isUploadDisabled}
                 onClick={() => {
                   setShowLinkDialog(true);
@@ -639,15 +769,8 @@ export function UploadMediaFile({
             )}
 
             {showControl('other') && (
-              <>
-                <input
-                  ref={otherInputRef}
-                  type="file"
-                  hidden
-                  onChange={handleFileUpload}
-                />
-                <button
-                  className="w-full px-4 py-2 text-left hover:bg-gray-100 flex items-center gap-2 disabled:opacity-50"
+              <button
+                  className="w-full px-4 py-2 text-left hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-2 disabled:opacity-50 text-slate-700 dark:text-slate-300"
                   disabled={isUploadDisabled}
                   onClick={() => {
                     otherInputRef.current?.click();
@@ -657,13 +780,12 @@ export function UploadMediaFile({
                   <FileText className="h-4 w-4" />
                   <span>Other</span>
                 </button>
-              </>
             )}
-            </div>
-          )}
+          </div>,
+          document.body
+          )
+        )}
         </div>
-        {helpText && <p className="text-sm text-gray-600 mt-1 ml-8">{helpText}</p>}
-      </div>
 
       {/* Link Dialog */}
       {showLinkDialog && (
@@ -672,14 +794,14 @@ export function UploadMediaFile({
           onClick={() => setShowLinkDialog(false)}
         >
           <div 
-            className="bg-white rounded-lg p-6 max-w-md w-full"
+            className="bg-white dark:bg-slate-800 rounded-lg p-6 max-w-md w-full"
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-lg font-semibold mb-4">Add Link</h3>
             {linkPreview && (
-              <div className="mb-4 aspect-video">
+              <div className="mb-4 aspect-[3/2]">
                 <iframe
-                  src={linkPreview}
+                  src={linkPreview ?? ''}
                   className="w-full h-full rounded"
                   allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
                   allowFullScreen
@@ -725,7 +847,7 @@ export function UploadMediaFile({
             )}
             <div className="p-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="p-2 bg-blue-100 rounded">
+                <div className="p-2 bg-blue-100 rounded-xl">
                   <DescriptionIcon className="h-5 w-5 text-blue-600" />
                 </div>
                 <div>
@@ -738,8 +860,8 @@ export function UploadMediaFile({
                 </div>
               </div>
               {!isUploadDisabled && (
-                <Button variant="ghost" size="icon" onClick={handleDeleteDescription}>
-                  <Delete className="h-4 w-4" />
+                <Button variant="ghost" size="icon" className="text-secondary-500 hover:bg-secondary-50 hover:text-secondary-600 dark:text-secondary-400 dark:hover:bg-secondary-900/20" onClick={handleDeleteDescription}>
+                  <Trash2 className="h-4 w-4" />
                 </Button>
               )}
             </div>
@@ -752,7 +874,7 @@ export function UploadMediaFile({
             {showPreview && (
               <div className="p-4">
                 <img
-                  src={imageUrl}
+                  src={buildImagePreviewUrl(imageUrl)}
                   alt="Uploaded"
                   className="rounded max-w-[200px]"
                 />
@@ -760,7 +882,7 @@ export function UploadMediaFile({
             )}
             <div className="p-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="p-2 bg-purple-100 rounded">
+                <div className="p-2 bg-purple-100 rounded-xl">
                   <ImageIcon className="h-5 w-5 text-purple-600" />
                 </div>
                 <span className="font-medium">Image</span>
@@ -769,9 +891,10 @@ export function UploadMediaFile({
                 <Button
                   variant="ghost"
                   size="icon"
+                  className="text-secondary-500 hover:bg-secondary-50 hover:text-secondary-600 dark:text-secondary-400 dark:hover:bg-secondary-900/20"
                   onClick={() => sendTextualResources('image', '')}
                 >
-                  <Delete className="h-4 w-4" />
+                  <Trash2 className="h-4 w-4" />
                 </Button>
               )}
             </div>
@@ -785,6 +908,7 @@ export function UploadMediaFile({
             asset={asset}
             showPreview={showPreview}
             isDownloadable={isDownloadable}
+            buildImagePreviewUrl={buildImagePreviewUrl}
             isUploadDisabled={isUploadDisabled}
             onDelete={handleDeleteAsset}
             onDownload={handleDownload}
@@ -808,6 +932,7 @@ interface AssetPreviewProps {
   asset: AssetData;
   showPreview: boolean;
   isDownloadable: boolean;
+  buildImagePreviewUrl: (url: string | undefined) => string;
   isUploadDisabled: boolean;
   onDelete: (id: string) => void;
   onDownload: (url: string) => void;
@@ -823,6 +948,7 @@ function AssetPreview({
   asset,
   showPreview,
   isDownloadable,
+  buildImagePreviewUrl,
   isUploadDisabled,
   onDelete,
   onDownload,
@@ -874,7 +1000,7 @@ function AssetPreview({
         <div className="relative">
           {!playVideo ? (
             <div
-              className="relative w-full aspect-video cursor-pointer"
+              className="relative w-full aspect-[3/2] cursor-pointer"
               onMouseEnter={() => onVideoHover(asset._id)}
               onMouseLeave={() => onVideoLeave(asset._id)}
               onClick={() => onVideoClick(asset._id)}
@@ -889,7 +1015,7 @@ function AssetPreview({
               </div>
             </div>
           ) : (
-            <div className="w-full aspect-video">
+            <div className="w-full aspect-[3/2]">
               <iframe
                 src={getVideoEmbedUrl(asset)}
                 className="w-full h-full rounded-t-lg"
@@ -901,10 +1027,10 @@ function AssetPreview({
         </div>
       )}
 
-      {/* Image Preview */}
+      {/* Image Preview - build Cloudinary URL when path only (normal media); S3/Wasabi returns full URL */}
       {asset.mediaType === 'image' && showPreview && asset.s3url && (
         <div className="p-4">
-          <img src={asset.s3url} alt={asset.fileName} className="rounded max-w-[200px]" />
+          <img src={buildImagePreviewUrl(asset.s3url)} alt={asset.fileName} className="rounded max-w-[200px]" />
         </div>
       )}
 
@@ -926,7 +1052,7 @@ function AssetPreview({
 
       {/* Link Preview */}
       {asset.mediaType === 'link' && showPreview && asset.url && (
-        <div className="w-full aspect-video">
+        <div className="w-full aspect-[3/2]">
           <iframe
             src={asset.url}
             className="w-full h-full rounded-t-lg"
@@ -939,7 +1065,7 @@ function AssetPreview({
       {/* Asset Details */}
       <div className="p-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className={cn('p-2 rounded', getIconBg())}>{getIcon()}</div>
+          <div className={cn('p-2 rounded-xl', getIconBg())}>{getIcon()}</div>
           <div>
             <p className="font-medium capitalize">{asset.mediaType}</p>
             <div className="flex items-center gap-1">
@@ -958,8 +1084,8 @@ function AssetPreview({
         </div>
         <div className="flex items-center gap-1">
           {!isUploadDisabled && (
-            <Button variant="ghost" size="icon" onClick={() => onDelete(asset._id)}>
-              <Delete className="h-4 w-4" />
+            <Button variant="ghost" size="icon" className="text-secondary-500 hover:bg-secondary-50 hover:text-secondary-600 dark:text-secondary-400 dark:hover:bg-secondary-900/20" onClick={() => onDelete(asset._id)}>
+              <Trash2 className="h-4 w-4" />
             </Button>
           )}
           {isDownloadable && asset.downloadUrl && (

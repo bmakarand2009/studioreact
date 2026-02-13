@@ -143,7 +143,7 @@ export const Pagination: React.FC<PaginationProps> = ({
                   min-w-[40px] px-3 py-1.5 rounded-lg font-semibold text-sm transition-all
                   ${
                     isActive
-                      ? 'bg-gradient-to-r from-primary-600 to-brand-600 text-white shadow-md'
+                      ? 'bg-gradient-to-r from-primary-500 to-brand-600 text-white shadow-md'
                       : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                   }
                   disabled:opacity-40 disabled:cursor-not-allowed

@@ -20,7 +20,7 @@ export default function AboutPage() {
           <div className="text-center">
             <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
               About
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-brand-600">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-brand-600">
                 {' '}Wajooba LMS
               </span>
             </h1>
@@ -56,7 +56,7 @@ export default function AboutPage() {
               </Link>
             </div>
             <div className="bg-gradient-to-br from-primary-100 to-brand-100 dark:from-primary-900/30 dark:to-brand-900/30 rounded-2xl p-12 text-center">
-              <div className="w-24 h-24 bg-primary-600 rounded-full flex items-center justify-center mx-auto mb-6">
+              <div className="w-24 h-24 bg-primary-500 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Target className="h-12 w-12 text-white" />
               </div>
               <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
@@ -117,7 +117,7 @@ export default function AboutPage() {
             ].map((value, index) => (
               <div key={index} className="bg-white dark:bg-gray-900 rounded-xl p-8 text-center hover:shadow-lg transition-shadow">
                 <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 dark:bg-primary-900/30 rounded-xl mb-6">
-                  <value.icon className="h-8 w-8 text-primary-600 dark:text-primary-400" />
+                  <value.icon className="h-8 w-8 text-primary-500 dark:text-primary-400" />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
                   {value.title}
@@ -132,7 +132,7 @@ export default function AboutPage() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-24 bg-gradient-to-r from-primary-600 to-brand-600">
+      <section className="py-24 bg-gradient-to-r from-primary-500 to-brand-600">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
             {[

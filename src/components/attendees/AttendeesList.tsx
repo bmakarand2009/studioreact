@@ -254,7 +254,7 @@ export const AttendeesList = ({
             adds member manually.
           </p>
         </div>
-        <div className="flex items-center text-primary-600">
+        <div className="flex items-center text-primary-500">
           <Button
             variant="ghost"
             size="sm"
@@ -314,7 +314,7 @@ export const AttendeesList = ({
       <div className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 overflow-hidden">
         {isLoading ? (
           <div className="p-8 text-center">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
             <p className="mt-2 text-sm text-slate-500">Loading attendees...</p>
           </div>
         ) : attendees.length === 0 ? (
@@ -365,7 +365,7 @@ export const AttendeesList = ({
                             aria-label="Student Preview"
                             title="Student Preview"
                           >
-                            <Eye className="h-4 w-4 text-primary-600 dark:text-primary-400" />
+                            <Eye className="h-4 w-4 text-primary-500 dark:text-primary-400" />
                           </button>
                           <button
                             onClick={() => handleViewProfile(attendee)}
@@ -441,7 +441,7 @@ export const AttendeesList = ({
                         {attendee.progress !== undefined ? (
                           <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-6 relative">
                             <div
-                              className="bg-primary-600 h-6 rounded-full flex items-center justify-center text-xs text-white"
+                              className="bg-primary-500 h-6 rounded-full flex items-center justify-center text-xs text-white"
                               style={{ width: `${attendee.progress}%` }}
                             >
                               {attendee.progress > 13

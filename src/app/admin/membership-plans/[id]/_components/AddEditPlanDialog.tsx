@@ -206,7 +206,7 @@ export const AddEditPlanDialog: React.FC<AddEditPlanDialogProps> = ({
           <div className="flex items-center gap-4">
              <span className={`hidden sm:inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold ${
               step === 1
-                ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300'
+                ? 'bg-primary-100 text-primary-500 dark:bg-primary-900/30 dark:text-primary-300'
                 : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
             }`}>
               Step {step} of 2 · {step === 1 ? 'Plan Details' : 'Categorization'}
@@ -221,7 +221,7 @@ export const AddEditPlanDialog: React.FC<AddEditPlanDialogProps> = ({
         <div className="flex-1 overflow-y-auto p-6 space-y-6 relative">
           {isLoading && (
             <div className="absolute inset-0 bg-white/50 dark:bg-slate-800/50 flex items-center justify-center z-10 backdrop-blur-sm">
-              <div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+              <div className="w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
             </div>
           )}
           {step === 1 ? (
@@ -259,7 +259,7 @@ export const AddEditPlanDialog: React.FC<AddEditPlanDialogProps> = ({
                 <div className="flex items-center justify-between mb-4">
                   <label className="text-sm font-semibold text-slate-700 dark:text-slate-200">Core Features</label>
                   {!readOnly && (
-                    <Button size="sm" variant="outline" onClick={addFeature} className="text-primary-600 border-primary-200 hover:bg-primary-50 dark:border-primary-900 dark:hover:bg-primary-900/20">
+                    <Button size="sm" variant="outline" onClick={addFeature} className="text-primary-500 border-primary-200 hover:bg-primary-50 dark:border-primary-900 dark:hover:bg-primary-900/20">
                       <Plus className="h-4 w-4 mr-1" /> Add Feature
                     </Button>
                   )}
@@ -302,10 +302,10 @@ export const AddEditPlanDialog: React.FC<AddEditPlanDialogProps> = ({
                     </div>
                   ))}
                   {(!formData.features || formData.features.length === 0) && (
-                    <div className="text-center py-8 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800/30">
+                    <div className="text-center py-8 border border-dashed border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800/30">
                       <p className="text-sm text-slate-500">No core features added yet.</p>
                       {!readOnly && (
-                        <Button variant="ghost" onClick={addFeature} className="text-primary-600 mt-1 hover:bg-primary-50 dark:hover:bg-primary-900/10">
+                        <Button variant="ghost" onClick={addFeature} className="text-primary-500 mt-1 hover:bg-primary-50 dark:hover:bg-primary-900/10">
                           Add your first feature
                         </Button>
                       )}
@@ -362,7 +362,7 @@ export const AddEditPlanDialog: React.FC<AddEditPlanDialogProps> = ({
                     </div>
                   ))}
                   {(!formData.bonusFeatures || formData.bonusFeatures.length === 0) && (
-                    <div className="text-center py-8 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800/30">
+                    <div className="text-center py-8 border border-dashed border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800/30">
                       <p className="text-sm text-slate-500">No bonus features added yet.</p>
                       {!readOnly && (
                         <Button variant="ghost" onClick={addBonusFeature} className="text-amber-600 mt-1 hover:bg-amber-50 dark:hover:bg-amber-900/10">
@@ -422,7 +422,7 @@ export const AddEditPlanDialog: React.FC<AddEditPlanDialogProps> = ({
                       categories
                         .filter(c => selectedCategoryIds.includes(c.id))
                         .map(c => (
-                          <span key={c.id} className="inline-flex items-center rounded-md bg-primary-50 px-2 py-1 text-xs font-medium text-primary-700 ring-1 ring-inset ring-primary-700/10 dark:bg-primary-400/10 dark:text-primary-400 dark:ring-primary-400/20">
+                          <span key={c.id} className="inline-flex items-center rounded-md bg-primary-50 px-2 py-1 text-xs font-medium text-primary-500 ring-1 ring-inset ring-primary-500/10 dark:bg-primary-400/10 dark:text-primary-400 dark:ring-primary-400/20">
                             {c.name}
                           </span>
                         ))
@@ -458,7 +458,7 @@ export const AddEditPlanDialog: React.FC<AddEditPlanDialogProps> = ({
                             >
                               <div className={`flex h-4 w-4 items-center justify-center rounded border
                                 ${isSelected
-                                  ? 'border-primary-600 bg-primary-600 text-white'
+                                  ? 'border-primary-500 bg-primary-500 text-white'
                                   : 'border-slate-300 bg-white dark:border-slate-600 dark:bg-slate-700'
                                 }
                               `}>
@@ -499,11 +499,11 @@ export const AddEditPlanDialog: React.FC<AddEditPlanDialogProps> = ({
             </Button>
           ) : (
             readOnly ? (
-              <Button onClick={onClose} className="bg-primary-600 hover:bg-primary-700 text-white">
+              <Button onClick={onClose} className="bg-primary-500 hover:bg-primary-500 text-white">
                 Close
               </Button>
             ) : (
-              <Button onClick={handleSave} disabled={isSaving || selectedCategoryIds.length === 0} className="bg-primary-600 hover:bg-primary-700 text-white">
+              <Button onClick={handleSave} disabled={isSaving || selectedCategoryIds.length === 0} className="bg-primary-500 hover:bg-primary-500 text-white">
                 {isSaving ? (
                   <>Saving...</>
                 ) : (

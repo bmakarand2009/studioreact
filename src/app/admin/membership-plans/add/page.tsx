@@ -90,7 +90,7 @@ export default function AddMembershipPlanGroupPage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-2 rounded-full bg-primary-100 px-4 py-2 text-sm font-semibold text-primary-700 dark:bg-primary-900/30 dark:text-primary-300">
+            <span className="inline-flex items-center gap-2 rounded-full bg-primary-100 px-4 py-2 text-sm font-semibold text-primary-500 dark:bg-primary-900/30 dark:text-primary-300">
               Step 1 of 1 · Group Details
             </span>
           </div>
@@ -186,7 +186,7 @@ export default function AddMembershipPlanGroupPage() {
                   Cancel
                 </Button>
                 <Button
-                  className="rounded-xl bg-primary-600 px-6 py-2 text-sm font-semibold text-white shadow-md shadow-primary-500/30 transition hover:bg-primary-700"
+                  className="rounded-xl bg-primary-500 px-6 py-2 text-sm font-semibold text-white shadow-md shadow-primary-500/30 transition hover:bg-primary-500"
                   onClick={handleSubmit}
                   disabled={isLoading}
                 >
@@ -224,13 +224,13 @@ export default function AddMembershipPlanGroupPage() {
                           className={`
                             flex items-center justify-between w-full px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 border
                             ${isSelected 
-                              ? 'bg-white border-primary-500 text-primary-700 shadow-sm dark:bg-slate-900 dark:text-primary-300' 
+                              ? 'bg-white border-primary-500 text-primary-500 shadow-sm dark:bg-slate-900 dark:text-primary-300' 
                               : 'bg-transparent border-transparent text-slate-600 hover:bg-white hover:shadow-sm dark:text-slate-400 dark:hover:bg-slate-900'
                             }
                           `}
                         >
                           <span>{freq}</span>
-                          {isSelected && <Check className="h-4 w-4 text-primary-600" />}
+                          {isSelected && <Check className="h-4 w-4 text-primary-500" />}
                         </button>
                       );
                     })}

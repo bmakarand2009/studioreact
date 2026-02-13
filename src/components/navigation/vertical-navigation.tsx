@@ -229,7 +229,7 @@ export default function VerticalNavigation({ navigation, user, onLogout, onClose
                   collapsed ? 'px-0 justify-center' : 'px-2'
                 } ${
                   active
-                    ? 'bg-primary-600 text-white shadow-md border-l-4 border-primary-400'
+                    ? 'bg-primary-500 text-white shadow-md border-l-4 border-primary-400'
                     : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
                 }`}
                 title={collapsed ? item.title : undefined}

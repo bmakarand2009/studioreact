@@ -12,6 +12,7 @@ export { Switch } from './Switch';
 export { ToggleSlider, type ToggleSliderProps } from './ToggleSlider';
 export { Textarea } from './Textarea';
 export { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from './Select';
+export { SearchableDropdown, type SearchableDropdownProps } from './SearchableDropdown';
 
 // Pagination Components
 export { Pagination } from './Pagination';

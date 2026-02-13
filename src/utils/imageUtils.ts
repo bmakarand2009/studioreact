@@ -117,5 +117,28 @@ export class ImageUtils {
 
     return this.PLACEHOLDER;
   }
+
+  /**
+   * Build preview URL for any image (Cloudinary path, S3/Wasabi URL, or external URL).
+   * Use for activity/asset image previews.
+   * @param url - Image path (Cloudinary) or full URL (S3/Wasabi/http)
+   * @param cloudName - Cloudinary cloud name for building paths
+   * @param width - Optional width for Cloudinary transform (default 480)
+   * @param height - Optional height for Cloudinary transform (default 320)
+   * @returns Full URL for preview
+   */
+  static getPreviewImageUrl(
+    url: string | undefined,
+    cloudName?: string,
+    width: number = 480,
+    height: number = 320
+  ): string {
+    if (!url) return '';
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    if (cloudName) {
+      return this.buildCloudinaryUrl(cloudName, url, width, height, 'fill');
+    }
+    return url;
+  }
 }
 
